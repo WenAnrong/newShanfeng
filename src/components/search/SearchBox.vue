@@ -1,9 +1,13 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { ref } from "vue";
+
+function toggleEng() {}
+</script>
 
 <template>
   <div class="search-box">
     <div class="search-wrapper">
-      <button class="btn">
+      <button class="btn engineer-btn" @click="toggleEng">
         <svg
           t="1783328811071"
           class="icon"
@@ -29,6 +33,7 @@
 
 <style scoped lang="scss">
 @use "@/assets/variables" as *;
+@use "@/assets/animations" as *;
 
 .search-box {
   display: flex;
@@ -49,12 +54,32 @@
     --search-width: 50%;
     --search-max-width: 900px;
   }
+  @include portrait {
+    --search-width: 80%;
+    --search-max-width: 700px;
+  }
+
   display: flex;
   align-items: center;
   gap: 16px;
   background-color: rgba(0, 0, 0, 0.05);
   padding: 0 20px;
   border-radius: clamp(40px, 3.5vh, 56px);
+
+  // 获得焦点放大
+  @include scale-up(1.09);
+
+  @include compact() {
+    @include scale-up(1.06);
+  }
+
+  @include wide() {
+    @include scale-up(1.13);
+  }
+
+  @include portrait() {
+    @include scale-up(1.06);
+  }
 
   input {
     flex: 1;
