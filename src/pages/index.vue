@@ -33,8 +33,10 @@ import { ref } from "vue";
     </div>
 
     <!-- 内容层 -->
-    <Clock />
-    <Search />
+    <div class="main-content">
+      <Clock />
+      <Search />
+    </div>
     <Dock />
   </div>
 </template>
@@ -47,7 +49,8 @@ import { ref } from "vue";
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  padding: 18vh 0 50px 0;
   overflow: hidden;
 }
 
@@ -62,5 +65,13 @@ import { ref } from "vue";
 .container > :not(.gb) {
   position: relative;
   z-index: 1;
+}
+
+.main-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
 }
 </style>
