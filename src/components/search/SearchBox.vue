@@ -1,13 +1,29 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
+import SearchEnginePicker from "./SearchEnginePicker.vue";
 
-function toggleEng() {}
+const isShowMenu = ref(false); // 是否显示
+const triggerRef = ref<HTMLElement>(); // 当前按钮元素信息
+
+// 获得被选择的搜索引擎id
+const selectedEng = ref<string>("");
+function handleSelect(id: string) {
+  selectedEng.value = id;
+}
+
+// 切换显示和不显示搜索引擎切换菜单
+function toggleEng() {
+  isShowMenu.value = !isShowMenu.value;
+}
+
+// 计算弹窗触发元素位置
+const triggerElement = computed(() => triggerRef.value ?? null);
 </script>
 
 <template>
   <div class="search-box">
     <div class="search-wrapper">
-      <button class="btn engineer-btn" @click="toggleEng">
+      <button ref="triggerRef" class="btn engine-btn" @click="toggleEng">
         <svg
           t="1783328811071"
           class="icon"
@@ -28,6 +44,14 @@ function toggleEng() {}
       <input type="text" placeholder="搜索..." />
       <button class="btn">搜索</button>
     </div>
+
+    <!-- 选择搜索引擎菜单 -->
+    <SearchEnginePicker
+      :visible="isShowMenu"
+      :triggerEl="triggerElement"
+      @close="isShowMenu = false"
+      @select="handleSelect"
+    />
   </div>
 </template>
 

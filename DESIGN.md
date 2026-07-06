@@ -121,7 +121,7 @@ $bp-compact: 1366px;
 $bp-wide: 2560px;
 ```
 
-在 `src/assets/main.css` 中统一定义尺寸令牌:
+在 `src/assets/main.css` 中统一定义尺寸令牌。如果在 `_variables.scss` 中定义则会因为导入vue文件从而得到唯一id导致无法直接使用。
 
 ```css
 :root {

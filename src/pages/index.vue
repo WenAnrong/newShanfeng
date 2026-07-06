@@ -11,13 +11,6 @@ import { ref } from "vue";
   <div class="container">
     <!-- 背景层：绝对定位铺满 -->
     <div class="gb">
-      <div class="bg-mountains">
-        <div class="bg-mountain bg-mountain--far"></div>
-        <div class="bg-mountain bg-mountain--far2"></div>
-        <div class="bg-mountain bg-mountain--near"></div>
-      </div>
-      <div class="bg-mist bg-mist--upper"></div>
-      <div class="bg-mist bg-mist--lower"></div>
       <div class="bg-particles">
         <div class="bg-particle bg-particle--1 bg-particle--sm"></div>
         <div class="bg-particle bg-particle--2"></div>

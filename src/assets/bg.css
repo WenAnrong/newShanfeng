@@ -20,105 +20,6 @@
 }
 
 /* ============================================
-   远山层 — 底部极淡山影，不干扰停靠栏
-   ============================================ */
-
-/* 山峦容器 */
-.gb .bg-mountains {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-
-/* 单座山 */
-.bg-mountain {
-  position: absolute;
-  bottom: 0;
-  border-radius: 50% 50% 0 0;
-}
-
-/* 远山 1 — 最远最淡，左侧 */
-.bg-mountain--far {
-  left: -10%;
-  width: 65%;
-  height: 8vh;
-  background: rgba(55, 75, 100, 0.25);
-  border-radius: 60% 60% 0 0;
-}
-
-/* 远山 2 — 右侧 */
-.bg-mountain--far2 {
-  right: -15%;
-  width: 70%;
-  height: 6vh;
-  background: rgba(45, 65, 90, 0.2);
-  border-radius: 55% 55% 0 0;
-}
-
-/* 近山 — 略深，主峰 */
-.bg-mountain--near {
-  left: 8%;
-  width: 50%;
-  height: 5vh;
-  background: rgba(28, 42, 60, 0.35);
-  border-radius: 50% 55% 0 0;
-}
-
-/* ============================================
-   山间云雾
-   ============================================ */
-.bg-mist {
-  position: absolute;
-  left: 0;
-  right: 0;
-  z-index: 0;
-  pointer-events: none;
-  height: 40px;
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    rgba(180, 200, 210, 0.12) 40%,
-    rgba(180, 200, 210, 0.06) 100%
-  );
-  filter: blur(8px);
-}
-
-/* 云雾位于远山之上 */
-.bg-mist--upper {
-  bottom: 7vh;
-  animation: mistDrift 12s ease-in-out infinite;
-}
-
-/* 云雾位于近山之上 */
-.bg-mist--lower {
-  bottom: 4vh;
-  animation: mistDrift 14s ease-in-out infinite reverse;
-}
-
-@keyframes mistDrift {
-  0%,
-  100% {
-    transform: translateX(0);
-    opacity: 0.6;
-  }
-  25% {
-    transform: translateX(3%);
-    opacity: 0.9;
-  }
-  50% {
-    transform: translateX(-1%);
-    opacity: 1;
-  }
-  75% {
-    transform: translateX(-3%);
-    opacity: 0.7;
-  }
-}
-
-/* ============================================
    流风粒子 — 似风拂过的微光点
    ============================================ */
 .gb .bg-particles {
@@ -244,25 +145,6 @@
     );
   }
 
-  .bg-mountain--far {
-    background: rgba(140, 160, 180, 0.2);
-  }
-  .bg-mountain--far2 {
-    background: rgba(130, 150, 170, 0.16);
-  }
-  .bg-mountain--near {
-    background: rgba(95, 115, 140, 0.28);
-  }
-
-  .bg-mist {
-    background: linear-gradient(
-      180deg,
-      transparent 0%,
-      rgba(255, 255, 255, 0.25) 40%,
-      rgba(255, 255, 255, 0.08) 100%
-    );
-  }
-
   .bg-particle {
     background: rgba(120, 140, 170, 0.45);
   }
@@ -280,29 +162,4 @@
     #f5f5f0 90%,
     #fafaf5 100%
   );
-}
-
-/* ============================================
-   响应式
-   ============================================ */
-@media (max-width: 768px) {
-  .bg-mountain--far {
-    width: 75%;
-    height: 6vh;
-  }
-  .bg-mountain--far2 {
-    width: 80%;
-    height: 4vh;
-  }
-  .bg-mountain--near {
-    width: 55%;
-    height: 4vh;
-  }
-
-  .bg-mist--upper {
-    bottom: 5vh;
-  }
-  .bg-mist--lower {
-    bottom: 3vh;
-  }
 }
