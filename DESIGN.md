@@ -73,6 +73,85 @@
 
 ---
 
-## 4. 模块接口设计
+## 4. 详细设计
 
-暂定
+### 4.1 响应式大小
+
+#### 4.1.1 设计定位
+
+> 山风新页定位为 **桌面端浏览器新标签页**，不考虑手机端。需覆盖竖屏（portrait monitor）和高分辨率（4K）显示器场景。
+
+#### 4.1.2 断点方案（3 档）
+
+桌面专用，以 **水平视口宽度** 为判断依据：
+
+| 档位         | 宽度范围        | 适用场景                                          |
+| ------------ | --------------- | ------------------------------------------------- |
+| **compact**  | < 1366px        | 竖屏显示器（1080×1920）、13" 笔记本、窗口化较窄时 |
+| **standard** | 1366px ~ 2560px | 主流桌面显示器（1080p/2K）、笔记本外接            |
+| **wide**     | > 2560px        | 4K 及以上（3840×2160）、超宽屏                    |
+
+standard 为默认基线（无需 media query），compact 用 `max-width` 约束，wide 用 `min-width` 开启增强布局。
+
+```scss
+// Sass 变量
+$bp-compact: 1366px; // 竖屏/小笔记本上限
+$bp-wide: 2560px; // 4K 开启下限
+
+// 实际使用
+// compact: 竖屏、小窗口
+@media (max-width: #{$bp-compact - 1px}) {
+}
+
+// standard: 默认（无需 media query）
+// ... 1366px ~ 2560px 都适用
+
+// wide: 4K / 超宽屏
+@media (min-width: $bp-wide) {
+}
+```
+
+#### 4.1.3 实施规范
+
+**Sass 变量管理**：在 `src/assets/_variables.scss` 中统一定义：
+
+```scss
+// 断点
+$bp-compact: 1366px;
+$bp-wide: 2560px;
+```
+
+在 `src/assets/main.css` 中统一定义尺寸令牌:
+
+```css
+:root {
+  --clock-font-size: clamp(72px, 6vw, 120px);
+  --search-width: 60%;
+  --search-max-width: 800px;
+  --search-padding: 16px;
+  --dock-icon-size: 48px;
+  --container-padding-top: min(16vh, 160px);
+}
+```
+
+**代码隔离**：各组件的响应式样式写在各自 `.vue` 文件的 `<style scoped lang="scss">` 内部，不耦合到全局。
+
+**Sass mixin 辅助**：
+
+```scss
+@mixin compact {
+  @media (max-width: #{$bp-compact - 1px}) {
+    @content;
+  }
+}
+@mixin wide {
+  @media (min-width: $bp-wide) {
+    @content;
+  }
+}
+@mixin portrait {
+  @media (orientation: portrait) {
+    @content;
+  }
+}
+```

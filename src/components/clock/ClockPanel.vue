@@ -56,29 +56,47 @@ onUnmounted(() => {
 </template>
 
 <style scoped lang="scss">
+@use "@/assets/variables" as *;
+
 .clock-panel {
   text-align: center;
 
   .clock-time {
-    font-size: 96px;
+    font-size: var(--clock-font-size);
+    @include compact {
+      font-size: clamp(48px, 7vw, 72px); // 竖屏/窄屏缩小
+    }
+    @include wide {
+      font-size: clamp(120px, 5vw, 180px); // 4K 放大
+    }
+    @include portrait {
+      font-size: clamp(48px, 7vw, 72px); // 竖屏也缩小
+    }
     font-weight: 500;
     letter-spacing: -2px;
-    background-clip: text;
-    line-height: 1;
+    line-height: normal;
   }
 
   .date {
     display: flex;
+    font-weight: 400;
     justify-content: center;
     align-items: center;
     gap: 10px;
     margin-top: 12px;
     font-size: 18px;
     opacity: 0.8;
+    font-size: clamp(16px, 1.2vw, 20px); // 小屏14px ~ 大屏18px
+    @include wide {
+      font-size: clamp(18px, 1vw, 24px); // 4K 最大 24px
+    }
   }
 
   .lunar-date {
-    font-weight: 500;
+    font-size: clamp(14px, 1.2vw, 18px);
+    @include wide {
+      font-size: clamp(18px, 1vw, 24px); // 4K 最大 24px
+    }
   }
 }
 </style>

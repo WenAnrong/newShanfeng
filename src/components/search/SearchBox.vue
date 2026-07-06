@@ -28,6 +28,8 @@
 </template>
 
 <style scoped lang="scss">
+@use "@/assets/variables" as *;
+
 .search-box {
   display: flex;
   justify-content: center;
@@ -36,20 +38,28 @@
   width: 100%;
 }
 .search-wrapper {
-  height: 50px;
-  width: 68%;
+  height: clamp(40px, 3.5vh, 56px);
+  width: var(--search-width);
+  max-width: var(--search-max-width);
+  @include compact {
+    --search-width: 80%;
+    --search-max-width: 700px;
+  }
+  @include wide {
+    --search-width: 50%;
+    --search-max-width: 900px;
+  }
   display: flex;
   align-items: center;
   gap: 16px;
   background-color: rgba(0, 0, 0, 0.05);
   padding: 0 20px;
-  border-radius: 40px;
+  border-radius: clamp(40px, 3.5vh, 56px);
 
   input {
     flex: 1;
     padding: 8px;
     border: none;
-    border-radius: 4px;
     background-color: rgba(0, 0, 0, 0);
     outline: none;
     text-align: left;
@@ -59,7 +69,6 @@
     height: 100%;
     border: none;
     background-color: rgba(0, 0, 0, 0);
-    border-radius: 4px;
     cursor: pointer;
     overflow: hidden;
     font-size: 16px;

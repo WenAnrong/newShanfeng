@@ -41,7 +41,9 @@ import { ref } from "vue";
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+@use "@/assets/variables" as *;
+
 .container {
   position: relative;
   width: 100%;
@@ -50,8 +52,19 @@ import { ref } from "vue";
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: 18vh 0 50px 0;
   overflow: hidden;
+  padding: var(--container-padding-top) 0 50px 0;
+  @include compact {
+    padding: max(8vh, 60px) 0 40px 0;
+  }
+
+  @include wide {
+    padding: min(20vh, 280px) 0 60px 0;
+  }
+
+  @include portrait {
+    padding: max(8vh, 60px) 0 40px 0;
+  }
 }
 
 /* 背景层铺满 */

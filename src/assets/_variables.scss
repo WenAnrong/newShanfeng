@@ -1,0 +1,27 @@
+// 山风新页 响应式断点变量
+
+// ---------- 断点 ----------
+$bp-compact: 1366px; // 竖屏/小笔记本上限
+$bp-wide: 2560px; // 4K 开启下限
+
+// ---------- Mixin ----------
+// compact: max-width 向下约束
+@mixin compact {
+  @media (max-width: #{$bp-compact - 1px}) {
+    @content;
+  }
+}
+
+// wide: min-width 向上开启
+@mixin wide {
+  @media (min-width: $bp-wide) {
+    @content;
+  }
+}
+
+// 竖屏检测
+@mixin portrait {
+  @media (orientation: portrait) {
+    @content;
+  }
+}
