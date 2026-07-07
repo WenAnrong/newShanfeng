@@ -24,15 +24,3 @@ select,
 textarea {
   font-family: inherit;
 }
-
-/* ========================================
-   响应式设计
-   ======================================== */
-:root {
-  --clock-font-size: clamp(72px, 6vw, 120px);
-  --search-width: 60%;
-  --search-max-width: 800px;
-  --search-padding: 16px;
-  --dock-icon-size: 48px;
-  --container-padding-top: min(16vh, 160px);
-}

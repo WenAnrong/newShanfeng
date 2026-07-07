@@ -10,6 +10,7 @@
 
 <style scoped lang="scss">
 @use "../../assets/variables" as *;
+@use "../../assets/glass" as *;
 
 .dock-panel {
   display: flex;
@@ -18,30 +19,31 @@
   align-items: center;
   gap: 16px;
   padding: 12px 20px;
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: $surface-bg;
   border-radius: 18px;
+  --dock-item-size: $dock-icon-size;
 
   @include compact {
     gap: 10px;
     padding: 8px 12px;
-    --dock-icon-size: 36px;
+    --dock-item-size: 36px;
   }
   @include wide {
     gap: 24px;
     padding: 16px 32px;
-    --dock-icon-size: 60px;
+    --dock-item-size: 60px;
   }
 }
 
 .dock-item {
-  width: var(--dock-icon-size);
-  height: var(--dock-icon-size);
-  background-color: rgba(0, 0, 0, 0.1);
+  width: var(--dock-item-size);
+  height: var(--dock-item-size);
+  background-color: $surface-item-bg;
   border-radius: 8px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: calc(var(--dock-icon-size) * 0.3);
+  font-size: calc(var(--dock-item-size) * 0.3);
 }
 </style>

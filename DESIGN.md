@@ -7,6 +7,7 @@
 
 ## 0. 当前设计缺少的部分
 
+- 搜索词建议的父组件处理和测试未完成，未做响应式
 - 插件体系未开始设计，当前仅完成vue展示部分
 
 ---
@@ -121,19 +122,6 @@ $bp-compact: 1366px;
 $bp-wide: 2560px;
 ```
 
-在 `src/assets/main.css` 中统一定义尺寸令牌。如果在 `_variables.scss` 中定义则会因为导入vue文件从而得到唯一id导致无法直接使用。
-
-```css
-:root {
-  --clock-font-size: clamp(72px, 6vw, 120px);
-  --search-width: 60%;
-  --search-max-width: 800px;
-  --search-padding: 16px;
-  --dock-icon-size: 48px;
-  --container-padding-top: min(16vh, 160px);
-}
-```
-
 **代码隔离**：各组件的响应式样式写在各自 `.vue` 文件的 `<style scoped lang="scss">` 内部，不耦合到全局。
 
 **Sass mixin 辅助**：
@@ -154,4 +142,41 @@ $bp-wide: 2560px;
     @content;
   }
 }
+```
+
+### 4.2 搜索联想词建议
+
+实现函数为 `src/composables/useSearchSuggestions.ts` 。
+
+具体逻辑如下：
+
+```text
+Bing 请求
+    ├── 成功 → 显示 Bing 联想词
+    │
+    └── 失败 → 重试 (最多 2 次)
+                  ├── 成功 → 显示 Bing 联想词
+                  └── 还是失败 → 改用百度
+                                   ├── 成功 → 显示百度联想词
+                                   └── 失败 → 显示空
+```
+
+#### 4.2.1 使用方式
+
+**`useSearchSuggestions` composable 用法：**
+
+```ts
+import { useSearchSuggestions } from "@/composables/useSearchSuggestions";
+
+const { suggestions, isLoading, fetchSuggestions, clearSuggestions } =
+  useSearchSuggestions();
+
+// 输入变化时调用（内部已做 100ms 防抖）
+fetchSuggestions("关键词");
+
+// 获取联想词列表
+console.log(suggestions.value); // string[]
+
+// 关闭下拉时清空
+clearSuggestions();
 ```

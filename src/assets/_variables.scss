@@ -25,3 +25,11 @@ $bp-wide: 2560px; // 4K 开启下限
     @content;
   }
 }
+
+// ---------- 布局变量 ----------
+$clock-font-size: clamp(72px, 6vw, 120px);
+$search-width: 60%;
+$search-max-width: 800px;
+$search-padding: 16px;
+$dock-icon-size: 48px;
+$container-padding-top: #{min(16vh, 160px)};

@@ -15,16 +15,16 @@ interface SearchEngine {
 export const useEngineStore = defineStore("engine", () => {
   const engines: SearchEngine[] = [
     {
-      id: "google",
-      name: "Google",
-      icon: google,
-      url: "https://www.google.com/search?q={keyword}",
-    },
-    {
       id: "bing",
       name: "Bing",
       icon: bing,
       url: "https://www.bing.com/search?q={keyword}",
+    },
+    {
+      id: "google",
+      name: "Google",
+      icon: google,
+      url: "https://www.google.com/search?q={keyword}",
     },
     {
       id: "baidu",
@@ -34,7 +34,7 @@ export const useEngineStore = defineStore("engine", () => {
     },
   ];
 
-  const currentId = ref("google");
+  const currentId = ref<string>("bing");
   const current = computed(() => engines.find((e) => e.id === currentId.value));
 
   return { currentId, current, engines };

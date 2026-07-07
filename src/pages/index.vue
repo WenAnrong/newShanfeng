@@ -46,7 +46,7 @@ import { ref } from "vue";
   align-items: center;
   justify-content: space-between;
   overflow: hidden;
-  padding: var(--container-padding-top) 0 50px 0;
+  padding: $container-padding-top 0 50px 0;
   @include compact {
     padding: max(8vh, 60px) 0 40px 0;
   }

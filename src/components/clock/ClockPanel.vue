@@ -62,7 +62,7 @@ onUnmounted(() => {
   text-align: center;
 
   .clock-time {
-    font-size: var(--clock-font-size);
+    font-size: $clock-font-size;
     @include compact {
       font-size: clamp(48px, 7vw, 72px); // 竖屏/窄屏缩小
     }
