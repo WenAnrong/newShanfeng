@@ -2,28 +2,12 @@
 import Clock from "@/components/clock/ClockPanel.vue";
 import Search from "@/components/search/SearchBox.vue";
 import Dock from "@/components/dock/DockPanel.vue";
-import "@/assets/bg.css";
-
-import { ref } from "vue";
 </script>
 
 <template>
   <div class="container">
     <!-- 背景层：绝对定位铺满 -->
-    <div class="gb">
-      <div class="bg-particles">
-        <div class="bg-particle bg-particle--1 bg-particle--sm"></div>
-        <div class="bg-particle bg-particle--2"></div>
-        <div class="bg-particle bg-particle--3 bg-particle--lg"></div>
-        <div class="bg-particle bg-particle--4 bg-particle--sm"></div>
-        <div class="bg-particle bg-particle--5"></div>
-        <div class="bg-particle bg-particle--6 bg-particle--lg"></div>
-        <div class="bg-particle bg-particle--7"></div>
-        <div class="bg-particle bg-particle--8 bg-particle--sm"></div>
-        <div class="bg-particle bg-particle--9"></div>
-        <div class="bg-particle bg-particle--10 bg-particle--lg"></div>
-      </div>
-    </div>
+    <div class="gb"></div>
 
     <!-- 内容层 -->
     <div class="main-content">
@@ -60,11 +44,14 @@ import { ref } from "vue";
   }
 }
 
-/* 背景层铺满 */
 .gb {
   position: absolute;
   inset: 0;
   z-index: 0;
+
+  background-image: url("/src/assets/bg/bg1.webp");
+  background-size: cover;
+  background-position: center;
 }
 
 /* 内容组件浮于背景之上 */
