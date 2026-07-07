@@ -81,7 +81,7 @@ const inputRef = ref<HTMLElement | null>(null); // 搜索框元素信息
 }
 
 .search-wrapper {
-  height: clamp(40px, 3.5vh, 56px);
+  height: $search-height;
   width: $search-width;
   max-width: $search-max-width;
   @include glass-panel-1;

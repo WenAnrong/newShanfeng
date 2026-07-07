@@ -51,7 +51,7 @@ function openLa() {
   gap: 16px;
   padding: 12px 20px;
   border-radius: var(--standard-radio-radius);
-  --dock-item-size: $dock-icon-size;
+  --dock-item-size: #{$dock-icon-size};
 
   @include glass-panel-1;
 

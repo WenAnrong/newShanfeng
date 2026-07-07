@@ -1,8 +1,8 @@
 // 山风新页 响应式断点变量
 
 // ---------- 断点 ----------
-$bp-compact: 1366px; // 竖屏/小笔记本上限
-$bp-wide: 2560px; // 4K 开启下限
+$bp-compact: 1450px;
+$bp-wide: 2560px;
 
 // ---------- Mixin ----------
 // compact: max-width 向下约束
@@ -28,8 +28,9 @@ $bp-wide: 2560px; // 4K 开启下限
 
 // ---------- 布局变量 ----------
 $clock-font-size: clamp(72px, 6vw, 120px);
+$search-height: clamp(45px, 3.6vh, 70px);
 $search-width: 60%;
 $search-max-width: 800px;
 $search-padding: 16px;
-$dock-icon-size: 48px;
+$dock-icon-size: 45px;
 $container-padding-top: #{min(16vh, 160px)};

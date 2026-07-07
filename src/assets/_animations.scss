@@ -57,12 +57,3 @@ $duration-slow: 0.45s;
     }
   }
 }
-
-// ---------- Mixin：通用 transition 快捷方式 ----------
-@mixin transition($properties...) {
-  $transitions: ();
-  @each $prop in $properties {
-    $transitions: append($transitions, $prop $duration-normal ease, comma);
-  }
-  transition: $transitions;
-}
