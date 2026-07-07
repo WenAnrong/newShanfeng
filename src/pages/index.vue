@@ -2,6 +2,15 @@
 import Clock from "@/components/clock/ClockPanel.vue";
 import Search from "@/components/search/SearchBox.vue";
 import Dock from "@/components/dock/DockPanel.vue";
+import Launch from "@/launch/Launch.vue";
+import { ref } from "vue";
+
+// 是否打开启动台
+const showLaunch = ref(false);
+// 切换开关启动台
+function toggleLaunch() {
+  showLaunch.value = !showLaunch.value;
+}
 </script>
 
 <template>
@@ -14,7 +23,8 @@ import Dock from "@/components/dock/DockPanel.vue";
       <Clock />
       <Search />
     </div>
-    <Dock />
+    <Dock class="dock" @openLaunch="toggleLaunch" />
+    <Launch :visible="showLaunch" @close="showLaunch = false" />
   </div>
 </template>
 
@@ -30,17 +40,17 @@ import Dock from "@/components/dock/DockPanel.vue";
   align-items: center;
   justify-content: space-between;
   overflow: hidden;
-  padding: $container-padding-top 0 50px 0;
+  padding: $container-padding-top 0 30px 0;
   @include compact {
-    padding: max(8vh, 60px) 0 40px 0;
+    padding: max(8vh, 60px) 0 20px 0;
   }
 
   @include wide {
-    padding: min(20vh, 280px) 0 60px 0;
+    padding: min(20vh, 280px) 0 40px 0;
   }
 
   @include portrait {
-    padding: max(8vh, 60px) 0 40px 0;
+    padding: max(8vh, 60px) 0 20px 0;
   }
 }
 
@@ -66,5 +76,9 @@ import Dock from "@/components/dock/DockPanel.vue";
   flex-direction: column;
   align-items: center;
   gap: 30px;
+}
+
+.container > .dock {
+  z-index: 300;
 }
 </style>

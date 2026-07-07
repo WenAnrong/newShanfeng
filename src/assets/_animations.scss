@@ -26,11 +26,14 @@ $duration-slow: 0.45s;
   }
 }
 
-// ---------- Mixin：淡入淡出 ----------
+// ---------- Mixin：淡入淡出（用于vue的Transition） ----------
 @mixin fade($duration: $duration-slow) {
-  transition:
-    opacity $duration ease,
-    transform $duration ease;
+  &-enter-active,
+  &-leave-active {
+    transition:
+      opacity $duration ease,
+      transform $duration ease;
+  }
 
   &-enter-from,
   &-leave-to {
@@ -39,22 +42,11 @@ $duration-slow: 0.45s;
   }
 }
 
-// ---------- Mixin：弹跳 ----------
-// @mixin bounce {
-//   transition: transform $duration-fast $ease-spring;
-
-//   &:active {
-//     transform: scale(0.92);
-//   }
-// }
-
 // ---------- Mixin：上下跳动 ----------
-@mixin bounce-up-down($distance: 6px, $duration: $duration-normal) {
+@mixin bounce-up-down($distance: 12px, $duration: $duration-normal) {
   will-change: transform;
 
-  &:active {
-    animation: bounce-up-down $duration $ease-in-out infinite alternate;
-  }
+  animation: bounce-up-down $duration $ease-in-out infinite alternate;
 
   @keyframes bounce-up-down {
     from {

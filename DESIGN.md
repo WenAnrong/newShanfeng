@@ -183,3 +183,15 @@ console.log(suggestions.value); // string[]
 // 关闭下拉时清空
 clearSuggestions();
 ```
+
+### 4.3 z-index 设计
+
+通过配置不同的 z-index 达到想要的覆盖效果
+
+| z-index | 所属组件                           | 作用                         |
+| ------- | ---------------------------------- | ---------------------------- |
+| 0       | `.bg`（背景层）                    | 壁纸背景，绝对定位铺满       |
+| 1       | `.container > :not(.bg)`（主内容） | 时钟、搜索框                 |
+| 300     | `.container > .dock`（Dock 栏）    | 快捷方式栏，浮在 Launch 之上 |
+| 100     | 弹窗 / Popover                     | 搜索引擎选择器、搜索建议下拉 |
+| 200     | `.launch-overlay`（Launch 面板）   | 启动台全屏覆盖层             |

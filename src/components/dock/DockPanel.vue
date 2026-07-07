@@ -2,12 +2,32 @@
 import launch from "@/assets/svgs/launch.svg";
 import setting from "@/assets/svgs/setting.svg";
 import bookmark from "@/assets/svgs/bookmark.svg";
+import { ref } from "vue";
+
+// openLaunch: 打开启动台
+const emit = defineEmits<{
+  openLaunch: [];
+}>();
+
+// 跳动动画控制
+const isBouncing = ref();
+
+// 点击启动台传回信息
+function openLa() {
+  isBouncing.value = true;
+  setTimeout(() => {
+    emit("openLaunch");
+  }, 300);
+  setTimeout(() => {
+    isBouncing.value = false;
+  }, 500);
+}
 </script>
 
 <template>
   <div class="dock-panel">
-    <div class="dock-item">
-      <img :src="launch" class="img" />
+    <div class="dock-item" :class="{ bouncing: isBouncing }">
+      <img @click="openLa" :src="launch" class="img" />
     </div>
     <div class="dock-item">
       <img :src="setting" class="img" />
@@ -33,7 +53,7 @@ import bookmark from "@/assets/svgs/bookmark.svg";
   border-radius: var(--standard-radio-radius);
   --dock-item-size: $dock-icon-size;
 
-  @include glass-panel;
+  @include glass-panel-1;
 
   @include compact {
     gap: 10px;
@@ -56,10 +76,13 @@ import bookmark from "@/assets/svgs/bookmark.svg";
   display: flex;
   align-items: center;
   justify-content: center;
-  @include bounce-up-down;
 
   .img {
     width: 100%;
   }
+}
+
+.bouncing {
+  @include bounce-up-down;
 }
 </style>

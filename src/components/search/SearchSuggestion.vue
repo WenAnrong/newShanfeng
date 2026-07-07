@@ -14,7 +14,7 @@ const props = defineProps<{
 }>();
 
 // 子组件向父组件发送的事件
-// close: 告诉父组件"我要关了"
+// close: 告诉父组件关闭子组件
 // select: 选中联想词时通知父组件
 const emit = defineEmits<{
   close: [];
@@ -87,11 +87,11 @@ function selectSuggestion(text: string) {
 
 .suggestion-popover {
   position: fixed;
-  z-index: 1000;
+  z-index: 100;
   min-width: 160px;
   padding: 6px;
   border-radius: var(--standard-radio-radius);
-  @include glass-panel;
+  @include glass-panel-1;
 }
 
 .suggestion-item {
@@ -107,15 +107,7 @@ function selectSuggestion(text: string) {
 }
 
 // 淡入淡出动画
-.pop-enter-active,
-.pop-leave-active {
-  transition:
-    opacity $duration-slow ease,
-    transform $duration-slow ease;
-}
-.pop-enter-from,
-.pop-leave-to {
-  opacity: 0;
-  transform: translateY(-6px);
+.pop {
+  @include fade;
 }
 </style>

@@ -84,7 +84,7 @@ const inputRef = ref<HTMLElement | null>(null); // 搜索框元素信息
   height: clamp(40px, 3.5vh, 56px);
   width: $search-width;
   max-width: $search-max-width;
-  @include glass-panel;
+  @include glass-panel-1;
   @include compact {
     width: 80%;
     max-width: 700px;

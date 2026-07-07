@@ -12,7 +12,7 @@ const props = defineProps<{
 }>();
 
 // 子组件向父组件发送的事件
-// close: 告诉父组件"我要关了"
+// close: 告诉父组件要把子组件关闭
 const emit = defineEmits<{
   close: [];
 }>();
@@ -71,11 +71,11 @@ function select(id: string) {
 
 .engine-popover {
   position: fixed;
-  z-index: 1000;
+  z-index: 100;
   min-width: 160px;
   padding: 6px;
   border-radius: var(--standard-radio-radius);
-  @include glass-panel;
+  @include glass-panel-1;
 }
 
 .engine-item {
@@ -106,15 +106,7 @@ function select(id: string) {
 }
 
 // 淡入淡出动画
-.pop-enter-active,
-.pop-leave-active {
-  transition:
-    opacity $duration-slow ease,
-    transform $duration-slow ease;
-}
-.pop-enter-from,
-.pop-leave-to {
-  opacity: 0;
-  transform: translateY(-6px);
+.pop {
+  @include fade;
 }
 </style>

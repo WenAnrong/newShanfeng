@@ -5,6 +5,7 @@
 
 // ===== 毛玻璃 (Frosted Glass) =====
 $glass-bg: rgba(255, 255, 255, 0.12);
+$glass-bg-2: rgba(0, 0, 0, 0.4);
 $glass-border: rgba(255, 255, 255, 0.2);
 $glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 $glass-blur: 8px;
@@ -12,9 +13,18 @@ $glass-blur: 8px;
 $glass-hover-bg: rgba(0, 0, 0, 0.2);
 $glass-active-bg: rgba(0, 0, 0, 0.25);
 
-// 毛玻璃面板
-@mixin glass-panel {
+// 毛玻璃面板1
+@mixin glass-panel-1 {
   background: $glass-bg;
+  backdrop-filter: blur($glass-blur);
+  -webkit-backdrop-filter: blur($glass-blur);
+  border: 1px solid $glass-border;
+  box-shadow: $glass-shadow;
+}
+
+// 毛玻璃面板2
+@mixin glass-panel-2 {
+  background: $glass-bg-2;
   backdrop-filter: blur($glass-blur);
   -webkit-backdrop-filter: blur($glass-blur);
   border: 1px solid $glass-border;
