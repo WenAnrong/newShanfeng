@@ -90,6 +90,7 @@ function selectSuggestion(text: string) {
   z-index: 1000;
   min-width: 160px;
   padding: 6px;
+  border-radius: var(--standard-radio-radius);
   @include glass-panel;
 }
 

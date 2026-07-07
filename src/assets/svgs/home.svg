@@ -1,0 +1,6 @@
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- 橙色圆角背景 -->
+  <rect x="0" y="0" width="100" height="100" rx="20" fill="#e67e22"/>
+  <!-- 白色房子 -->
+  <polygon points="50 20, 80 45, 75 45, 75 75, 60 75, 60 55, 40 55, 40 75, 25 75, 25 45, 20 45" fill="white"/>
+</svg>

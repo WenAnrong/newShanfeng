@@ -7,11 +7,10 @@
 $glass-bg: rgba(255, 255, 255, 0.12);
 $glass-border: rgba(255, 255, 255, 0.2);
 $glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-$glass-blur: 24px;
-$glass-radius: 12px;
+$glass-blur: 8px;
 
-$glass-hover-bg: rgba(255, 255, 255, 0.2);
-$glass-active-bg: rgba(255, 255, 255, 0.25);
+$glass-hover-bg: rgba(0, 0, 0, 0.2);
+$glass-active-bg: rgba(0, 0, 0, 0.25);
 
 // 毛玻璃面板
 @mixin glass-panel {
@@ -19,7 +18,6 @@ $glass-active-bg: rgba(255, 255, 255, 0.25);
   backdrop-filter: blur($glass-blur);
   -webkit-backdrop-filter: blur($glass-blur);
   border: 1px solid $glass-border;
-  border-radius: $glass-radius;
   box-shadow: $glass-shadow;
 }
 

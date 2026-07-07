@@ -40,11 +40,29 @@ $duration-slow: 0.45s;
 }
 
 // ---------- Mixin：弹跳 ----------
-@mixin bounce {
-  transition: transform $duration-fast $ease-spring;
+// @mixin bounce {
+//   transition: transform $duration-fast $ease-spring;
+
+//   &:active {
+//     transform: scale(0.92);
+//   }
+// }
+
+// ---------- Mixin：上下跳动 ----------
+@mixin bounce-up-down($distance: 6px, $duration: $duration-normal) {
+  will-change: transform;
 
   &:active {
-    transform: scale(0.92);
+    animation: bounce-up-down $duration $ease-in-out infinite alternate;
+  }
+
+  @keyframes bounce-up-down {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(-$distance);
+    }
   }
 }
 

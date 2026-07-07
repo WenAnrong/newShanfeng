@@ -1,0 +1,10 @@
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- 蓝绿色圆角背景 -->
+  <rect x="0" y="0" width="100" height="100" rx="20" fill="#00b894"/>
+  <!-- 白色分享图标 -->
+  <circle cx="70" cy="30" r="8" fill="white"/>
+  <circle cx="30" cy="50" r="8" fill="white"/>
+  <circle cx="70" cy="70" r="8" fill="white"/>
+  <line x1="38" y1="46" x2="62" y2="34" stroke="white" stroke-width="5" stroke-linecap="round"/>
+  <line x1="38" y1="54" x2="62" y2="66" stroke="white" stroke-width="5" stroke-linecap="round"/>
+</svg>

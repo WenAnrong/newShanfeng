@@ -7,7 +7,9 @@
 
 ## 0. 当前设计缺少的部分
 
+- 禁止文字被选中
 - 搜索词建议的父组件处理和测试未完成，未做响应式
+- 开始启动部分设计骨架屏，解决闪白问题
 - 插件体系未开始设计，当前仅完成vue展示部分
 
 ---
@@ -52,6 +54,7 @@
 │  ├─ dock/                 快捷方式栏          │
 │  ├─ favorites/            收藏夹面板          │
 │  ├─ settings/             设置面板            │
+│  ├─ launch/               仿mac的启动台        │
 │  └─ common/               Toast等            │
 ├──────────────────────────────────────────────┤
 │  Composables (composables/) 可复用逻辑         │
@@ -61,7 +64,7 @@
 │  └─ useToast.ts              提示消息         │
 ├──────────────────────────────────────────────┤
 │  Stores (stores/)         业务状态管理        │
-│  ├─ shortcutStore.ts      快捷方式           │
+│  ├─ shortcutStore.ts      dock栏的快捷方式     │
 │  ├─ searchStore.ts        搜索引擎管理        │
 │  ├─ themeStore.ts         主题/暗色模式       │
 │  ├─ wallpaperStore.ts     壁纸展示状态        │

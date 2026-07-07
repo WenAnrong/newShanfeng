@@ -1,0 +1,8 @@
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- 青色圆角背景 -->
+  <rect x="0" y="0" width="100" height="100" rx="20" fill="#1abc9c"/>
+  <!-- 白色下载图标 -->
+  <rect x="25" y="65" width="50" height="10" rx="2" fill="white"/>
+  <line x1="50" y1="20" x2="50" y2="55" stroke="white" stroke-width="8" stroke-linecap="round"/>
+  <polyline points="35 45, 50 60, 65 45" fill="none" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

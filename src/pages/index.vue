@@ -7,7 +7,7 @@ import Dock from "@/components/dock/DockPanel.vue";
 <template>
   <div class="container">
     <!-- 背景层：绝对定位铺满 -->
-    <div class="gb"></div>
+    <div class="bg"></div>
 
     <!-- 内容层 -->
     <div class="main-content">
@@ -44,7 +44,7 @@ import Dock from "@/components/dock/DockPanel.vue";
   }
 }
 
-.gb {
+.bg {
   position: absolute;
   inset: 0;
   z-index: 0;
@@ -55,7 +55,7 @@ import Dock from "@/components/dock/DockPanel.vue";
 }
 
 /* 内容组件浮于背景之上 */
-.container > :not(.gb) {
+.container > :not(.bg) {
   position: relative;
   z-index: 1;
 }

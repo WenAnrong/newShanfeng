@@ -1,16 +1,27 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import launch from "@/assets/svgs/launch.svg";
+import setting from "@/assets/svgs/setting.svg";
+import bookmark from "@/assets/svgs/bookmark.svg";
+</script>
 
 <template>
   <div class="dock-panel">
-    <div class="dock-item">Item 1</div>
-    <div class="dock-item">Item 2</div>
-    <div class="dock-item">Item 3</div>
+    <div class="dock-item">
+      <img :src="launch" class="img" />
+    </div>
+    <div class="dock-item">
+      <img :src="setting" class="img" />
+    </div>
+    <div class="dock-item">
+      <img :src="bookmark" class="img" />
+    </div>
   </div>
 </template>
 
 <style scoped lang="scss">
-@use "../../assets/variables" as *;
-@use "../../assets/glass" as *;
+@use "@/assets/variables" as *;
+@use "@/assets/glass" as *;
+@use "@/assets/animations" as *;
 
 .dock-panel {
   display: flex;
@@ -19,9 +30,10 @@
   align-items: center;
   gap: 16px;
   padding: 12px 20px;
-  background-color: $surface-bg;
-  border-radius: 18px;
+  border-radius: var(--standard-radio-radius);
   --dock-item-size: $dock-icon-size;
+
+  @include glass-panel;
 
   @include compact {
     gap: 10px;
@@ -39,11 +51,15 @@
   width: var(--dock-item-size);
   height: var(--dock-item-size);
   background-color: $surface-item-bg;
-  border-radius: 8px;
+  border-radius: 20%;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: calc(var(--dock-item-size) * 0.3);
+  @include bounce-up-down;
+
+  .img {
+    width: 100%;
+  }
 }
 </style>

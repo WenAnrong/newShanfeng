@@ -1,0 +1,11 @@
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- 蓝色圆角背景 -->
+  <rect x="0" y="0" width="100" height="100" rx="20" fill="#54a0ff"/>
+  <!-- 左侧文字 A -->
+  <text x="30" y="55" font-family="Arial, sans-serif" font-size="25" font-weight="bold" fill="white" text-anchor="middle">A</text>
+  <!-- 右侧中文 -->
+  <text x="70" y="55" font-family="Arial, sans-serif" font-size="25" font-weight="bold" fill="white" text-anchor="middle">中</text>
+  <!-- 箭头 -->
+  <path d="M45 50 L55 50" stroke="white" stroke-width="4" stroke-linecap="round"/>
+  <path d="M50 45 L55 50 L50 55" stroke="white" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
