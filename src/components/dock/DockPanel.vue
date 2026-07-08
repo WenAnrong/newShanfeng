@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { svgs } from "@/utils/svg";
-import { ref, computed, watchEffect, warn } from "vue";
+import { ref, computed, watchEffect } from "vue";
 import { usePreferredDark } from "@vueuse/core";
 import { useShortcutStore } from "@/stores/shortcutStore";
 
@@ -72,6 +72,88 @@ function clickTo(url: string) {
   }
   window.location.href = url;
 }
+
+// =========拖拽实现==========
+const isShowDelete = ref(false); // 是否显示删除文字
+let deleteTimer: ReturnType<typeof setTimeout> | null = null; // 保存定时器id
+const labelColor = ref<string>(""); // 记录原本的标签颜色
+let draggedId: number | null = null; // 当前拖拽的是哪个 shortcut
+let originalRect: DOMRect | null = null; // 拖拽开始时元素的位置
+let isDeleteMode = ref(false); // 600ms 到期后为 true
+
+// 拖拽开始
+document.addEventListener(
+  "dragstart",
+  (e) => {
+    const el = (e.target as HTMLElement).closest(".drg") as HTMLElement;
+    if (el) {
+      // 获取id
+      const id = parseInt(el.dataset.id ?? "");
+      if (isNaN(id)) return;
+      draggedId = id;
+
+      originalRect = el.getBoundingClientRect();
+
+      // 600ms 后做的事
+      deleteTimer = setTimeout(() => {
+        isDeleteMode.value = true;
+        isShowDelete.value = true;
+        const dlabel = el.querySelector(".dock-label") as HTMLElement;
+        if (dlabel) {
+          labelColor.value = dlabel.style.color;
+          dlabel.style.color = "red";
+        }
+      }, 600);
+    }
+  },
+  false,
+);
+
+// 拖拽中途
+// document.addEventListener(
+//   "drag",
+//   (e) => {
+//     const el = (e.target as HTMLElement).closest(".drg") as HTMLElement;
+//     if (el) {
+//       el.style.border = "1px solid blue";
+//     }
+//   },
+//   false,
+// );
+// 拖拽结束
+document.addEventListener(
+  "dragend",
+  (e) => {
+    const el = (e.target as HTMLElement).closest(".drg") as HTMLElement;
+    if (el) {
+      // 去除定时器
+      if (deleteTimer !== null) {
+        clearTimeout(deleteTimer);
+        deleteTimer = null;
+      }
+
+      // 删除判定：只有红色"删除？"出现后，且拖离了原位才删
+      if (isDeleteMode && draggedId !== null && originalRect) {
+        const centerX = originalRect.left + originalRect.width / 2;
+        const centerY = originalRect.top + originalRect.height / 2;
+        const dist = Math.sqrt(
+          (e.clientX - centerX) ** 2 + (e.clientY - centerY) ** 2,
+        );
+
+        if (dist > 60) {
+          // 拖远了，大于60px，删除
+          shortcutStore.deleteShortcut(draggedId);
+        }
+      }
+
+      isShowDelete.value = false;
+      // 恢复文字颜色
+      const dlabel = el.querySelector(".dock-label") as HTMLElement;
+      if (dlabel) dlabel.style.color = labelColor.value;
+    }
+  },
+  false,
+);
 </script>
 
 <template>
@@ -82,12 +164,17 @@ function clickTo(url: string) {
     </div>
 
     <div
-      class="dock-item"
+      class="dock-item drg"
       v-for="shortcut in shortcutStore.shortcuts"
       :key="shortcut.id"
+      @click="clickTo(shortcut.path)"
+      draggable="true"
+      :data-id="shortcut.id"
     >
       <img draggable="false" :src="shortcut.icon" class="img" />
-      <span class="dock-label">{{ shortcut.name }}</span>
+      <span class="dock-label">{{
+        isShowDelete ? "删除？" : shortcut.name
+      }}</span>
     </div>
 
     <div class="division"></div>

@@ -25,7 +25,16 @@ export const useShortcutStore = defineStore("shortcut", () => {
   ];
 
   // 移除快捷方式
-  function deleteShortcut(id: number) {}
+  function deleteShortcut(id: number) {
+    const index = shortcuts.findIndex((item) => item.id === id);
+    if (index !== -1) {
+      shortcuts.splice(index, 1);
+      // 重新编号，从 1 开始
+      shortcuts.forEach((item, idx) => {
+        item.id = idx + 1;
+      });
+    }
+  }
 
-  return { shortcuts };
+  return { shortcuts, deleteShortcut };
 });

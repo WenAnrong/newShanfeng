@@ -53,6 +53,7 @@ function handleSwitchBg(mode: string) {
 
 <style scoped lang="scss">
 @use "@/assets/variables" as *;
+@use "@/assets/glass" as *;
 
 .container {
   position: relative;
