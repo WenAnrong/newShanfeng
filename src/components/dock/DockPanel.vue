@@ -8,9 +8,11 @@ import { ref, computed, watchEffect } from "vue";
 import { usePreferredDark } from "@vueuse/core";
 
 // openLaunch: 打开启动台
+// openSetting: 打开设置
 // switchBg: 切换暗亮色壁纸
 const emit = defineEmits<{
   openLaunch: [];
+  openSetting: [];
   switchBg: [value: string];
 }>();
 
@@ -55,30 +57,25 @@ function cycleTheme() {
   themeMode.value = order[(idx + 1) % order.length] as ThemeMode;
 }
 
-// 跳动动画控制
-const isBouncing = ref();
-
-// 点击启动台传回信息
+// 点击启动台传回信息告诉父组件
 function openLa() {
-  isBouncing.value = true;
-  setTimeout(() => {
-    emit("openLaunch");
-  }, 300);
-  setTimeout(() => {
-    isBouncing.value = false;
-  }, 500);
+  emit("openLaunch");
+}
+
+function openSet() {
+  emit("openSetting");
 }
 </script>
 
 <template>
   <div class="dock-panel">
     <div class="division"></div>
-    <div class="dock-item" :class="{ bouncing: isBouncing }">
+    <div class="dock-item">
       <img @click="openLa" :src="launch" class="img" />
       <span class="dock-label">启动台</span>
     </div>
     <div class="dock-item">
-      <img :src="setting" class="img" />
+      <img @click="openSet" :src="setting" class="img" />
       <span class="dock-label">设置</span>
     </div>
     <div class="dock-item">
@@ -160,22 +157,27 @@ function openLa() {
     padding: 4px 10px;
     border-radius: 6px;
     color: $text-secondary;
-    font-size: 12px;
+    font-size: 10px;
     pointer-events: none;
     @include glass-panel-1;
     opacity: 0;
     transition:
       opacity 0.2s ease,
       transform 0.2s ease;
+    @include compact {
+      font-size: 8px;
+    }
+    @include wide {
+      font-size: 13px;
+    }
+    @include portrait {
+      font-size: 8px;
+    }
   }
 
   &:hover .dock-label {
     opacity: 1;
     transform: translateX(-50%) scale(1);
   }
-}
-
-.bouncing {
-  @include bounce-up-down;
 }
 </style>

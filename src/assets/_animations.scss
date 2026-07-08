@@ -41,19 +41,3 @@ $duration-slow: 0.45s;
     transform: translateY(-8px);
   }
 }
-
-// ---------- Mixin：上下跳动 ----------
-@mixin bounce-up-down($distance: 12px, $duration: $duration-normal) {
-  will-change: transform;
-
-  animation: bounce-up-down $duration $ease-in-out infinite alternate;
-
-  @keyframes bounce-up-down {
-    from {
-      transform: translateY(0);
-    }
-    to {
-      transform: translateY(-$distance);
-    }
-  }
-}

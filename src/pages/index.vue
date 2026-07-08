@@ -2,14 +2,21 @@
 import Clock from "@/components/clock/ClockPanel.vue";
 import Search from "@/components/search/SearchBox.vue";
 import Dock from "@/components/dock/DockPanel.vue";
-import Launch from "@/components/launch/Launch.vue";
+import Launch from "@/components/launch/LaunchPanel.vue";
+import Setting from "@/components/settings/SettingsPanel.vue";
 import { ref } from "vue";
 
 // 是否打开启动台
-const showLaunch = ref(false);
+const isShowLaunch = ref(false);
 // 切换开关启动台
 function toggleLaunch() {
-  showLaunch.value = !showLaunch.value;
+  isShowLaunch.value = !isShowLaunch.value;
+}
+
+// 是否打开设置界面
+const isShowSetting = ref(false);
+function toggleSetting() {
+  isShowSetting.value = !isShowSetting.value;
 }
 
 // 壁纸 URL
@@ -31,8 +38,14 @@ function handleSwitchBg(mode: string) {
       <Clock />
       <Search />
     </div>
-    <Dock class="dock" @openLaunch="toggleLaunch" @switchBg="handleSwitchBg" />
-    <Launch :visible="showLaunch" @close="showLaunch = false" />
+    <Dock
+      class="dock"
+      @openLaunch="toggleLaunch"
+      @switchBg="handleSwitchBg"
+      @openSetting="toggleSetting"
+    />
+    <Launch :visible="isShowLaunch" @close="isShowLaunch = false" />
+    <Setting :visible="isShowSetting" @close="isShowSetting = false" />
   </div>
 </template>
 

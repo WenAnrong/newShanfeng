@@ -193,3 +193,42 @@ clearSuggestions();
 | 300     | `.container > .dock`（Dock 栏）    | 快捷方式栏，浮在 Launch 之上 |
 | 100     | 弹窗 / Popover                     | 搜索引擎选择器、搜索建议下拉 |
 | 200     | `.launch-overlay`（Launch 面板）   | 启动台全屏覆盖层             |
+
+### 4.4 暗亮色配置
+
+在 `main.css` 里提供暗色了亮色两种颜色
+
+```css
+/* ---- 亮色主题（默认） ---- */
+:root,
+[data-theme="light"] {
+  /* 亮色 */
+}
+
+/* ---- 暗色主题 ---- */
+[data-theme="dark"] {
+  /* 暗色 */
+}
+```
+
+但是不直接使用这些颜色，而是在 `_glass.scss` 里调用，然后其他组件再调用这里面的内容
+
+为什么不直接全放在 `_glass.scss` ？
+答：主题切换必须在运行时通过属性选择器 [data-theme="dark"] 改变值，这是 SCSS 变量做不到的，必须用 CSS 自定义属性。`main.css` 存值（运行时主题色），`_glass.scss` 存名字映射（编译时别名），组件只管用名字。
+
+```text
+main.css              ← 运行时动态层
+  定义 :root / [data-theme="dark"] 下的 CSS 变量值
+  └─ --text-primary: #1a1a2e
+  └─ --glass-bg: rgba(255,255,255,.12)
+      │
+      ▼
+_glass.scss           ← SCSS 编译时桥接层
+  把 CSS 变量映射成 SCSS 变量，供组件 @use
+  └─ $text-primary: var(--text-primary)
+  └─ $glass-bg: var(--glass-bg)
+      │
+      ▼
+组件 .vue             ← 消费层
+  @use 后直接用 $text-primary，不用写 var(--x)
+```
