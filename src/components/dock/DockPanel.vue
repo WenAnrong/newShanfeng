@@ -75,81 +75,92 @@ function clickTo(url: string) {
 
 // =========拖拽实现==========
 const isShowDelete = ref(false); // 是否显示删除文字
-let deleteTimer: ReturnType<typeof setTimeout> | null = null; // 保存定时器id
-const labelColor = ref<string>(""); // 记录原本的标签颜色
 let draggedId: number | null = null; // 当前拖拽的是哪个 shortcut
 let originalRect: DOMRect | null = null; // 拖拽开始时元素的位置
-let isDeleteMode = ref(false); // 600ms 到期后为 true
+const labelColor = ref(""); // 控制标签颜色，空字符串=用CSS默认
 
 // 拖拽开始
 document.addEventListener(
   "dragstart",
   (e) => {
+    // 通过closest找到最近的.item元素（防止拖拽子元素时找不到）
     const el = (e.target as HTMLElement).closest(".drg") as HTMLElement;
     if (el) {
+      // 设置样式
+      el.classList.add("is-dragging");
+
       // 获取id
       const id = parseInt(el.dataset.id ?? "");
       if (isNaN(id)) return;
       draggedId = id;
 
       originalRect = el.getBoundingClientRect();
-
-      // 600ms 后做的事
-      deleteTimer = setTimeout(() => {
-        isDeleteMode.value = true;
-        isShowDelete.value = true;
-        const dlabel = el.querySelector(".dock-label") as HTMLElement;
-        if (dlabel) {
-          labelColor.value = dlabel.style.color;
-          dlabel.style.color = "red";
-        }
-      }, 600);
     }
   },
   false,
 );
 
 // 拖拽中途
-// document.addEventListener(
-//   "drag",
-//   (e) => {
-//     const el = (e.target as HTMLElement).closest(".drg") as HTMLElement;
-//     if (el) {
-//       el.style.border = "1px solid blue";
-//     }
-//   },
-//   false,
-// );
+document.addEventListener(
+  "drag",
+  (e) => {
+    const el = (e.target as HTMLElement).closest(".drg") as HTMLElement;
+    if (el) {
+      // 拖拽开始/结束瞬间坐标可能为 (0,0)，会把距离算成极大值而误判，直接忽略
+      if (e.clientX === 0 && e.clientY === 0) return;
+
+      // 实现靠近后换位置
+      if (draggedId !== null && originalRect) {
+        const centerX = originalRect.left + originalRect.width / 2;
+        const centerY = originalRect.top + originalRect.height / 2;
+        const dist = Math.sqrt(
+          (e.clientX - centerX) ** 2 + (e.clientY - centerY) ** 2,
+        );
+        if (dist > 100) {
+          console.log("可删除");
+          isShowDelete.value = true;
+          labelColor.value = "red";
+        } else {
+          console.log("不可删除");
+          isShowDelete.value = false;
+          // 恢复文字颜色
+          labelColor.value = "";
+        }
+      }
+    }
+  },
+  false,
+);
+
 // 拖拽结束
 document.addEventListener(
   "dragend",
   (e) => {
     const el = (e.target as HTMLElement).closest(".drg") as HTMLElement;
     if (el) {
-      // 去除定时器
-      if (deleteTimer !== null) {
-        clearTimeout(deleteTimer);
-        deleteTimer = null;
-      }
+      el.classList.remove("is-dragging"); // 去除拖拽样式
 
       // 删除判定：只有红色"删除？"出现后，且拖离了原位才删
-      if (isDeleteMode && draggedId !== null && originalRect) {
+      if (draggedId !== null && originalRect) {
         const centerX = originalRect.left + originalRect.width / 2;
         const centerY = originalRect.top + originalRect.height / 2;
         const dist = Math.sqrt(
           (e.clientX - centerX) ** 2 + (e.clientY - centerY) ** 2,
         );
 
-        if (dist > 60) {
-          // 拖远了，大于60px，删除
+        // 先同步重置视觉状态，避免放手后残留红色一帧
+        isShowDelete.value = false;
+        labelColor.value = "";
+
+        if (dist > 100) {
+          // 拖远了，大于100px，删除
           shortcutStore.deleteShortcut(draggedId);
         }
       }
 
-      isShowDelete.value = false;
-      // 恢复文字颜色
-      const dlabel = el.querySelector(".dock-label") as HTMLElement;
-      if (dlabel) dlabel.style.color = labelColor.value;
+      // 清理拖拽上下文
+      draggedId = null;
+      originalRect = null;
     }
   },
   false,
@@ -172,8 +183,8 @@ document.addEventListener(
       :data-id="shortcut.id"
     >
       <img draggable="false" :src="shortcut.icon" class="img" />
-      <span class="dock-label">{{
-        isShowDelete ? "删除？" : shortcut.name
+      <span class="dock-label" :style="{ color: labelColor || undefined }">{{
+        isShowDelete ? "删除?" : shortcut.name
       }}</span>
     </div>
 
@@ -251,6 +262,11 @@ document.addEventListener(
 
   .img {
     width: 100%;
+    transition: filter 0.2s ease; // 变暗/恢复时有平滑过渡
+  }
+
+  &.is-dragging .img {
+    filter: brightness(0.5);
   }
 
   .dock-label {
