@@ -1,9 +1,5 @@
 <script setup lang="ts">
-import launch from "@/assets/svgs/launch.svg";
-import setting from "@/assets/svgs/setting.svg";
-import auto from "@/assets/svgs/auto.svg";
-import dark from "@/assets/svgs/dark.svg";
-import light from "@/assets/svgs/light.svg";
+import { svgs } from "@/utils/svg";
 import { ref, computed, watchEffect, warn } from "vue";
 import { usePreferredDark } from "@vueuse/core";
 
@@ -38,9 +34,9 @@ watchEffect(() => {
 
 // 三个状态循环
 const themeIcon = computed(() => {
-  if (themeMode.value === "light") return light;
-  if (themeMode.value === "dark") return dark;
-  return auto;
+  if (themeMode.value === "light") return svgs.light;
+  if (themeMode.value === "dark") return svgs.dark;
+  return svgs.auto;
 });
 
 // 按钮上面文字
@@ -70,12 +66,12 @@ function openSet() {
 <template>
   <div class="dock-panel">
     <div class="dock-item">
-      <img @click="openLa" :src="launch" class="img" />
+      <img @click="openLa" :src="svgs.launch" class="img" />
       <span class="dock-label">启动台</span>
     </div>
     <div class="division"></div>
     <div class="dock-item">
-      <img @click="openSet" :src="setting" class="img" />
+      <img @click="openSet" :src="svgs.setting" class="img" />
       <span class="dock-label">设置</span>
     </div>
     <div class="dock-item">
