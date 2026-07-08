@@ -5,6 +5,15 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* 输入框允许选中 */
+input,
+textarea {
+  user-select: auto;
+  -webkit-user-select: auto;
 }
 
 html,
