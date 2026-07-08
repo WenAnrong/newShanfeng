@@ -1,7 +1,7 @@
 // 山风新页 响应式断点变量
 
 // ---------- 断点 ----------
-$bp-compact: 1450px;
+$bp-compact: 1440px;
 $bp-wide: 2560px;
 
 // ---------- Mixin ----------
@@ -32,5 +32,5 @@ $search-height: clamp(45px, 3.6vh, 70px);
 $search-width: 60%;
 $search-max-width: 800px;
 $search-padding: 16px;
-$dock-icon-size: 45px;
+$dock-icon-size: clamp(36px, 2.5vw, 60px);
 $container-padding-top: #{min(16vh, 160px)};

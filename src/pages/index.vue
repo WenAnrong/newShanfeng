@@ -2,7 +2,7 @@
 import Clock from "@/components/clock/ClockPanel.vue";
 import Search from "@/components/search/SearchBox.vue";
 import Dock from "@/components/dock/DockPanel.vue";
-import Launch from "@/launch/Launch.vue";
+import Launch from "@/components/launch/Launch.vue";
 import { ref } from "vue";
 
 // 是否打开启动台

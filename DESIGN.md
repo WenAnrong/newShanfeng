@@ -52,7 +52,6 @@
 │  ├─ clock/                时钟 + 农历         │
 │  ├─ search/               搜索框              │
 │  ├─ dock/                 快捷方式栏          │
-│  ├─ favorites/            收藏夹面板          │
 │  ├─ settings/             设置面板            │
 │  ├─ launch/               仿mac的启动台        │
 │  └─ common/               Toast等            │
@@ -60,7 +59,6 @@
 │  Composables (composables/) 可复用逻辑         │
 │  ├─ useBingWallpaper.ts      必应壁纸获取      │
 │  ├─ useSearchSuggestions.ts  搜索建议         │
-│  ├─ useDockMagnetic.ts       Dock 磁吸动效    │
 │  └─ useToast.ts              提示消息         │
 ├──────────────────────────────────────────────┤
 │  Stores (stores/)         业务状态管理        │
@@ -68,7 +66,7 @@
 │  ├─ searchStore.ts        搜索引擎管理        │
 │  ├─ themeStore.ts         主题/暗色模式       │
 │  ├─ wallpaperStore.ts     壁纸展示状态        │
-│  └─ favoritesStore.ts     收藏管理            │
+│  └─ launchStore.ts        启动台管理          │
 ├──────────────────────────────────────────────┤
 │  Utils (utils/)           工具层              │
 │  └─ icon.ts              favicon 检测/获取     │
@@ -91,15 +89,15 @@
 
 | 档位         | 宽度范围        | 适用场景                                          |
 | ------------ | --------------- | ------------------------------------------------- |
-| **compact**  | < 1450px        | 竖屏显示器（1080×1920）、13" 笔记本、窗口化较窄时 |
-| **standard** | 1450px ~ 2560px | 主流桌面显示器（1080p/2K）、笔记本外接            |
+| **compact**  | < 1440px        | 竖屏显示器（1080×1920）、13" 笔记本、窗口化较窄时 |
+| **standard** | 1440px ~ 2560px | 主流桌面显示器（1080p/2K）、笔记本外接            |
 | **wide**     | > 2560px        | 4K 及以上（3840×2160）、超宽屏                    |
 
 standard 为默认基线（无需 media query），compact 用 `max-width` 约束，wide 用 `min-width` 开启增强布局。
 
 ```scss
 // Sass 变量
-$bp-compact: 1450px; // 竖屏/小笔记本上限
+$bp-compact: 1440px; // 竖屏/小笔记本上限
 $bp-wide: 2560px; // 4K 开启下限
 
 // 实际使用
@@ -108,7 +106,7 @@ $bp-wide: 2560px; // 4K 开启下限
 }
 
 // standard: 默认（无需 media query）
-// ... 1450px ~ 2560px 都适用
+// ... 1440px ~ 2560px 都适用
 
 // wide: 4K / 超宽屏
 @media (min-width: $bp-wide) {
@@ -121,7 +119,7 @@ $bp-wide: 2560px; // 4K 开启下限
 
 ```scss
 // 断点
-$bp-compact: 1450px;
+$bp-compact: 1440px;
 $bp-wide: 2560px;
 ```
 
