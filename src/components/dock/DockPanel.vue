@@ -2,6 +2,9 @@
 import { svgs } from "@/utils/svg";
 import { ref, computed, watchEffect, warn } from "vue";
 import { usePreferredDark } from "@vueuse/core";
+import { useShortcutStore } from "@/stores/shortcutStore";
+
+const shortcutStore = useShortcutStore();
 
 // openLaunch: 打开启动台
 // openSetting: 打开设置
@@ -61,21 +64,40 @@ function openLa() {
 function openSet() {
   emit("openSetting");
 }
+
+// 点击打开网页
+function clickTo(url: string) {
+  if (!url.startsWith("http://") && !url.startsWith("https://")) {
+    url = "https://" + url;
+  }
+  window.location.href = url;
+}
 </script>
 
 <template>
   <div class="dock-panel">
     <div class="dock-item">
-      <img @click="openLa" :src="svgs.launch" class="img" />
+      <img draggable="false" @click="openLa" :src="svgs.launch" class="img" />
       <span class="dock-label">启动台</span>
     </div>
+
+    <div
+      class="dock-item"
+      v-for="shortcut in shortcutStore.shortcuts"
+      :key="shortcut.id"
+    >
+      <img draggable="false" :src="shortcut.icon" class="img" />
+      <span class="dock-label">{{ shortcut.name }}</span>
+    </div>
+
     <div class="division"></div>
+
     <div class="dock-item">
-      <img @click="openSet" :src="svgs.setting" class="img" />
+      <img draggable="false" @click="openSet" :src="svgs.setting" class="img" />
       <span class="dock-label">设置</span>
     </div>
     <div class="dock-item">
-      <img :src="themeIcon" class="img" @click="cycleTheme" />
+      <img draggable="false" :src="themeIcon" class="img" @click="cycleTheme" />
       <span class="dock-label">{{ themeLabel }}</span>
     </div>
   </div>
