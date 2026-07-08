@@ -5,6 +5,7 @@ import Dock from "@/components/dock/DockPanel.vue";
 import Launch from "@/components/launch/LaunchPanel.vue";
 import Setting from "@/components/settings/SettingsPanel.vue";
 import { ref } from "vue";
+import Toast from "@/components/common/Toast.vue";
 
 // 是否打开启动台
 const isShowLaunch = ref(false);
@@ -46,6 +47,7 @@ function handleSwitchBg(mode: string) {
     />
     <Launch :visible="isShowLaunch" @close="isShowLaunch = false" />
     <Setting :visible="isShowSetting" @close="isShowSetting = false" />
+    <Toast />
   </div>
 </template>
 

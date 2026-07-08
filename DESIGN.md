@@ -232,3 +232,54 @@ _glass.scss           ← SCSS 编译时桥接层
 组件 .vue             ← 消费层
   @use 后直接用 $text-primary，不用写 var(--x)
 ```
+
+### 4.5 Toast 提醒
+
+> 轻量级消息提示，用于操作反馈（复制成功、设置保存、收藏等）。
+
+#### 4.5.1 架构
+
+```text
+useToast.ts              ← 状态管理
+  维护全局响应式消息队列
+  导出 show() 函数
+        │
+        ▼
+Toast.vue               ← 视图渲染
+  用 Teleport 挂到 body
+  读取 useToast 的消息队列
+  TransitionGroup 动画
+        │
+        ▼
+     index.vue     ← 挂载点
+  只放一次 <Toast />
+```
+
+#### 4.5.2 接口示例
+
+```ts
+// useToast.ts — 导出
+function show(text: string, type?: "info" | "success" | "error"): void;
+// 调用示例
+show("已复制到剪贴板");
+show("保存成功", "success", 3000);
+show("操作失败", "error");
+```
+
+#### 4.5.3 ts、vue文件的功能
+
+```text
+show("已复制")
+    ↓
+toasts.value.push({ id:0, text:"已复制" })    ← useToast.ts 做的事
+    ↓
+toasts 是 ref，Vue 检测到变化
+    ↓
+v-for 重新渲染，一个 <div>已复制</div> 出现在页面  ← Toast.vue 做的事
+    ↓
+2.5 秒后定时器触发
+    ↓
+filter 把 id=0 从数组删掉
+    ↓
+Vue 检测到变化，那个 <div> 从页面消失
+```

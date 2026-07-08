@@ -4,7 +4,7 @@ import setting from "@/assets/svgs/setting.svg";
 import auto from "@/assets/svgs/auto.svg";
 import dark from "@/assets/svgs/dark.svg";
 import light from "@/assets/svgs/light.svg";
-import { ref, computed, watchEffect } from "vue";
+import { ref, computed, watchEffect, warn } from "vue";
 import { usePreferredDark } from "@vueuse/core";
 
 // openLaunch: 打开启动台
@@ -69,11 +69,11 @@ function openSet() {
 
 <template>
   <div class="dock-panel">
-    <div class="division"></div>
     <div class="dock-item">
       <img @click="openLa" :src="launch" class="img" />
       <span class="dock-label">启动台</span>
     </div>
+    <div class="division"></div>
     <div class="dock-item">
       <img @click="openSet" :src="setting" class="img" />
       <span class="dock-label">设置</span>
