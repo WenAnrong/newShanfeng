@@ -124,7 +124,7 @@ function openLa() {
 .division {
   width: 2.5px;
   height: calc(var(--dock-item-size) * 0.7);
-  background: rgba(0, 0, 0, 0.25);
+  background: $text-secondary;
   border-radius: 2.5px;
   flex-shrink: 0;
 }
@@ -132,7 +132,6 @@ function openLa() {
 .dock-item {
   width: var(--dock-item-size);
   height: var(--dock-item-size);
-  background-color: $surface-item-bg;
   border-radius: 20%;
   cursor: pointer;
   display: flex;

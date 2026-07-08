@@ -54,10 +54,6 @@ textarea {
   /* 交互状态 */
   --glass-hover-bg: rgba(0, 0, 0, 0.15);
   --glass-active-bg: rgba(0, 0, 0, 0.22);
-
-  /* 半透明表面 */
-  --surface-bg: rgba(0, 0, 0, 0.04);
-  --surface-item-bg: rgba(0, 0, 0, 0.08);
 }
 
 /* ---- 暗色主题 ---- */
@@ -75,8 +71,4 @@ textarea {
   /* 交互状态 */
   --glass-hover-bg: rgba(255, 255, 255, 0.1);
   --glass-active-bg: rgba(255, 255, 255, 0.18);
-
-  /* 半透明表面 */
-  --surface-bg: rgba(255, 255, 255, 0.04);
-  --surface-item-bg: rgba(255, 255, 255, 0.08);
 }

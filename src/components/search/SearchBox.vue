@@ -101,7 +101,6 @@ const inputRef = ref<HTMLElement | null>(null); // 搜索框元素信息
   display: flex;
   align-items: center;
   gap: 16px;
-  background-color: $surface-bg;
   padding: 0 20px;
   border-radius: clamp(40px, 3.5vh, 56px);
 
