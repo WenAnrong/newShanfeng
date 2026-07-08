@@ -127,6 +127,11 @@ const inputRef = ref<HTMLElement | null>(null); // 搜索框元素信息
     background-color: rgba(0, 0, 0, 0);
     outline: none;
     text-align: left;
+    color: $text-primary;
+
+    &::placeholder {
+      color: $text-secondary;
+    }
   }
 
   .btn {
@@ -136,6 +141,7 @@ const inputRef = ref<HTMLElement | null>(null); // 搜索框元素信息
     cursor: pointer;
     overflow: hidden;
     font-size: 16px;
+    color: $text-primary;
   }
 
   .engine-btn {

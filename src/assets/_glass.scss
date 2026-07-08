@@ -1,17 +1,18 @@
 // ========================================
 // 山风新页 — 半透明玻璃与表面样式
 // 统一管理所有毛玻璃、半透明背景
+// 所有颜色值引用 CSS 变量，随主题切换自动变化
 // ========================================
 
 // ===== 毛玻璃 (Frosted Glass) =====
-$glass-bg: rgba(255, 255, 255, 0.12);
-$glass-bg-2: rgba(0, 0, 0, 0.4);
-$glass-border: rgba(255, 255, 255, 0.2);
-$glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+$glass-bg: var(--glass-bg);
+$glass-bg-2: var(--glass-bg-2);
+$glass-border: var(--glass-border);
+$glass-shadow: var(--glass-shadow);
 $glass-blur: 8px;
 
-$glass-hover-bg: rgba(0, 0, 0, 0.2);
-$glass-active-bg: rgba(0, 0, 0, 0.25);
+$glass-hover-bg: var(--glass-hover-bg);
+$glass-active-bg: var(--glass-active-bg);
 
 // 毛玻璃面板1
 @mixin glass-panel-1 {
@@ -31,6 +32,10 @@ $glass-active-bg: rgba(0, 0, 0, 0.25);
   box-shadow: $glass-shadow;
 }
 
-// ===== 半透明暗色表面 =====
-$surface-bg: rgba(0, 0, 0, 0.05);
-$surface-item-bg: rgba(0, 0, 0, 0.1);
+// ===== 半透明表面（亮暗各一套） =====
+$surface-bg: var(--surface-bg);
+$surface-item-bg: var(--surface-item-bg);
+
+// ===== 主题文字色 =====
+$text-primary: var(--text-primary);
+$text-secondary: var(--text-secondary);

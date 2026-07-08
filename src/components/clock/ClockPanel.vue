@@ -57,9 +57,11 @@ onUnmounted(() => {
 
 <style scoped lang="scss">
 @use "@/assets/variables" as *;
+@use "@/assets/glass" as *;
 
 .clock-panel {
   text-align: center;
+  color: $text-primary;
 
   .clock-time {
     font-size: $clock-font-size;
@@ -84,8 +86,7 @@ onUnmounted(() => {
     align-items: center;
     gap: 10px;
     margin-top: 12px;
-    font-size: 18px;
-    opacity: 0.8;
+    color: $text-primary;
     font-size: clamp(16px, 1.2vw, 20px);
     @include wide {
       font-size: clamp(18px, 1vw, 24px);
@@ -93,6 +94,7 @@ onUnmounted(() => {
   }
 
   .lunar-date {
+    color: $text-primary;
     font-size: clamp(14px, 1.2vw, 18px);
     @include wide {
       font-size: clamp(18px, 1vw, 24px);

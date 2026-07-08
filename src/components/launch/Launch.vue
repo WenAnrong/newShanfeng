@@ -12,17 +12,12 @@ const panelRef = ref<HTMLElement>();
 
 // 点击外部关闭
 onClickOutside(panelRef, () => emit("close"));
-
-// TODO：没用
-function onKeydown(e: KeyboardEvent) {
-  if (e.key === "Escape") emit("close");
-}
 </script>
 
 <template>
   <Teleport to="body">
     <Transition name="launch">
-      <div v-if="visible" class="launch-overlay" @keydown="onKeydown">
+      <div v-if="visible" class="launch-overlay">
         <div ref="panelRef" class="launch-panel">
           <!-- 你的 launch 内容 -->
           <p>Launch 面板</p>
@@ -50,6 +45,7 @@ function onKeydown(e: KeyboardEvent) {
   padding: 40px;
   min-width: 400px;
   min-height: 300px;
+  color: $text-primary;
 }
 
 .launch {

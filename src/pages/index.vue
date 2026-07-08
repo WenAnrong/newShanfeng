@@ -11,19 +11,27 @@ const showLaunch = ref(false);
 function toggleLaunch() {
   showLaunch.value = !showLaunch.value;
 }
+
+// 壁纸 URL
+const bgImage = ref("/src/assets/bg/bg1.webp");
+
+function handleSwitchBg(mode: string) {
+  bgImage.value =
+    mode === "dark" ? "/src/assets/bg/bg2.webp" : "/src/assets/bg/bg1.webp";
+}
 </script>
 
 <template>
   <div class="container">
     <!-- 背景层：绝对定位铺满 -->
-    <div class="bg"></div>
+    <div class="bg" :style="{ backgroundImage: `url(${bgImage})` }"></div>
 
     <!-- 内容层 -->
     <div class="main-content">
       <Clock />
       <Search />
     </div>
-    <Dock class="dock" @openLaunch="toggleLaunch" />
+    <Dock class="dock" @openLaunch="toggleLaunch" @switchBg="handleSwitchBg" />
     <Launch :visible="showLaunch" @close="showLaunch = false" />
   </div>
 </template>
@@ -59,9 +67,9 @@ function toggleLaunch() {
   inset: 0;
   z-index: 0;
 
-  background-image: url("/src/assets/bg/bg1.webp");
   background-size: cover;
   background-position: center;
+  transition: background-image 0.5s ease;
 }
 
 /* 内容组件浮于背景之上 */

@@ -102,7 +102,7 @@ function selectSuggestion(text: string) {
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
-  color: #333;
+  color: $text-primary;
   transition: background $duration-fast ease;
 }
 
