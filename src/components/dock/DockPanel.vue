@@ -88,12 +88,10 @@ document.addEventListener(
     if (el) {
       // 设置样式
       el.classList.add("is-dragging");
-
       // 获取id
       const id = parseInt(el.dataset.id ?? "");
       if (isNaN(id)) return;
       draggedId = id;
-
       originalRect = el.getBoundingClientRect();
     }
   },
@@ -109,22 +107,21 @@ document.addEventListener(
       // 拖拽开始/结束瞬间坐标可能为 (0,0)，会把距离算成极大值而误判，直接忽略
       if (e.clientX === 0 && e.clientY === 0) return;
 
-      // 实现靠近后换位置
+      // 一直判断，用于显示红色字体
       if (draggedId !== null && originalRect) {
-        const centerX = originalRect.left + originalRect.width / 2;
         const centerY = originalRect.top + originalRect.height / 2;
-        const dist = Math.sqrt(
-          (e.clientX - centerX) ** 2 + (e.clientY - centerY) ** 2,
-        );
-        if (dist > 100) {
-          console.log("可删除");
+        const distY = Math.abs(e.clientY - centerY);
+        if (distY > window.innerHeight * 0.18) {
           isShowDelete.value = true;
           labelColor.value = "red";
         } else {
-          console.log("不可删除");
           isShowDelete.value = false;
           // 恢复文字颜色
           labelColor.value = "";
+
+          // 交换元素
+          if (distY < 20) {
+          }
         }
       }
     }
@@ -142,18 +139,15 @@ document.addEventListener(
 
       // 删除判定：只有红色"删除？"出现后，且拖离了原位才删
       if (draggedId !== null && originalRect) {
-        const centerX = originalRect.left + originalRect.width / 2;
         const centerY = originalRect.top + originalRect.height / 2;
-        const dist = Math.sqrt(
-          (e.clientX - centerX) ** 2 + (e.clientY - centerY) ** 2,
-        );
+        const distY = Math.abs(e.clientY - centerY);
 
         // 先同步重置视觉状态，避免放手后残留红色一帧
         isShowDelete.value = false;
         labelColor.value = "";
 
-        if (dist > 100) {
-          // 拖远了，大于100px，删除
+        if (distY > window.innerHeight * 0.18) {
+          // 拖远了，大于视口高度的18%，删除
           shortcutStore.deleteShortcut(draggedId);
         }
       }
