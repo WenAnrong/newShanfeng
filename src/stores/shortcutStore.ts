@@ -41,20 +41,20 @@ export const useShortcutStore = defineStore("shortcut", () => {
     },
   ];
 
-  // 添加快捷方式
-  function addShortcut(name: string, path: string, icon: string) {
-    const newId =
-      shortcuts.length > 0 ? Math.max(...shortcuts.map((s) => s.id)) + 1 : 1;
-    const newUid =
-      shortcuts.length > 0 ? Math.max(...shortcuts.map((s) => s.uid)) + 1 : 1;
-    shortcuts.push({
-      id: newId,
-      uid: newUid,
-      name,
-      path,
-      icon,
-    });
-  }
+  // TODO：从启动台添加快捷方式（等设置好启动台数据结构后再实现）
+  // function addShortcut(name: string, path: string, icon: string) {
+  //   const newId =
+  //     shortcuts.length > 0 ? Math.max(...shortcuts.map((s) => s.id)) + 1 : 1;
+  //   const newUid =
+  //     shortcuts.length > 0 ? Math.max(...shortcuts.map((s) => s.uid)) + 1 : 1;
+  //   shortcuts.push({
+  //     id: newId,
+  //     uid: newUid,
+  //     name,
+  //     path,
+  //     icon,
+  //   });
+  // }
 
   // 移除快捷方式
   function deleteShortcut(id: number) {
@@ -87,5 +87,5 @@ export const useShortcutStore = defineStore("shortcut", () => {
     });
   }
 
-  return { shortcuts, deleteShortcut, moveShortcutById, addShortcut };
+  return { shortcuts, deleteShortcut, moveShortcutById };
 });

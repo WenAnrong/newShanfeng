@@ -333,7 +333,6 @@ document.addEventListener(
             shortcutStore.shortcuts.forEach((item, i) => {
               item.id = i + 1;
             });
-            console.log("store里数组", shortcutStore.shortcuts);
           }
         }
       }
