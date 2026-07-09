@@ -74,25 +74,81 @@ function clickTo(url: string) {
 }
 
 // =========拖拽实现==========
-const isShowDelete = ref(false); // 是否显示删除文字
 let draggedId: number | null = null; // 当前拖拽的是哪个 shortcut
 let originalRect: DOMRect | null = null; // 拖拽开始时元素的位置
-const labelColor = ref(""); // 控制标签颜色，空字符串=用CSS默认
+const DRAG_THRESHOLD = window.innerHeight * 0.2; // Y轴距离超过此值显示"删除"
+const isShowSpace = ref(false); // 是否显示文字
+
+// 自定义浮动幽灵图（替代原生 drag ghost）
+let dragFloater: HTMLElement | null = null;
+let dragFloaterText: HTMLElement | null = null;
+
+// 创建自定义浮动幽灵图
+function createDragFloater(imgSrc: string) {
+  const floater = document.createElement("div");
+  floater.style.cssText = `
+    position: fixed;
+    top: 0; left: 0;
+    pointer-events: none;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    transform: translate(-50%, -50%);
+  `;
+
+  const icon = document.createElement("img");
+  icon.src = imgSrc;
+  icon.style.cssText = "width:48px;height:48px;border-radius:20%;";
+  floater.appendChild(icon);
+
+  const text = document.createElement("span");
+  text.textContent = "删除";
+  text.style.cssText = `
+    display: none;
+    color: #ff3b30;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  `;
+  floater.appendChild(text);
+  dragFloaterText = text;
+
+  document.body.appendChild(floater);
+  return floater;
+}
 
 // 拖拽开始
 document.addEventListener(
   "dragstart",
   (e) => {
-    // 通过closest找到最近的.item元素（防止拖拽子元素时找不到）
     const el = (e.target as HTMLElement).closest(".drg") as HTMLElement;
     if (el) {
-      // 设置样式
       el.classList.add("is-dragging");
-      // 获取id
       const id = parseInt(el.dataset.id ?? "");
       if (isNaN(id)) return;
+      // 记录当前拖拽的 shortcut id 和原始位置
       draggedId = id;
       originalRect = el.getBoundingClientRect();
+
+      // 不显示space元素
+      isShowSpace.value = true;
+
+      // 用 1×1 透明像素隐藏原生幽灵图
+      const blank = new Image();
+      blank.src =
+        "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+      e.dataTransfer?.setDragImage(blank, 0, 0);
+
+      // 创建自定义浮动幽灵图
+      const img = el.querySelector("img");
+      if (img) {
+        dragFloater = createDragFloater(img.src);
+        dragFloater.style.left = e.clientX + "px";
+        dragFloater.style.top = e.clientY + "px";
+      }
     }
   },
   false,
@@ -102,27 +158,22 @@ document.addEventListener(
 document.addEventListener(
   "drag",
   (e) => {
-    const el = (e.target as HTMLElement).closest(".drg") as HTMLElement;
-    if (el) {
-      // 拖拽开始/结束瞬间坐标可能为 (0,0)，会把距离算成极大值而误判，直接忽略
-      if (e.clientX === 0 && e.clientY === 0) return;
+    if (e.clientX === 0 && e.clientY === 0) return;
 
-      // 一直判断，用于显示红色字体
-      if (draggedId !== null && originalRect) {
-        const centerY = originalRect.top + originalRect.height / 2;
-        const distY = Math.abs(e.clientY - centerY);
-        if (distY > window.innerHeight * 0.18) {
-          isShowDelete.value = true;
-          labelColor.value = "red";
-        } else {
-          isShowDelete.value = false;
-          // 恢复文字颜色
-          labelColor.value = "";
+    // 更新浮动幽灵图位置
+    if (dragFloater) {
+      dragFloater.style.left = e.clientX + "px";
+      dragFloater.style.top = e.clientY + "px";
+    }
 
-          // 交换元素
-          if (distY < 20) {
-          }
-        }
+    // 判断距离，控制"删除"显隐
+    if (draggedId !== null && originalRect && dragFloaterText) {
+      const centerY = originalRect.top + originalRect.height / 2;
+      const distY = Math.abs(e.clientY - centerY);
+      if (distY > DRAG_THRESHOLD) {
+        dragFloaterText.style.display = "block";
+      } else {
+        dragFloaterText.style.display = "none";
       }
     }
   },
@@ -135,24 +186,27 @@ document.addEventListener(
   (e) => {
     const el = (e.target as HTMLElement).closest(".drg") as HTMLElement;
     if (el) {
-      el.classList.remove("is-dragging"); // 去除拖拽样式
+      el.classList.remove("is-dragging");
 
-      // 删除判定：只有红色"删除？"出现后，且拖离了原位才删
+      // 移除浮动幽灵图
+      if (dragFloater) {
+        dragFloater.remove();
+        dragFloater = null;
+        dragFloaterText = null;
+      }
+
+      // 删除判定
       if (draggedId !== null && originalRect) {
         const centerY = originalRect.top + originalRect.height / 2;
         const distY = Math.abs(e.clientY - centerY);
 
-        // 先同步重置视觉状态，避免放手后残留红色一帧
-        isShowDelete.value = false;
-        labelColor.value = "";
-
-        if (distY > window.innerHeight * 0.18) {
-          // 拖远了，大于视口高度的18%，删除
+        if (distY > DRAG_THRESHOLD) {
           shortcutStore.deleteShortcut(draggedId);
         }
       }
 
-      // 清理拖拽上下文
+      // 重置状态
+      isShowSpace.value = false;
       draggedId = null;
       originalRect = null;
     }
@@ -177,9 +231,11 @@ document.addEventListener(
       :data-id="shortcut.id"
     >
       <img draggable="false" :src="shortcut.icon" class="img" />
-      <span class="dock-label" :style="{ color: labelColor || undefined }">{{
-        isShowDelete ? "删除?" : shortcut.name
-      }}</span>
+      <span
+        :style="{ display: isShowSpace ? 'none' : 'block' }"
+        class="dock-label"
+        >{{ shortcut.name }}</span
+      >
     </div>
 
     <div class="division"></div>
@@ -259,8 +315,12 @@ document.addEventListener(
     transition: filter 0.2s ease; // 变暗/恢复时有平滑过渡
   }
 
-  &.is-dragging .img {
-    filter: brightness(0.5);
+  &.is-dragging {
+    background: rgba(128, 128, 128, 0.15);
+    border: 2px dashed rgba(128, 128, 128, 0.35);
+    .img {
+      opacity: 0;
+    }
   }
 
   .dock-label {
