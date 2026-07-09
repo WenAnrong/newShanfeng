@@ -79,6 +79,11 @@ let originalRect: DOMRect | null = null; // 拖拽开始时元素的位置
 const DRAG_THRESHOLD = window.innerHeight * 0.2; // Y轴距离超过此值显示"删除"
 const isShowSpace = ref(false); // 是否显示文字
 
+// 缓存布局尺寸（在 dragstart 时记录，避免被 transform 干扰）
+let layoutItemWidth = 0;
+let layoutGap = 0;
+let layoutShift = 0;
+
 // 自定义浮动幽灵图（替代原生 drag ghost）
 let dragFloater: HTMLElement | null = null;
 let dragFloaterText: HTMLElement | null = null;
@@ -133,6 +138,20 @@ document.addEventListener(
       draggedId = id;
       originalRect = el.getBoundingClientRect();
 
+      // 缓存布局尺寸（所有 item 均无 transform 时读取，保证准确）
+      const allItems = document.querySelectorAll<HTMLElement>(".drg");
+      if (allItems.length >= 2) {
+        const r0 = allItems[0]!.getBoundingClientRect();
+        const r1 = allItems[1]!.getBoundingClientRect();
+        layoutItemWidth = r0.width;
+        layoutGap = r1.left - r0.right;
+        layoutShift = layoutItemWidth + layoutGap;
+      } else if (allItems.length === 1) {
+        layoutItemWidth = allItems[0]!.getBoundingClientRect().width;
+        layoutGap = 0;
+        layoutShift = layoutItemWidth;
+      }
+
       // 不显示space元素
       isShowSpace.value = true;
 
@@ -154,6 +173,68 @@ document.addEventListener(
   false,
 );
 
+// 上一次插入位置，用于避免 drag 高频重复设置相同值
+let lastInsertIndex = -1;
+
+// 根据鼠标 X 找到插入位置（items 中的第几个之前）
+// 用 item 的右边界（含 gap 中点）作为切换点，保证一格一换
+function calcInsertIndex(clientX: number): number {
+  const items = document.querySelectorAll<HTMLElement>(".drg");
+  if (!items.length) return 0;
+  for (let i = 0; i < items.length; i++) {
+    const rect = items[i]!.getBoundingClientRect();
+    // 边界 = item 右边缘 + gap 的一半
+    const boundary = rect.right + layoutGap / 2;
+    if (clientX < boundary) return i;
+  }
+  return items.length;
+}
+
+// 更新所有 items 的 translateX 产生"让位"动画
+function applyShifts(insertIndex: number) {
+  const items = document.querySelectorAll<HTMLElement>(".drg");
+  if (!items.length || draggedId === null) return;
+
+  const shift = layoutShift;
+  if (shift <= 0) return;
+
+  const draggedIdx = shortcutStore.shortcuts.findIndex(
+    (s) => s.id === draggedId,
+  );
+
+  items.forEach((el, i) => {
+    if (i === draggedIdx) {
+      el.style.transform = ""; // 被拖元素本身不移位
+      return;
+    }
+
+    if (insertIndex < draggedIdx) {
+      // 鼠标在拖拽元素左侧 → 中间的元素右移
+      if (i >= insertIndex && i < draggedIdx) {
+        el.style.transform = `translateX(${shift}px)`;
+      } else {
+        el.style.transform = "";
+      }
+    } else if (insertIndex > draggedIdx) {
+      // 鼠标在拖拽元素右侧 → 中间的元素左移
+      if (i > draggedIdx && i < insertIndex) {
+        el.style.transform = `translateX(${-shift}px)`;
+      } else {
+        el.style.transform = "";
+      }
+    } else {
+      el.style.transform = "";
+    }
+  });
+}
+
+// 清除所有位移
+function resetShifts() {
+  document
+    .querySelectorAll<HTMLElement>(".drg")
+    .forEach((el) => (el.style.transform = ""));
+}
+
 // 拖拽中途
 document.addEventListener(
   "drag",
@@ -166,14 +247,28 @@ document.addEventListener(
       dragFloater.style.top = e.clientY + "px";
     }
 
-    // 判断距离，控制"删除"显隐
-    if (draggedId !== null && originalRect && dragFloaterText) {
+    // 判断距离
+    if (draggedId !== null && originalRect) {
       const centerY = originalRect.top + originalRect.height / 2;
       const distY = Math.abs(e.clientY - centerY);
-      if (distY > DRAG_THRESHOLD) {
-        dragFloaterText.style.display = "block";
-      } else {
-        dragFloaterText.style.display = "none";
+
+      // 控制"删除"显隐
+      if (dragFloaterText) {
+        dragFloaterText.style.display =
+          distY > DRAG_THRESHOLD ? "block" : "none";
+      }
+
+      // ---- 让位动画：只有 Y 偏移小于 20px 时才触发移位 ----
+      if (distY < 20) {
+        const idx = calcInsertIndex(e.clientX);
+        if (idx !== lastInsertIndex) {
+          lastInsertIndex = idx;
+          applyShifts(idx);
+        }
+      } else if (lastInsertIndex !== -1) {
+        // 移出水平区 → 清除移位，恢复原位
+        resetShifts();
+        lastInsertIndex = -1;
       }
     }
   },
@@ -195,13 +290,51 @@ document.addEventListener(
         dragFloaterText = null;
       }
 
-      // 删除判定
+      // 清除所有移位（放手归位）
+      resetShifts();
+      const finalInsertIndex = lastInsertIndex;
+      lastInsertIndex = -1;
+      layoutItemWidth = 0;
+      layoutGap = 0;
+      layoutShift = 0;
+
+      // 删除 / 移动判定
       if (draggedId !== null && originalRect) {
         const centerY = originalRect.top + originalRect.height / 2;
         const distY = Math.abs(e.clientY - centerY);
 
         if (distY > DRAG_THRESHOLD) {
           shortcutStore.deleteShortcut(draggedId);
+        } else if (distY < 20 && finalInsertIndex >= 0) {
+          const idx = shortcutStore.shortcuts.findIndex(
+            (s) => s.id === draggedId,
+          );
+          const len = shortcutStore.shortcuts.length;
+
+          // 没有真正移动的情况：插入点就是原位或紧挨原位右侧
+          const noMove =
+            finalInsertIndex === idx ||
+            finalInsertIndex === idx + 1 ||
+            (idx === len - 1 && finalInsertIndex === len);
+
+          if (!noMove) {
+            if (finalInsertIndex >= len) {
+              // 移到末尾
+              const [item] = shortcutStore.shortcuts.splice(idx, 1);
+              shortcutStore.shortcuts.push(item!);
+            } else {
+              // 移到 finalInsertIndex 处（该位置 item 之前）
+              shortcutStore.moveShortcutById(
+                draggedId,
+                shortcutStore.shortcuts[finalInsertIndex]!.id,
+              );
+            }
+            // 重新编号
+            shortcutStore.shortcuts.forEach((item, i) => {
+              item.id = i + 1;
+            });
+            console.log("store里数组", shortcutStore.shortcuts);
+          }
         }
       }
 
@@ -225,7 +358,7 @@ document.addEventListener(
     <div
       class="dock-item drg"
       v-for="shortcut in shortcutStore.shortcuts"
-      :key="shortcut.id"
+      :key="shortcut.uid"
       @click="clickTo(shortcut.path)"
       draggable="true"
       :data-id="shortcut.id"
@@ -318,6 +451,8 @@ document.addEventListener(
   &.is-dragging {
     background: rgba(128, 128, 128, 0.15);
     border: 2px dashed rgba(128, 128, 128, 0.35);
+    scale: none;
+    transform: none;
     .img {
       opacity: 0;
     }
