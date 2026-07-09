@@ -1,60 +1,18 @@
 <script setup lang="ts">
 import { svgs } from "@/utils/svg";
-import { ref, computed, watchEffect } from "vue";
-import { usePreferredDark } from "@vueuse/core";
+import { ref } from "vue";
 import { useShortcutStore } from "@/stores/shortcutStore";
+import { useThemeStore } from "@/stores/themeStore";
 
 const shortcutStore = useShortcutStore();
+const themeStore = useThemeStore();
 
 // openLaunch: 打开启动台
 // openSetting: 打开设置
-// switchBg: 切换暗亮色壁纸
 const emit = defineEmits<{
   openLaunch: [];
   openSetting: [];
-  switchBg: [value: string];
 }>();
-
-// 三态："light" | "dark" | "auto"
-type ThemeMode = "light" | "dark" | "auto";
-const themeMode = ref<ThemeMode>(
-  (localStorage.getItem("theme-mode") as ThemeMode) || "auto",
-);
-const preferredDark = usePreferredDark();
-
-// 当 mode 或系统偏好变化时，自动同步 data-theme
-watchEffect(() => {
-  let effective: string;
-  if (themeMode.value === "auto") {
-    effective = preferredDark.value ? "dark" : "light";
-  } else {
-    effective = themeMode.value;
-  }
-  emit("switchBg", effective);
-  document.documentElement.dataset.theme = effective;
-  localStorage.setItem("theme-mode", themeMode.value);
-});
-
-// 三个状态循环
-const themeIcon = computed(() => {
-  if (themeMode.value === "light") return svgs.light;
-  if (themeMode.value === "dark") return svgs.dark;
-  return svgs.auto;
-});
-
-// 按钮上面文字
-const themeLabel = computed(() => {
-  if (themeMode.value === "light") return "亮色";
-  if (themeMode.value === "dark") return "暗色";
-  return "自动";
-});
-
-// 点击按钮切换暗色、亮色和自动
-function cycleTheme() {
-  const order = ["light", "dark", "auto"] as const;
-  const idx = order.indexOf(themeMode.value);
-  themeMode.value = order[(idx + 1) % order.length] as ThemeMode;
-}
 
 // 点击启动台传回信息告诉父组件
 function openLa() {
@@ -377,8 +335,13 @@ document.addEventListener(
       <span class="dock-label">设置</span>
     </div>
     <div class="dock-item">
-      <img draggable="false" :src="themeIcon" class="img" @click="cycleTheme" />
-      <span class="dock-label">{{ themeLabel }}</span>
+      <img
+        draggable="false"
+        :src="themeStore.themeIcon"
+        class="img"
+        @click="themeStore.cycleTheme"
+      />
+      <span class="dock-label">{{ themeStore.themeLabel }}</span>
     </div>
   </div>
 </template>

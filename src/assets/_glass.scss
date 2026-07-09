@@ -8,6 +8,7 @@
 $glass-bg: var(--glass-bg);
 $glass-bg-2: var(--glass-bg-2);
 $glass-bg-3: var(--glass-bg-3);
+$glass-bg-setting: var(--glass-bg-setting);
 $glass-border: var(--glass-border);
 $glass-shadow: var(--glass-shadow);
 $glass-blur: 8px;
@@ -38,6 +39,15 @@ $glass-active-bg: var(--glass-active-bg);
   background: $glass-bg-3;
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
+  border: 1px solid $glass-border;
+  box-shadow: $glass-shadow;
+}
+
+// 毛玻璃 — 设置面板（比普通面板更不透明）
+@mixin glass-panel-setting {
+  background: $glass-bg-setting;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid $glass-border;
   box-shadow: $glass-shadow;
 }

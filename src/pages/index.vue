@@ -4,8 +4,11 @@ import Search from "@/components/search/SearchBox.vue";
 import Dock from "@/components/dock/DockPanel.vue";
 import Launch from "@/components/launch/LaunchPanel.vue";
 import Setting from "@/components/settings/SettingsPanel.vue";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import Toast from "@/components/common/Toast.vue";
+import { useThemeStore } from "@/stores/themeStore";
+
+const themeStore = useThemeStore();
 
 // 是否打开启动台
 const isShowLaunch = ref(false);
@@ -23,10 +26,15 @@ function toggleSetting() {
 // 壁纸 URL
 const bgImage = ref("/src/assets/bg/bg1.webp");
 
-function handleSwitchBg(mode: string) {
-  bgImage.value =
-    mode === "dark" ? "/src/assets/bg/bg2.webp" : "/src/assets/bg/bg1.webp";
-}
+// 监听主题变化切换壁纸
+watch(
+  () => themeStore.effectiveTheme,
+  (mode) => {
+    bgImage.value =
+      mode === "dark" ? "/src/assets/bg/bg2.webp" : "/src/assets/bg/bg1.webp";
+  },
+  { immediate: true },
+);
 </script>
 
 <template>
@@ -42,7 +50,6 @@ function handleSwitchBg(mode: string) {
     <Dock
       class="dock"
       @openLaunch="toggleLaunch"
-      @switchBg="handleSwitchBg"
       @openSetting="toggleSetting"
     />
     <Launch :visible="isShowLaunch" @close="isShowLaunch = false" />

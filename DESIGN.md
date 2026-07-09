@@ -64,6 +64,7 @@
 │  ├─ shortcutStore.ts      dock栏的快捷方式    │
 │  ├─ searchStore.ts        搜索引擎管理        │
 │  ├─ wallpaperStore.ts     壁纸管理            │
+│  ├─ themeStore.ts         主题管理            │
 │  └─ launchStore.ts        启动台管理          │
 ├──────────────────────────────────────────────┤
 │  Utils (utils/)           工具层              │
@@ -191,8 +192,9 @@ clearSuggestions();
 | 300     | `.container > .dock`（Dock 栏）    | 快捷方式栏，浮在 Launch 之上 |
 | 100     | 弹窗 / Popover                     | 搜索引擎选择器、搜索建议下拉 |
 | 200     | `.launch-overlay`（Launch 面板）   | 启动台全屏覆盖层             |
+| 200     | `.setting-overlay`（设置 面板）    | 设置全屏覆盖层               |
 
-### 4.4 暗亮色配置
+### 4.4 主题配置
 
 在 `main.css` 里提供暗色了亮色两种颜色
 
@@ -211,7 +213,8 @@ clearSuggestions();
 
 但是不直接使用这些颜色，而是在 `_glass.scss` 里调用，然后其他组件再调用这里面的内容
 
-为什么不直接全放在 `_glass.scss` ？
+#### 4.4.1 为什么不直接全放在 `_glass.scss` ？
+
 答：主题切换必须在运行时通过属性选择器 [data-theme="dark"] 改变值，这是 SCSS 变量做不到的，必须用 CSS 自定义属性。`main.css` 存值（运行时主题色），`_glass.scss` 存名字映射（编译时别名），组件只管用名字。
 
 ```text
@@ -230,6 +233,39 @@ _glass.scss           ← SCSS 编译时桥接层
 组件 .vue             ← 消费层
   @use 后直接用 $text-primary，不用写 var(--x)
 ```
+
+#### 4.4.2 主题共享
+
+主题状态集中在 `themeStore`（`src/stores/themeStore.ts`）统一管理，各组件通过 Pinia 调用，避免重复读写 localStorage 和手动同步 DOM。
+
+```text
+themeStore.ts            ← 状态管理
+  ├─ themeMode         三态：light / dark / auto
+  ├─ effectiveTheme    实际亮暗（auto 时按系统偏好计算）
+  ├─ themeIcon         当前模式对应的图标 URL
+  ├─ themeLabel        当前模式对应的中文标签
+  ├─ cycleTheme()      循环切换：亮 → 暗 → 自动
+  ├─ setThemeMode(m)   直接设置指定模式
+  └─ watch             自动同步 data-theme + localStorage
+       │
+       ├─▶ document.documentElement.dataset.theme
+       │      └─ CSS 属性选择器 [data-theme="dark"] 生效
+       │
+       ├─▶ localStorage.setItem("theme-mode", ...)
+       │      └─ 刷新后恢复上次主题
+       │
+       ▼
+其他组件                ← 消费方
+  ├─ DockPanel.vue    显示 themeIcon / themeLabel，绑定 cycleTheme
+  ├─ SettingsPanel.vue 外观 Tab 中调用 setThemeMode
+  └─ index.vue         watch effectiveTheme 切换壁纸
+```
+
+**关键设计：**
+
+- **单一数据源**：所有组件读写同一个 store，不再各自操作 localStorage。
+- **自动同步**：store 内部的 `watch` 在 `themeMode` 或 `effectiveTheme` 变化时自动更新 `data-theme` 和 `localStorage`，组件无需关心 DOM 同步细节。
+- **响应式壁纸**：`index.vue` 通过 `watch(() => themeStore.effectiveTheme, ...)` 监听主题变化来切换壁纸图片，不再依赖 DockPanel 的 emit 事件。
 
 ### 4.5 Toast 提醒
 
