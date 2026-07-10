@@ -12,7 +12,7 @@ const panelRef = ref<HTMLElement>();
 onClickOutside(panelRef, () => emit("close"));
 
 // 当前选中的 tab
-type Tab = "appearance" | "about";
+type Tab = "appearance" | "about" | "synchronize";
 const activeTab = ref<Tab>("appearance");
 
 function setThemeMode(m: "light" | "dark" | "auto") {
@@ -52,6 +52,13 @@ function setThemeMode(m: "light" | "dark" | "auto") {
             </button>
 
             <button
+              :class="['tab-btn', { active: activeTab === 'synchronize' }]"
+              @click="activeTab = 'synchronize'"
+            >
+              备份和同步
+            </button>
+
+            <button
               :class="['tab-btn', { active: activeTab === 'about' }]"
               @click="activeTab = 'about'"
             >
@@ -69,6 +76,11 @@ function setThemeMode(m: "light" | "dark" | "auto") {
                   <button
                     v-for="opt in [
                       {
+                        id: 'auto',
+                        label: '自动',
+                        img: '/src/assets/setting-icon/lightanddark.webp',
+                      },
+                      {
                         id: 'light',
                         label: '亮色',
                         img: '/src/assets/setting-icon/light.webp',
@@ -77,11 +89,6 @@ function setThemeMode(m: "light" | "dark" | "auto") {
                         id: 'dark',
                         label: '暗色',
                         img: '/src/assets/setting-icon/dark.webp',
-                      },
-                      {
-                        id: 'auto',
-                        label: '自动',
-                        img: '/src/assets/setting-icon/lightanddark.webp',
                       },
                     ] as const"
                     :key="opt.id"
@@ -94,6 +101,17 @@ function setThemeMode(m: "light" | "dark" | "auto") {
                     <img :src="opt.img" class="mode-icon" />
                     <span>{{ opt.label }}</span>
                   </button>
+                </div>
+              </section>
+            </div>
+
+            <!-- 同步设置区域 -->
+            <div v-if="activeTab === 'synchronize'" class="tab-content">
+              <section class="setting-section">
+                <label class="section-label">同步设置</label>
+                <div class="synchronize-options">
+                  <button class="sync-btn">手动同步</button>
+                  <button class="sync-btn">自动同步</button>
                 </div>
               </section>
             </div>
@@ -137,7 +155,7 @@ function setThemeMode(m: "light" | "dark" | "auto") {
   display: flex;
   flex-direction: column;
   width: min(600px, 60vw);
-  max-height: min(600px, 70vh);
+  height: 600px;
   border-radius: 18px;
   overflow: hidden;
   @include glass-panel-setting;

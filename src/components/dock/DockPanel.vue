@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { svgs } from "@/utils/svg";
 import { ref } from "vue";
+import { onClickOutside } from "@vueuse/core";
 import { useShortcutStore } from "@/stores/shortcutStore";
 import { useThemeStore } from "@/stores/themeStore";
 
@@ -303,45 +304,140 @@ document.addEventListener(
   },
   false,
 );
+
+// =========右键菜单==========
+const contextMenu = ref({
+  visible: false,
+  x: 0,
+  y: 0,
+  shortcut: null as {
+    id: number;
+    name: string;
+    path: string;
+    icon: string;
+  } | null,
+});
+
+// 右键事件
+function handleContextMenu(e: MouseEvent) {
+  const el = (e.currentTarget as HTMLElement)?.closest(
+    ".drg",
+  ) as HTMLElement | null;
+  if (!el) return;
+
+  // 从 data-id 属性中读取 shortcut 的 id（数字）
+  const id = parseInt(el.dataset.id ?? "");
+  if (isNaN(id)) return;
+
+  // 根据 id 在 shortcutStore 中找到对应的快捷方式对象
+  const shortcut = shortcutStore.shortcuts.find((s) => s.id === id);
+  if (!shortcut) return;
+
+  // 设置菜单位置（鼠标点击处）和要操作的快捷方式
+  contextMenu.value = {
+    visible: true, // 显示菜单
+    x: e.clientX, // 鼠标在视口中的 X 坐标
+    y: window.innerHeight - e.clientY, // 鼠标在视口中的 Y 坐标（从底部计算）
+    shortcut, // 被右键的快捷方式数据
+  };
+}
+
+// 关闭右键菜单
+function closeContextMenu() {
+  contextMenu.value.visible = false;
+}
+
+// 右键菜单-在新标签页打开
+function openInNewTab() {
+  const shortcut = contextMenu.value.shortcut;
+  if (shortcut) {
+    if (
+      !shortcut.path.startsWith("http://") &&
+      !shortcut.path.startsWith("https://")
+    ) {
+      shortcut.path = "https://" + shortcut.path;
+    }
+    window.open(shortcut.path, "_blank");
+  }
+  closeContextMenu();
+}
+
+// 右键菜单-删除
+function deleteShortcut() {
+  const shortcut = contextMenu.value.shortcut;
+  if (shortcut) {
+    shortcutStore.deleteShortcut(shortcut.id);
+  }
+  closeContextMenu();
+}
+
+// 右键菜单点击外部关闭
+const contextMenuRef = ref<HTMLElement | null>(null);
+onClickOutside(contextMenuRef, () => {
+  closeContextMenu();
+});
 </script>
 
 <template>
-  <div class="dock-panel">
-    <div class="dock-item">
-      <img draggable="false" @click="openLa" :src="svgs.launch" class="img" />
-      <span class="dock-label">启动台</span>
-    </div>
+  <div v-bind="$attrs" class="dock-wrapper">
+    <div class="dock-panel">
+      <div class="dock-item">
+        <img draggable="false" @click="openLa" :src="svgs.launch" class="img" />
+        <span class="dock-label">启动台</span>
+      </div>
 
-    <div
-      class="dock-item drg"
-      v-for="shortcut in shortcutStore.shortcuts"
-      :key="shortcut.uid"
-      @click="clickTo(shortcut.path)"
-      draggable="true"
-      :data-id="shortcut.id"
-    >
-      <img draggable="false" :src="shortcut.icon" class="img" />
-      <span
-        :style="{ display: isShowSpace ? 'none' : 'block' }"
-        class="dock-label"
-        >{{ shortcut.name }}</span
+      <div
+        class="dock-item drg"
+        v-for="shortcut in shortcutStore.shortcuts"
+        :key="shortcut.uid"
+        @click="clickTo(shortcut.path)"
+        draggable="true"
+        :data-id="shortcut.id"
+        @contextmenu.prevent="handleContextMenu"
       >
+        <img draggable="false" :src="shortcut.icon" class="img" />
+        <span
+          :style="{ display: isShowSpace ? 'none' : 'block' }"
+          class="dock-label"
+          >{{ shortcut.name }}</span
+        >
+      </div>
+
+      <div class="division"></div>
+
+      <div class="dock-item">
+        <img
+          draggable="false"
+          @click="openSet"
+          :src="svgs.setting"
+          class="img"
+        />
+        <span class="dock-label">设置</span>
+      </div>
+      <div class="dock-item">
+        <img
+          draggable="false"
+          :src="themeStore.themeIcon"
+          class="img"
+          @click="themeStore.cycleTheme"
+        />
+        <span class="dock-label">{{ themeStore.themeLabel }}</span>
+      </div>
     </div>
 
-    <div class="division"></div>
-
-    <div class="dock-item">
-      <img draggable="false" @click="openSet" :src="svgs.setting" class="img" />
-      <span class="dock-label">设置</span>
-    </div>
-    <div class="dock-item">
-      <img
-        draggable="false"
-        :src="themeStore.themeIcon"
-        class="img"
-        @click="themeStore.cycleTheme"
-      />
-      <span class="dock-label">{{ themeStore.themeLabel }}</span>
+    <!-- 右键菜单 -->
+    <div
+      v-if="contextMenu.visible"
+      ref="contextMenuRef"
+      class="context-menu"
+      :style="{ left: contextMenu.x + 'px', bottom: contextMenu.y + 'px' }"
+    >
+      <div class="context-menu-item" @click="openInNewTab">
+        <span>在新标签页中打开</span>
+      </div>
+      <div class="context-menu-item danger" @click="deleteShortcut">
+        <span>删除</span>
+      </div>
     </div>
   </div>
 </template>
@@ -450,6 +546,52 @@ document.addEventListener(
   &:hover .dock-label {
     opacity: 1;
     transform: translateX(-50%) scale(1);
+  }
+}
+
+// =========右键菜单==========
+.context-menu {
+  position: fixed;
+  z-index: 300;
+  padding: 6px 0;
+  border-radius: 10px;
+  @include glass-panel-1;
+  backdrop-filter: blur(20px);
+  overflow: hidden;
+  animation: contextMenuIn 0.12s ease-out;
+
+  @keyframes contextMenuIn {
+    from {
+      opacity: 0;
+      transform: scale(0.92);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}
+
+.context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  font-size: 13px;
+  color: $text-primary;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  white-space: nowrap;
+
+  &:hover {
+    background: rgba(128, 128, 128, 0.15);
+  }
+
+  &.danger {
+    color: #ff3b30;
+    &:hover {
+      background: rgba(255, 59, 48, 0.12);
+    }
   }
 }
 </style>

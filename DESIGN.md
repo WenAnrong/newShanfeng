@@ -193,6 +193,7 @@ clearSuggestions();
 | 100     | 弹窗 / Popover                     | 搜索引擎选择器、搜索建议下拉 |
 | 200     | `.launch-overlay`（Launch 面板）   | 启动台全屏覆盖层             |
 | 200     | `.setting-overlay`（设置 面板）    | 设置全屏覆盖层               |
+| 300     | `.context-menu`（右键菜单）        | 右键菜单                     |
 
 ### 4.4 主题配置
 
