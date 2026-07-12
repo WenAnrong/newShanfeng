@@ -473,6 +473,8 @@ onClickOutside(contextMenuRef, () => {
     padding: 16px 32px;
     --dock-item-size: clamp(65px, 2.5vw, 90px);
   }
+
+  animation: dockSlideUp 1.7s $ease-spring both;
 }
 
 .division {
@@ -592,6 +594,17 @@ onClickOutside(contextMenuRef, () => {
     &:hover {
       background: rgba(255, 59, 48, 0.12);
     }
+  }
+}
+
+@keyframes dockSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 </style>

@@ -12,7 +12,7 @@ const panelRef = ref<HTMLElement>();
 onClickOutside(panelRef, () => emit("close"));
 
 // 当前选中的 tab
-type Tab = "appearance" | "about" | "synchronize";
+type Tab = "appearance" | "about" | "synchronize" | "search";
 const activeTab = ref<Tab>("appearance");
 
 function setThemeMode(m: "light" | "dark" | "auto") {
@@ -59,6 +59,13 @@ function setThemeMode(m: "light" | "dark" | "auto") {
             </button>
 
             <button
+              :class="['tab-btn', { active: activeTab === 'search' }]"
+              @click="activeTab = 'search'"
+            >
+              搜索引擎
+            </button>
+
+            <button
               :class="['tab-btn', { active: activeTab === 'about' }]"
               @click="activeTab = 'about'"
             >
@@ -68,7 +75,7 @@ function setThemeMode(m: "light" | "dark" | "auto") {
 
           <!-- 内容区域 -->
           <div class="setting-body">
-            <!-- ===== 外观 ===== -->
+            <!--  外观 -->
             <div v-if="activeTab === 'appearance'" class="tab-content">
               <section class="setting-section">
                 <label class="section-label">主题模式</label>
@@ -102,6 +109,7 @@ function setThemeMode(m: "light" | "dark" | "auto") {
                     <span>{{ opt.label }}</span>
                   </button>
                 </div>
+                <label class="section-label">壁纸管理</label>
               </section>
             </div>
 
@@ -116,7 +124,12 @@ function setThemeMode(m: "light" | "dark" | "auto") {
               </section>
             </div>
 
-            <!-- ===== 关于 ===== -->
+            <!-- 搜索引擎 -->
+            <div v-if="activeTab === 'search'" class="tab-content">
+              暂未实现
+            </div>
+
+            <!-- 关于 -->
             <div v-if="activeTab === 'about'" class="tab-content">
               <div class="about-info">
                 <h3>山风新页</h3>
@@ -270,9 +283,10 @@ function setThemeMode(m: "light" | "dark" | "auto") {
 .setting-section {
   .section-label {
     display: block;
-    font-size: 12px;
+    font-size: 14px;
     color: $text-secondary;
     margin-bottom: 10px;
+    margin-top: 12px;
   }
 }
 

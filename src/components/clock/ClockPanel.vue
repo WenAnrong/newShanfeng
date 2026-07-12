@@ -58,10 +58,13 @@ onUnmounted(() => {
 <style scoped lang="scss">
 @use "@/assets/variables" as *;
 @use "@/assets/glass" as *;
+@use "@/assets/animations" as *;
 
 .clock-panel {
   text-align: center;
   color: $text-primary;
+
+  animation: dockSlideDown 2.2s $ease-spring both;
 
   .clock-time {
     font-size: $clock-font-size;
@@ -99,6 +102,17 @@ onUnmounted(() => {
     @include wide {
       font-size: clamp(18px, 1vw, 24px);
     }
+  }
+}
+
+@keyframes dockSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 </style>

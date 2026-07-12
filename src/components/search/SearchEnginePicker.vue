@@ -75,6 +75,9 @@ function select(id: string) {
   min-width: 160px;
   padding: 6px;
   border-radius: var(--standard-radio-radius);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   @include glass-panel-1;
 }
 
