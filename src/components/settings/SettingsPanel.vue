@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { onClickOutside } from "@vueuse/core";
-import { useThemeStore } from "@/stores/themeStore";
-import { useWallpaperStore } from "@/stores/wallpaperStore";
+import Appearance from "./Appearance.vue";
+import About from "./About.vue";
+import Synchronize from "./Sync.vue";
+import SearchEngine from "./SearchEngine.vue";
 
 defineProps<{ visible: boolean }>();
 const emit = defineEmits<{ close: [] }>();
-
-const themeStore = useThemeStore();
-const wallpaperStore = useWallpaperStore();
 
 const panelRef = ref<HTMLElement>();
 onClickOutside(panelRef, () => emit("close"));
@@ -16,33 +15,6 @@ onClickOutside(panelRef, () => emit("close"));
 // 当前选中的 tab
 type Tab = "appearance" | "about" | "synchronize" | "search";
 const activeTab = ref<Tab>("appearance");
-
-// 隐藏的文件输入
-const lightInput = ref<HTMLInputElement>();
-const darkInput = ref<HTMLInputElement>();
-
-function selectLightWallpaper() {
-  lightInput.value?.click();
-}
-function selectDarkWallpaper() {
-  darkInput.value?.click();
-}
-
-async function onLightFileChange(e: Event) {
-  const file = (e.target as HTMLInputElement).files?.[0];
-  if (!file) return;
-  await wallpaperStore.setWallpaper("light", file);
-}
-
-async function onDarkFileChange(e: Event) {
-  const file = (e.target as HTMLInputElement).files?.[0];
-  if (!file) return;
-  await wallpaperStore.setWallpaper("dark", file);
-}
-
-function setThemeMode(m: "light" | "dark" | "auto") {
-  themeStore.setThemeMode(m);
-}
 </script>
 
 <template>
@@ -102,105 +74,22 @@ function setThemeMode(m: "light" | "dark" | "auto") {
           <div class="setting-body">
             <!--  外观 -->
             <div v-if="activeTab === 'appearance'" class="tab-content">
-              <section class="setting-section">
-                <label class="section-label">主题模式</label>
-                <div class="theme-mode-group">
-                  <button
-                    v-for="opt in [
-                      {
-                        id: 'auto',
-                        label: '自动',
-                        img: '/src/assets/setting-icon/lightanddark.webp',
-                      },
-                      {
-                        id: 'light',
-                        label: '亮色',
-                        img: '/src/assets/setting-icon/light.webp',
-                      },
-                      {
-                        id: 'dark',
-                        label: '暗色',
-                        img: '/src/assets/setting-icon/dark.webp',
-                      },
-                    ] as const"
-                    :key="opt.id"
-                    :class="[
-                      'mode-btn',
-                      { active: themeStore.themeMode === opt.id },
-                    ]"
-                    @click="setThemeMode(opt.id)"
-                  >
-                    <img :src="opt.img" class="mode-icon" />
-                    <span>{{ opt.label }}</span>
-                  </button>
-                </div>
-                <label class="section-label">壁纸管理</label>
-                <div class="theme-mode-group wallpaper-group">
-                  <button
-                    class="mode-btn wallpaper-btn"
-                    @click="selectLightWallpaper"
-                  >
-                    <img
-                      class="wallpaper-preview"
-                      :src="wallpaperStore.lightWallpaper"
-                    />
-                    <span>亮色壁纸</span>
-                  </button>
-                  <button
-                    class="mode-btn wallpaper-btn"
-                    @click="selectDarkWallpaper"
-                  >
-                    <img
-                      class="wallpaper-preview"
-                      :src="wallpaperStore.darkWallpaper"
-                    />
-                    <span>暗色壁纸</span>
-                  </button>
-                </div>
-                <!-- 隐藏的文件选择器 -->
-                <input
-                  ref="lightInput"
-                  type="file"
-                  accept="image/*"
-                  hidden
-                  @change="onLightFileChange"
-                />
-                <input
-                  ref="darkInput"
-                  type="file"
-                  accept="image/*"
-                  hidden
-                  @change="onDarkFileChange"
-                />
-              </section>
+              <Appearance />
             </div>
 
             <!-- 同步设置区域 -->
             <div v-if="activeTab === 'synchronize'" class="tab-content">
-              <section class="setting-section">
-                <label class="section-label">同步设置</label>
-                <div class="synchronize-options">
-                  <button class="sync-btn">手动同步</button>
-                  <button class="sync-btn">自动同步</button>
-                </div>
-              </section>
+              <Synchronize />
             </div>
 
             <!-- 搜索引擎 -->
             <div v-if="activeTab === 'search'" class="tab-content">
-              暂未实现
+              <SearchEngine />
             </div>
 
             <!-- 关于 -->
             <div v-if="activeTab === 'about'" class="tab-content">
-              <div class="about-info">
-                <h3>山风新页</h3>
-                <p class="about-desc">浏览器新标签页扩展</p>
-                <div class="about-meta">
-                  <span>版本 v0.1.0</span>
-                  <span>毛玻璃主题</span>
-                </div>
-              </div>
+              <About />
             </div>
           </div>
         </div>
@@ -225,7 +114,7 @@ function setThemeMode(m: "light" | "dark" | "auto") {
   @include glass-panel-3;
 }
 
-// ————— 面板卡片 —————
+// 面板卡片
 .setting-panel {
   display: flex;
   flex-direction: column;
@@ -242,7 +131,7 @@ function setThemeMode(m: "light" | "dark" | "auto") {
   }
 }
 
-// ————— 头部 —————
+// 头部
 .setting-header {
   display: flex;
   align-items: center;
@@ -273,7 +162,7 @@ function setThemeMode(m: "light" | "dark" | "auto") {
   }
 }
 
-// ————— Tab 导航 —————
+// Tab 导航
 .setting-tabs {
   display: flex;
   gap: 4px;
@@ -315,7 +204,7 @@ function setThemeMode(m: "light" | "dark" | "auto") {
   }
 }
 
-// ————— 内容区 —————
+// 内容区
 .setting-body {
   flex: 1;
   overflow-y: auto;
@@ -340,113 +229,7 @@ function setThemeMode(m: "light" | "dark" | "auto") {
   gap: 24px;
 }
 
-// ————— 设置项区块 —————
-.setting-section {
-  .section-label {
-    display: block;
-    font-size: 14px;
-    color: $text-secondary;
-    margin-bottom: 10px;
-    margin-top: 12px;
-  }
-}
-
-// ————— 主题模式按钮组 —————
-.theme-mode-group {
-  display: flex;
-  gap: 8px;
-
-  .mode-btn {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    padding: 12px 0;
-    border: 0.5px solid $glass-border;
-    border-radius: 10px;
-    background: transparent;
-    cursor: pointer;
-    font-size: 13px;
-    color: $text-secondary;
-    transition: all 0.15s ease;
-
-    &:hover {
-      background: $glass-hover-bg;
-    }
-
-    &.active {
-      background: $glass-active-bg;
-      color: $text-primary;
-      font-weight: 500;
-      border-color: transparent;
-    }
-  }
-
-  .mode-icon {
-    width: 100%;
-    border-radius: 6px;
-    pointer-events: none;
-  }
-
-  &.wallpaper-group {
-    gap: 12px;
-  }
-
-  .wallpaper-btn {
-    cursor: pointer;
-    padding: 8px;
-  }
-
-  .wallpaper-preview {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-    border-radius: 6px;
-    pointer-events: none;
-  }
-}
-
-// ————— 占位提示 —————
-.tab-placeholder {
-  color: $text-secondary;
-  font-size: 14px;
-  text-align: center;
-  padding: 40px 0;
-}
-
-// ————— 关于 —————
-.about-info {
-  text-align: center;
-  padding: 20px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-
-  h3 {
-    font-size: 18px;
-    font-weight: 500;
-    margin: 0;
-  }
-
-  .about-desc {
-    font-size: 14px;
-    color: $text-secondary;
-    margin: 0;
-  }
-
-  .about-meta {
-    display: flex;
-    justify-content: center;
-    gap: 16px;
-    font-size: 12px;
-    color: $text-secondary;
-    margin-top: 4px;
-  }
-}
-
-// ————— Transition —————
+// Transition
 .setting {
   @include fade;
 
