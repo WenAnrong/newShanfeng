@@ -68,6 +68,7 @@
 │  └─ launchStore.ts        启动台管理          │
 ├──────────────────────────────────────────────┤
 │  Utils (utils/)           工具层              │
+│  ├─ db.ts                 壁纸IndexedDB存储   │
 │  └─ svg.ts                svg检测/获取        │
 └──────────────────────────────────────────────┘
 ```
@@ -338,6 +339,51 @@ Vue 检测到变化，那个 <div> 从页面消失
 #### 4.6.4 右键菜单
 
 用户右键点击 dock 栏的快捷方式时，会弹出一个右键菜单，提供删除和在新标签页打开选项。点击删除会调用 `shortcutStore.deleteShortcut()` 删除该快捷方式，点击在新标签页打开会调用 `window.open(shortcut.url, "_blank")` 来在新标签页中打开该快捷方式的链接。
+
+### 4.7 壁纸存储
+
+> 壁纸图片持久化存储，用户可分别为亮色/暗色主题设置不同壁纸，关闭页面后不丢失。
+
+#### 4.7.1 架构
+
+```
+src/utils/db.ts                   ← IndexedDB 工具层
+  封装 IndexedDB 读写操作，不依赖 Vue
+  ├─ saveWallpaper(key, blob)     存入壁纸 Blob
+  ├─ loadWallpaper(key)           读取壁纸 Blob
+  └─ deleteWallpaper(key)         删除壁纸
+        │
+        ▼
+src/stores/wallpaperStore.ts      ← Pinia 状态管理
+  管理壁纸的 objectURL，供组件消费
+  ├─ lightWallpaper / darkWallpaper  当前壁纸 objectURL（ref<string>）
+  ├─ init()                          启动时从 IndexedDB 加载
+  └─ setWallpaper(mode, file)        上传新壁纸 → DB + 更新 URL
+```
+
+#### 4.7.2 接口说明
+
+**`src/utils/db.ts`** — IndexedDB 封装
+
+| 函数                       | 说明                              |
+| -------------------------- | --------------------------------- |
+| `saveWallpaper(key, blob)` | 将壁纸 Blob 存入数据库            |
+| `loadWallpaper(key)`       | 读取壁纸 Blob，无则返回 undefined |
+| `deleteWallpaper(key)`     | 删除指定壁纸                      |
+
+- 数据库名：`shanfeng-wallpaper`
+- 对象存储：`wallpapers`（key-value 结构）
+- key：`"light"` | `"dark"`
+
+**`src/stores/wallpaperStore.ts`** — Pinia Store
+
+| 属性/方法                  | 说明                                  |
+| -------------------------- | ------------------------------------- |
+| `lightWallpaper`           | 亮色壁纸 objectURL（ref），默认 bg1   |
+| `darkWallpaper`            | 暗色壁纸 objectURL（ref），默认 bg2   |
+| `ready`                    | 是否已完成初始化                      |
+| `init()`                   | 异步初始化，从 IndexedDB 加载已有壁纸 |
+| `setWallpaper(mode, file)` | 设置壁纸：存 DB + 更新 objectURL      |
 
 ## 5. 问题
 

@@ -4,11 +4,13 @@ import Search from "@/components/search/SearchBox.vue";
 import Dock from "@/components/dock/DockPanel.vue";
 import Launch from "@/components/launch/LaunchPanel.vue";
 import Setting from "@/components/settings/SettingsPanel.vue";
-import { ref, watch } from "vue";
+import { ref, computed } from "vue";
 import Toast from "@/components/common/Toast.vue";
 import { useThemeStore } from "@/stores/themeStore";
+import { useWallpaperStore } from "@/stores/wallpaperStore";
 
 const themeStore = useThemeStore();
+const wallpaperStore = useWallpaperStore();
 
 // 是否打开启动台
 const isShowLaunch = ref(false);
@@ -23,24 +25,25 @@ function toggleSetting() {
   isShowSetting.value = !isShowSetting.value;
 }
 
-// 壁纸 URL
-const bgImage = ref("/src/assets/bg/bg1.webp");
+// 从 IndexedDB 加载已保存的壁纸
+wallpaperStore.init();
 
-// 监听主题变化切换壁纸
-watch(
-  () => themeStore.effectiveTheme,
-  (mode) => {
-    bgImage.value =
-      mode === "dark" ? "/src/assets/bg/bg2.webp" : "/src/assets/bg/bg1.webp";
-  },
-  { immediate: true },
+// 根据主题切换壁纸
+const bgImage = computed(() =>
+  themeStore.effectiveTheme === "dark"
+    ? wallpaperStore.darkWallpaper
+    : wallpaperStore.lightWallpaper,
 );
 </script>
 
 <template>
   <div class="container">
-    <!-- 背景层：绝对定位铺满 -->
-    <div class="bg" :style="{ backgroundImage: `url(${bgImage})` }"></div>
+    <!-- 背景层：init 完成后才显示，避免默认图闪烁 -->
+    <div
+      v-if="wallpaperStore.ready"
+      class="bg"
+      :style="{ backgroundImage: `url(${bgImage})` }"
+    ></div>
 
     <!-- 内容层 -->
     <div class="main-content">
@@ -71,6 +74,7 @@ watch(
   align-items: center;
   justify-content: space-between;
   overflow: hidden;
+  background-color: #0d1117;
   padding: $container-padding-top 0 30px 0;
   @include compact {
     padding: max(8vh, 60px) 0 20px 0;

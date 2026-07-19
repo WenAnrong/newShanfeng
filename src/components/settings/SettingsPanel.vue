@@ -2,11 +2,13 @@
 import { ref } from "vue";
 import { onClickOutside } from "@vueuse/core";
 import { useThemeStore } from "@/stores/themeStore";
+import { useWallpaperStore } from "@/stores/wallpaperStore";
 
 defineProps<{ visible: boolean }>();
 const emit = defineEmits<{ close: [] }>();
 
 const themeStore = useThemeStore();
+const wallpaperStore = useWallpaperStore();
 
 const panelRef = ref<HTMLElement>();
 onClickOutside(panelRef, () => emit("close"));
@@ -14,6 +16,29 @@ onClickOutside(panelRef, () => emit("close"));
 // 当前选中的 tab
 type Tab = "appearance" | "about" | "synchronize" | "search";
 const activeTab = ref<Tab>("appearance");
+
+// 隐藏的文件输入
+const lightInput = ref<HTMLInputElement>();
+const darkInput = ref<HTMLInputElement>();
+
+function selectLightWallpaper() {
+  lightInput.value?.click();
+}
+function selectDarkWallpaper() {
+  darkInput.value?.click();
+}
+
+async function onLightFileChange(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0];
+  if (!file) return;
+  await wallpaperStore.setWallpaper("light", file);
+}
+
+async function onDarkFileChange(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0];
+  if (!file) return;
+  await wallpaperStore.setWallpaper("dark", file);
+}
 
 function setThemeMode(m: "light" | "dark" | "auto") {
   themeStore.setThemeMode(m);
@@ -110,6 +135,43 @@ function setThemeMode(m: "light" | "dark" | "auto") {
                   </button>
                 </div>
                 <label class="section-label">壁纸管理</label>
+                <div class="theme-mode-group wallpaper-group">
+                  <button
+                    class="mode-btn wallpaper-btn"
+                    @click="selectLightWallpaper"
+                  >
+                    <img
+                      class="wallpaper-preview"
+                      :src="wallpaperStore.lightWallpaper"
+                    />
+                    <span>亮色壁纸</span>
+                  </button>
+                  <button
+                    class="mode-btn wallpaper-btn"
+                    @click="selectDarkWallpaper"
+                  >
+                    <img
+                      class="wallpaper-preview"
+                      :src="wallpaperStore.darkWallpaper"
+                    />
+                    <span>暗色壁纸</span>
+                  </button>
+                </div>
+                <!-- 隐藏的文件选择器 -->
+                <input
+                  ref="lightInput"
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  @change="onLightFileChange"
+                />
+                <input
+                  ref="darkInput"
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  @change="onDarkFileChange"
+                />
               </section>
             </div>
 
@@ -168,9 +230,8 @@ function setThemeMode(m: "light" | "dark" | "auto") {
   display: flex;
   flex-direction: column;
   width: min(600px, 60vw);
-  height: 600px;
+  height: 75vh;
   border-radius: 18px;
-  overflow: hidden;
   @include glass-panel-setting;
   color: $text-primary;
 
@@ -324,6 +385,24 @@ function setThemeMode(m: "light" | "dark" | "auto") {
 
   .mode-icon {
     width: 100%;
+    border-radius: 6px;
+    pointer-events: none;
+  }
+
+  &.wallpaper-group {
+    gap: 12px;
+  }
+
+  .wallpaper-btn {
+    cursor: pointer;
+    padding: 8px;
+  }
+
+  .wallpaper-preview {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
     border-radius: 6px;
     pointer-events: none;
   }
