@@ -1,7 +1,7 @@
 # 山风新页 设计文档
 
 > 浏览器新标签页扩展。该文档会随着开发不断调整。
-> 文档最后修改时间：2026/07/10
+> 文档最后修改时间：2026/07/19
 
 ---
 
@@ -195,6 +195,7 @@ clearSuggestions();
 | 200     | `.launch-overlay`（Launch 面板）   | 启动台全屏覆盖层             |
 | 200     | `.setting-overlay`（设置 面板）    | 设置全屏覆盖层               |
 | 300     | `.context-menu`（右键菜单）        | 右键菜单                     |
+| 999     | `.toast-container`（Toast 提示）   | Toast 提示                   |
 
 ### 4.4 主题配置
 
@@ -267,7 +268,7 @@ themeStore.ts            ← 状态管理
 
 - **单一数据源**：所有组件读写同一个 store，不再各自操作 localStorage。
 - **自动同步**：store 内部的 `watch` 在 `themeMode` 或 `effectiveTheme` 变化时自动更新 `data-theme` 和 `localStorage`，组件无需关心 DOM 同步细节。
-- **响应式壁纸**：`index.vue` 通过 `watch(() => themeStore.effectiveTheme, ...)` 监听主题变化来切换壁纸图片，不再依赖 DockPanel 的 emit 事件。
+- **响应式壁纸**：`index.vue` 通过 `watch(() => themeStore.effectiveTheme, ...)` 监听主题变化来切换壁纸图片。
 
 ### 4.5 Toast 提醒
 

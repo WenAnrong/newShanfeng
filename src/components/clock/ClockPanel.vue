@@ -30,12 +30,14 @@ const updateClock = () => {
     "日 ";
 };
 
+// 定时器 ID
+let intervalId: number | undefined = undefined;
+
 // 挂载时更新时钟
 onMounted(() => {
   updateClock();
+  intervalId = setInterval(updateClock, 1000);
 });
-
-const intervalId = setInterval(updateClock, 1000);
 
 // 卸载时清除定时器
 onUnmounted(() => {

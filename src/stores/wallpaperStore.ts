@@ -6,21 +6,21 @@ import defaultDark from "@/assets/bg/bg2.webp";
 import { saveWallpaper, loadWallpaper } from "@/utils/db";
 
 export const useWallpaperStore = defineStore("wallpaper", () => {
-  /** 亮色壁纸的 object URL，初始化完成前为 undefined */
+  // 亮色壁纸的 object URL，初始化完成前为 undefined
   const lightWallpaper = ref<string>();
-  /** 暗色壁纸的 object URL，初始化完成前为 undefined */
+  // 暗色壁纸的 object URL，初始化完成前为 undefined
   const darkWallpaper = ref<string>();
-  /** 是否已完成 IndexedDB 加载 */
+  // 是否已完成 IndexedDB 加载
   const ready = ref(false);
 
-  /** 从 IndexedDB 加载已保存的壁纸，无自定义时回退默认图 */
+  // 从 IndexedDB 加载已保存的壁纸，无自定义时回退默认图
   async function init() {
     const [lightBlob, darkBlob] = await Promise.all([
       loadWallpaper("light"),
       loadWallpaper("dark"),
     ]);
 
-    // 一次性赋值，避免中间态闪烁
+    // 壁纸赋值
     lightWallpaper.value = lightBlob
       ? URL.createObjectURL(lightBlob)
       : defaultLight;
@@ -28,6 +28,7 @@ export const useWallpaperStore = defineStore("wallpaper", () => {
       ? URL.createObjectURL(darkBlob)
       : defaultDark;
 
+    // 标记已完成加载
     ready.value = true;
   }
 

@@ -9,6 +9,8 @@ export const useThemeStore = defineStore("theme", () => {
   const themeMode = ref<ThemeMode>(
     (localStorage.getItem("theme-mode") as ThemeMode) || "auto",
   );
+
+  // 系统当前偏好亮暗模式
   const preferredDark = usePreferredDark();
 
   // 有效主题：根据 mode 和系统偏好计算出实际亮暗

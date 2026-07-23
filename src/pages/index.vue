@@ -38,7 +38,7 @@ const bgImage = computed(() =>
 
 <template>
   <div class="container">
-    <!-- 背景层：init 完成后才显示，避免默认图闪烁 -->
+    <!-- 背景层：init 完成后才显示 -->
     <div
       v-if="wallpaperStore.ready"
       class="bg"
