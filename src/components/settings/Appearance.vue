@@ -2,6 +2,9 @@
 import { ref } from "vue";
 import { useWallpaperStore } from "@/stores/wallpaperStore";
 import { useThemeStore } from "@/stores/themeStore";
+import lightanddark from "@/assets/setting-icon/lightanddark.webp";
+import light from "@/assets/setting-icon/light.webp";
+import dark from "@/assets/setting-icon/dark.webp";
 
 const wallpaperStore = useWallpaperStore();
 const themeStore = useThemeStore();
@@ -43,17 +46,17 @@ function setThemeMode(m: "light" | "dark" | "auto") {
           {
             id: 'auto',
             label: '自动',
-            img: '/src/assets/setting-icon/lightanddark.webp',
+            img: lightanddark,
           },
           {
             id: 'light',
             label: '亮色',
-            img: '/src/assets/setting-icon/light.webp',
+            img: light,
           },
           {
             id: 'dark',
             label: '暗色',
-            img: '/src/assets/setting-icon/dark.webp',
+            img: dark,
           },
         ] as const"
         :key="opt.id"
