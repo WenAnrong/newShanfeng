@@ -520,29 +520,20 @@ onClickOutside(contextMenuRef, () => {
 
   .dock-label {
     position: absolute;
-    top: -30px;
+    top: -40px;
     left: 50%;
     transform: translateX(-50%) scale(0.85);
     white-space: nowrap;
     padding: 4px 10px;
     border-radius: 6px;
     color: $text-secondary;
-    font-size: 10px;
+    font-size: 14px;
     pointer-events: none;
     @include glass-panel-1;
     opacity: 0;
     transition:
       opacity 0.2s ease,
       transform 0.2s ease;
-    @include compact {
-      font-size: 8px;
-    }
-    @include wide {
-      font-size: 13px;
-    }
-    @include portrait {
-      font-size: 8px;
-    }
   }
 
   &:hover .dock-label {
