@@ -19,49 +19,6 @@ function debounce<T extends (...args: any[]) => any>(
   };
 }
 
-// 解析 Bing API 响应数据
-function parseSuggestions(data: any): string[] {
-  const suggests: string[] = [];
-  if (data && data.AS && data.AS.Results) {
-    data.AS.Results.forEach((result: any) => {
-      if (result.Suggests) {
-        result.Suggests.forEach((suggest: any) => {
-          if (suggest.Txt) {
-            suggests.push(suggest.Txt);
-          }
-        });
-      }
-    });
-  }
-  return suggests;
-}
-
-// 解析 Bing JSONP 响应文本
-function parseBingResponse(text: string): any | null {
-  const jsonStart = text.indexOf("({");
-  if (jsonStart === -1) return null;
-
-  const commentStart = text.indexOf("/*");
-  if (commentStart === -1) return null;
-
-  let jsonEnd = -1;
-  for (let i = commentStart - 1; i >= 0; i--) {
-    if (text[i] === "}") {
-      jsonEnd = i + 1;
-      break;
-    }
-  }
-
-  if (jsonEnd === -1 || jsonEnd <= jsonStart) return null;
-
-  try {
-    const jsonStr = text.substring(jsonStart + 1, jsonEnd);
-    return JSON.parse(jsonStr);
-  } catch {
-    return null;
-  }
-}
-
 // 解析百度 JSONP 响应文本
 function parseBaiduResponse(text: string): any | null {
   const prefix = "window.baidu.sug(";
@@ -132,40 +89,6 @@ async function loadBaiduSuggestions(
   }
 }
 
-// 加载 Bing 搜索建议
-async function loadBingSuggestions(
-  query: string,
-  onSuccess: (suggestions: string[]) => void,
-  onError: () => void,
-) {
-  try {
-    const response = await fetch(
-      `https://sg1.api.bing.com/qsonhs.aspx?type=cb&q=${encodeURIComponent(query)}`,
-      {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-        },
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const text = await response.text();
-    const data = parseBingResponse(text);
-    if (data) {
-      onSuccess(parseSuggestions(data));
-    } else {
-      onError();
-    }
-  } catch (error) {
-    console.error("Failed to load Bing suggestions:", error);
-    onError();
-  }
-}
-
 export function useSearchSuggestions(): UseSearchSuggestionsReturn {
   const suggestions = ref<string[]>([]);
   const isLoading = ref(false);
@@ -176,7 +99,7 @@ export function useSearchSuggestions(): UseSearchSuggestionsReturn {
     isLoading.value = false;
   };
 
-  const loadSuggestions = async (query: string, retryCount = 0) => {
+  const loadSuggestions = async (query: string) => {
     isLoading.value = true;
     suggestions.value = [];
 
@@ -190,21 +113,7 @@ export function useSearchSuggestions(): UseSearchSuggestionsReturn {
       isLoading.value = false;
     };
 
-    try {
-      await loadBingSuggestions(query, onSuccess, async () => {
-        if (query === currentQuery && retryCount < 2) {
-          console.warn(`Bing API failed, retrying... (${retryCount + 1}/2)`);
-          setTimeout(() => loadSuggestions(query, retryCount + 1), 200);
-          return;
-        }
-        console.warn(
-          "Bing API failed after retries, switching to Baidu suggestions",
-        );
-        await loadBaiduSuggestions(query, onSuccess, onError);
-      });
-    } catch {
-      onError();
-    }
+    await loadBaiduSuggestions(query, onSuccess, onError);
   };
 
   const fetchSuggestions = debounce((query: string) => {

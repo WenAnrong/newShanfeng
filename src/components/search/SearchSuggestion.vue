@@ -53,7 +53,7 @@ watch(
   },
 );
 
-// 选中联想词苟返回给父组件信息
+// 选中联想词后返回给父组件信息
 function selectSuggestion(text: string) {
   emit("select", text);
 }

@@ -8,8 +8,7 @@
 ## 0. 当前设计缺少的部分
 
 - 搜索词建议的父组件处理和测试未完成，未做响应式
-- 插件体系未开始设计，当前仅完成vue展示部分
-- 设计一个在当前页打开或者新建标签页打开的选项（搜索部分）
+- 设计一个在当前页打开或者在新建标签页打开的选项（搜索部分）
 
 ---
 
@@ -149,17 +148,20 @@ $bp-wide: 2560px;
 
 实现函数为 `src/composables/useSearchSuggestions.ts` 。
 
-具体逻辑如下：
+具体实现逻辑：
 
 ```text
-Bing 请求
-    ├── 成功 → 显示 Bing 联想词
-    │
-    └── 失败 → 重试 (最多 2 次)
-                  ├── 成功 → 显示 Bing 联想词
-                  └── 还是失败 → 改用百度
-                                   ├── 成功 → 显示百度联想词
-                                   └── 失败 → 显示空
+用户输入 (SearchBox.vue)
+  → onInput(): input.length >= 2 时显示建议
+  → <SearchSuggestion :query="input" />
+
+SearchSuggestion.vue 监听 query 变化
+  → fetchSuggestions(query)  [100ms 防抖]
+  → useSearchSuggestions.ts:
+       GET https://suggestion.baidu.com/su?wd=关键词&cb=window.baidu.sug
+       → GBK 解码 → 解析 JSONP 回调 → 提取 data.s (string[])
+       → suggestions.value = 联想词列表
+  → v-for 渲染下拉列表
 ```
 
 #### 4.2.1 使用方式
@@ -178,7 +180,7 @@ fetchSuggestions("关键词");
 // 获取联想词列表
 console.log(suggestions.value); // string[]
 
-// 关闭下拉时清空
+// 清空
 clearSuggestions();
 ```
 
@@ -386,8 +388,12 @@ src/stores/wallpaperStore.ts      ← Pinia 状态管理
 | `init()`                   | 异步初始化，从 IndexedDB 加载已有壁纸 |
 | `setWallpaper(mode, file)` | 设置壁纸：存 DB + 更新 objectURL      |
 
-## 5. 问题
+## 5. 插件体系设计
 
-### 5.1 启动时闪白问题
+`extensions/` 目录下分别为 Chromium 和 Firefox 的插件目录。当执行 `npm run build` 后，`dist/` 下的内容会自动复制到两个插件目录中。用户可以直接在浏览器中加载插件。
+
+## 6. 问题
+
+### 6.1 启动时闪白问题
 
 在index.html中添加了一个启动屏 `<div id="splash-screen"></div>`，并在CSS中设置了背景色为 `#323232`。在 `src/main.ts` 中，应用启动后会通过 JavaScript 将启动屏淡出并移除，从而显示应用的主内容。以解决启动时的闪白问题。

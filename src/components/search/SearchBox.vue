@@ -32,6 +32,30 @@ function clickSearch() {
 
 const isShowSuggestions = ref(false); // 是否显示搜索建议
 const inputRef = ref<HTMLElement | null>(null); // 搜索框元素信息
+
+// 输入时显示搜索建议
+function onInput() {
+  if (input.value.trim().length >= 2) {
+    isShowSuggestions.value = true;
+  } else {
+    isShowSuggestions.value = false;
+  }
+}
+
+// 聚焦时如果有文字则显示搜索建议
+function onFocus() {
+  if (input.value.trim().length >= 2) {
+    isShowSuggestions.value = true;
+  }
+}
+
+// 选中联想词
+function onSelectSuggestion(text: string) {
+  input.value = text;
+  isShowSuggestions.value = false;
+  // 选中后自动搜索
+  clickSearch();
+}
 </script>
 
 <template>
@@ -45,6 +69,8 @@ const inputRef = ref<HTMLElement | null>(null); // 搜索框元素信息
         v-model="input"
         type="text"
         @keyup.enter="clickSearch"
+        @input="onInput"
+        @focus="onFocus"
         placeholder="搜索..."
       />
       <button class="btn" @click="clickSearch">搜索</button>
@@ -63,6 +89,7 @@ const inputRef = ref<HTMLElement | null>(null); // 搜索框元素信息
       :triggerEl="inputRef"
       :query="input"
       @close="isShowSuggestions = false"
+      @select="onSelectSuggestion"
     />
   </div>
 </template>
