@@ -43,6 +43,12 @@ textarea {
   --standard-radio-radius: 18px;
 }
 
+/* 统一滚动条样式 */
+.scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-bg) transparent;
+}
+
 /* ========================================
    主题系统 — CSS 自定义属性
    ======================================== */
@@ -65,6 +71,9 @@ textarea {
   /* 交互状态 */
   --glass-hover-bg: rgba(0, 0, 0, 0.15);
   --glass-active-bg: rgba(0, 0, 0, 0.22);
+
+  /* 滚动条 */
+  --scrollbar-bg: rgba(0, 0, 0, 0.2);
 }
 
 /* ---- 暗色主题 ---- */
@@ -84,4 +93,7 @@ textarea {
   /* 交互状态 */
   --glass-hover-bg: rgba(255, 255, 255, 0.1);
   --glass-active-bg: rgba(255, 255, 255, 0.18);
+
+  /* 滚动条 */
+  --scrollbar-bg: rgba(255, 255, 255, 0.2);
 }

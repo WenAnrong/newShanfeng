@@ -65,9 +65,9 @@ function onSelectSuggestion(text: string) {
         <img :src="engineStore.current?.icon" class="eng-img" />
       </button>
       <input
-        ref="inputRef"
         v-model="input"
         type="text"
+        ref="inputRef"
         @keyup.enter="clickSearch"
         @input="onInput"
         @focus="onFocus"

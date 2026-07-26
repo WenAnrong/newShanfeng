@@ -71,7 +71,7 @@ const activeTab = ref<Tab>("appearance");
           </nav>
 
           <!-- 内容区域 -->
-          <div class="setting-body">
+          <div class="setting-body scrollbar">
             <!--  外观 -->
             <div v-if="activeTab === 'appearance'" class="tab-content">
               <Appearance />
@@ -209,18 +209,6 @@ const activeTab = ref<Tab>("appearance");
   flex: 1;
   overflow-y: auto;
   padding: 20px 24px 24px;
-
-  // 自定义滚动条
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: $glass-border;
-    border-radius: 2px;
-  }
 }
 
 .tab-content {

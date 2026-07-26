@@ -33,7 +33,9 @@ const popoverStyle = computed(() => {
   if (!props.triggerEl) return {};
   const rect = props.triggerEl.getBoundingClientRect();
   return {
-    top: `${rect.bottom + 6}px`,
+    top: `${rect.bottom + 14}px`,
+    left: `${rect.left}px`,
+    width: `${rect.width}px`,
   };
 });
 
@@ -65,7 +67,7 @@ function selectSuggestion(text: string) {
       <div
         v-if="visible"
         ref="popoverRef"
-        class="suggestion-popover"
+        class="suggestion-popover scrollbar"
         :style="popoverStyle"
       >
         <div
@@ -82,16 +84,30 @@ function selectSuggestion(text: string) {
 </template>
 
 <style scoped lang="scss">
+@use "@/assets/variables" as *;
 @use "@/assets/animations" as *;
 @use "@/assets/glass" as *;
 
 .suggestion-popover {
   position: fixed;
   z-index: 100;
-  min-width: 160px;
   padding: 6px;
+  overflow-y: auto;
   border-radius: var(--standard-radio-radius);
   @include glass-panel-1;
+
+  // 响应式
+  @include compact {
+    max-height: 45svh;
+  }
+
+  @include wide {
+    max-height: 50vh;
+  }
+
+  @include portrait {
+    max-height: 40vh;
+  }
 }
 
 .suggestion-item {
