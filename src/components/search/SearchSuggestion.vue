@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import { useSearchSuggestions } from "@/composables/useSearchSuggestions";
 import { onClickOutside } from "@vueuse/core";
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 
 // 父组件传入参数
 // visible: 是否显示
 // triggerEl: 触发按钮的 DOM 元素，用来计算弹窗位置
 // query: 输入的文字
+// shouldFetch: 是否发送请求获取联想词（选中联想词时不发）
 const props = defineProps<{
   visible: boolean;
   triggerEl: HTMLElement | null;
   query: string;
+  shouldFetch: boolean;
 }>();
 
 // 子组件向父组件发送的事件
@@ -22,10 +24,12 @@ const emit = defineEmits<{
 }>();
 
 const popoverRef = ref<HTMLElement>();
+const activeIndex = ref(-1); // 当前高亮索引，-1 表示无选中
 
 // 点击外部关闭
 onClickOutside(popoverRef, () => {
   if (props.visible) emit("close");
+  activeIndex.value = -1;
 });
 
 // 计算弹窗位置
@@ -47,18 +51,81 @@ const { suggestions, isLoading, fetchSuggestions, clearSuggestions } =
 watch(
   () => props.query,
   (val: string) => {
+    if (!props.shouldFetch) return; // 不是手动输入，跳过请求
     if (val && val.trim().length >= 2) {
       fetchSuggestions(val);
     } else {
       clearSuggestions();
     }
+    activeIndex.value = -1; // 重置高亮
   },
 );
 
 // 选中联想词后返回给父组件信息
 function selectSuggestion(text: string) {
   emit("select", text);
+  activeIndex.value = -1;
 }
+
+// 高亮项变化时自动滚入视野
+watch(activeIndex, (idx) => {
+  if (idx < 0 || !popoverRef.value) return;
+  const items = popoverRef.value.querySelectorAll(".suggestion-item");
+  items[idx]?.scrollIntoView({ block: "nearest" });
+});
+
+// 键盘导航
+function onInputKeydown(e: KeyboardEvent) {
+  if (!props.visible || suggestions.value.length === 0) return;
+
+  switch (e.key) {
+    case "ArrowDown":
+      e.preventDefault();
+      activeIndex.value =
+        activeIndex.value < suggestions.value.length - 1
+          ? activeIndex.value + 1
+          : 0;
+      emit("select", suggestions.value[activeIndex.value] as string);
+      break;
+
+    case "ArrowUp":
+      e.preventDefault();
+      activeIndex.value =
+        activeIndex.value > 0
+          ? activeIndex.value - 1
+          : suggestions.value.length - 1;
+      emit("select", suggestions.value[activeIndex.value] as string);
+      break;
+
+    // case "Enter":
+    //   if (activeIndex.value >= 0) {
+    //     e.preventDefault();
+    //     emit("select", suggestions.value[activeIndex.value] as string);
+    //     activeIndex.value = -1;
+    //   }
+    //   break;
+
+    case "Escape":
+      emit("close");
+      activeIndex.value = -1;
+      break;
+  }
+}
+
+// 在 triggerEl（搜索框）上绑定/解绑键盘事件
+onMounted(() => {
+  props.triggerEl?.addEventListener("keydown", onInputKeydown);
+});
+onUnmounted(() => {
+  props.triggerEl?.removeEventListener("keydown", onInputKeydown);
+});
+watch(
+  () => props.triggerEl,
+  (el, oldEl) => {
+    oldEl?.removeEventListener("keydown", onInputKeydown);
+    el?.addEventListener("keydown", onInputKeydown);
+  },
+);
 </script>
 
 <template>
@@ -74,6 +141,7 @@ function selectSuggestion(text: string) {
           v-for="(s, i) in suggestions"
           :key="i"
           class="suggestion-item"
+          :class="{ active: i === activeIndex }"
           @click="selectSuggestion(s)"
         >
           <span>{{ s }}</span>
@@ -120,6 +188,10 @@ function selectSuggestion(text: string) {
   font-size: 14px;
   color: $text-primary;
   transition: background $duration-fast ease;
+
+  &.active {
+    background: $glass-active-bg;
+  }
 }
 
 // 淡入淡出动画

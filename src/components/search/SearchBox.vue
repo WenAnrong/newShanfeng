@@ -32,9 +32,11 @@ function clickSearch() {
 
 const isShowSuggestions = ref(false); // 是否显示搜索建议
 const inputRef = ref<HTMLElement | null>(null); // 搜索框元素信息
+const shouldFetchSuggestions = ref(true); // 是否为手动输入触发的请求
 
 // 输入时显示搜索建议
 function onInput() {
+  shouldFetchSuggestions.value = true;
   if (input.value.trim().length >= 2) {
     isShowSuggestions.value = true;
   } else {
@@ -49,12 +51,10 @@ function onFocus() {
   }
 }
 
-// 选中联想词
+// 选中联想词（上下键或鼠标点击）
 function onSelectSuggestion(text: string) {
+  shouldFetchSuggestions.value = false;
   input.value = text;
-  isShowSuggestions.value = false;
-  // 选中后自动搜索
-  clickSearch();
 }
 </script>
 
@@ -88,6 +88,7 @@ function onSelectSuggestion(text: string) {
       :visible="isShowSuggestions"
       :triggerEl="inputRef"
       :query="input"
+      :shouldFetch="shouldFetchSuggestions"
       @close="isShowSuggestions = false"
       @select="onSelectSuggestion"
     />
