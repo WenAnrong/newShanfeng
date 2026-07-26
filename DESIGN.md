@@ -1,7 +1,7 @@
 # 山风新页 设计文档
 
 > 浏览器新标签页扩展。该文档会随着开发不断调整。
-> 文档最后修改时间：2026/07/19
+> 文档最后修改时间：2026/07/27
 
 ---
 
@@ -387,12 +387,26 @@ src/stores/wallpaperStore.ts      ← Pinia 状态管理
 | `init()`                   | 异步初始化，从 IndexedDB 加载已有壁纸 |
 | `setWallpaper(mode, file)` | 设置壁纸：存 DB + 更新 objectURL      |
 
-## 5. 插件体系设计
+## 5. 浏览器存储说明
+
+**localStorage：**
+| 键名 | 说明 |
+|---------- | ---------------------------- |
+| theme-mode | 主题模式（light/dark/auto） |
+| search-engine | 搜索引擎id |
+
+**indexedDB：**
+| 数据库名 | 对象存储名 | 键名 | 说明 |
+|---------- | ---------- | ---- | ---------------------------- |
+| shanfeng-wallpaper | wallpapers | light | 亮色主题壁纸 Blob |
+| shanfeng-wallpaper | wallpapers | dark | 暗色主题壁纸 Blob |
+
+## 6. 插件体系设计
 
 `extensions/` 目录下分别为 Chromium 和 Firefox 的插件目录。当执行 `npm run build` 后，`dist/` 下的内容会自动复制到两个插件目录中。用户可以直接在浏览器中加载插件。
 
-## 6. 问题
+## 7. 问题
 
-### 6.1 启动时闪白问题
+### 7.1 启动时闪白问题
 
 在index.html中添加了一个启动屏 `<div id="splash-screen"></div>`，并在CSS中设置了背景色为 `#323232`。在 `src/main.ts` 中，应用启动后会通过 JavaScript 将启动屏淡出并移除，从而显示应用的主内容。以解决启动时的闪白问题。

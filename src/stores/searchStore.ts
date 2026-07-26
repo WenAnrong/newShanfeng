@@ -13,6 +13,7 @@ interface SearchEngine {
 }
 
 export const useEngineStore = defineStore("engine", () => {
+  // 默认搜索引擎列表
   const engines: SearchEngine[] = [
     {
       id: "bing",
@@ -34,8 +35,22 @@ export const useEngineStore = defineStore("engine", () => {
     },
   ];
 
-  const currentId = ref<string>("bing");
+  // 当前搜索引擎 ID，从 localStorage 中获取，如果没有则默认使用 "bing"
+  const currentId = ref<string>(
+    localStorage.getItem("search-engine") || "bing",
+  );
+
+  // 切换搜索引擎
+  function setCurrentEngine(id: string) {
+    if (engines.some((e) => e.id === id)) {
+      currentId.value = id;
+      // 将选中的搜索引擎 ID 保存到 localStorage
+      localStorage.setItem("search-engine", id);
+    }
+  }
+
+  // 当前搜索引擎对象
   const current = computed(() => engines.find((e) => e.id === currentId.value));
 
-  return { currentId, current, engines };
+  return { setCurrentEngine, currentId, current, engines };
 });

@@ -36,7 +36,7 @@ const popoverStyle = computed(() => {
 });
 
 function select(id: string) {
-  store.currentId = id;
+  store.setCurrentEngine(id);
   emit("close");
 }
 </script>
