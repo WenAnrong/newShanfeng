@@ -294,6 +294,7 @@ function deleteEngine(id: string) {
 @use "@/assets/variables" as *;
 @use "@/assets/animations" as *;
 @use "@/assets/glass" as *;
+@use "@/assets/m3-tokens" as m3;
 
 .search-engine-settings {
   display: flex;
@@ -324,15 +325,15 @@ function deleteEngine(id: string) {
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  border: 0.5px solid $glass-border;
-  border-radius: 12px;
+  border: 0.5px solid m3.$m3-outline-variant;
+  border-radius: m3.$m3-shape-md;
   background: transparent;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: all m3.$m3-duration-medium m3.$m3-easing-standard;
 
   &:hover {
-    background: $glass-hover-bg;
-    border-color: rgba(255, 255, 255, 0.15);
+    background: rgba(128, 128, 128, 0.08);
+    border-color: m3.$m3-outline;
 
     .engine-delete-btn {
       opacity: 1;
@@ -345,12 +346,12 @@ function deleteEngine(id: string) {
   }
 
   &.active {
-    background: $glass-active-bg;
+    background: m3.$m3-primary-container;
     border-color: transparent;
-    box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.1);
 
     .engine-name {
-      font-weight: 600;
+      font-weight: 500;
+      color: m3.$m3-on-primary-container;
     }
   }
 
@@ -376,7 +377,7 @@ function deleteEngine(id: string) {
   .engine-name {
     font-size: 14px;
     color: $text-primary;
-    transition: font-weight 0.15s ease;
+    transition: all m3.$m3-duration-medium m3.$m3-easing-standard;
   }
 
   .engine-delete-btn {
@@ -392,7 +393,7 @@ function deleteEngine(id: string) {
     color: $text-secondary;
     opacity: 0;
     visibility: hidden;
-    transition: all 0.15s ease;
+    transition: all m3.$m3-duration-medium m3.$m3-easing-standard;
 
     &:hover {
       background: rgba(231, 76, 60, 0.2);
@@ -404,24 +405,24 @@ function deleteEngine(id: string) {
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    border: 1.5px solid $glass-border;
+    border: 1.5px solid m3.$m3-outline-variant;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    transition: all 0.2s ease;
+    transition: all m3.$m3-duration-medium m3.$m3-easing-standard;
 
     .check-dot {
       width: 10px;
       height: 10px;
       border-radius: 50%;
-      background: $text-primary;
-      animation: pop-in 0.25s $ease-spring;
+      background: m3.$m3-primary;
+      animation: pop-in m3.$m3-duration-long m3.$m3-easing-emphasized;
     }
   }
 
   &.active .engine-check {
-    border-color: $text-primary;
+    border-color: m3.$m3-primary;
   }
 }
 
@@ -432,17 +433,18 @@ function deleteEngine(id: string) {
     align-items: center;
     gap: 6px;
     padding: 10px 16px;
-    border: 0.5px dashed $glass-border;
-    border-radius: 12px;
+    border: 0.5px dashed m3.$m3-outline-variant;
+    border-radius: m3.$m3-shape-md;
     background: transparent;
     cursor: pointer;
     font-size: 13px;
     color: $text-secondary;
-    transition: all 0.18s ease;
+    transition: all m3.$m3-duration-medium m3.$m3-easing-standard;
 
     &:hover {
-      background: $glass-hover-bg;
-      color: $text-primary;
+      background: rgba(128, 128, 128, 0.08);
+      color: m3.$m3-primary;
+      border-color: m3.$m3-primary;
       border-style: solid;
     }
   }
@@ -454,10 +456,10 @@ function deleteEngine(id: string) {
   flex-direction: column;
   gap: 14px;
   padding: 16px;
-  border: 0.5px solid $glass-border;
-  border-radius: 12px;
-  background: $glass-bg;
-  animation: form-slide-in 0.22s $ease-out;
+  border: 0.5px solid m3.$m3-outline-variant;
+  border-radius: m3.$m3-shape-md;
+  background: m3.$m3-surface-variant;
+  animation: form-slide-in m3.$m3-duration-long m3.$m3-easing-decelerated;
 }
 
 .form-field {
@@ -478,20 +480,20 @@ function deleteEngine(id: string) {
   .form-input {
     width: 100%;
     padding: 8px 12px;
-    border: 0.5px solid $glass-border;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.06);
+    border: 0.5px solid m3.$m3-outline-variant;
+    border-radius: m3.$m3-shape-sm;
+    background: rgba(128, 128, 128, 0.06);
     outline: none;
     font-size: 13px;
     color: $text-primary;
-    transition: border-color 0.15s ease;
+    transition: border-color m3.$m3-duration-medium m3.$m3-easing-standard;
 
     &::placeholder {
       color: rgba(128, 128, 128, 0.6);
     }
 
     &:focus {
-      border-color: rgba(255, 255, 255, 0.3);
+      border-color: m3.$m3-primary;
     }
   }
 }
@@ -523,10 +525,10 @@ function deleteEngine(id: string) {
   .form-btn {
     padding: 7px 18px;
     border: none;
-    border-radius: 8px;
+    border-radius: m3.$m3-shape-sm;
     cursor: pointer;
     font-size: 13px;
-    transition: all 0.15s ease;
+    transition: all m3.$m3-duration-medium m3.$m3-easing-standard;
 
     &:active {
       transform: scale(0.97);
@@ -538,17 +540,17 @@ function deleteEngine(id: string) {
     color: $text-secondary;
 
     &:hover {
-      background: $glass-hover-bg;
+      background: rgba(128, 128, 128, 0.08);
     }
   }
 
   .form-btn-submit {
-    background: rgba(255, 255, 255, 0.15);
-    color: $text-primary;
+    background: m3.$m3-primary;
+    color: m3.$m3-on-primary;
     font-weight: 500;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.22);
+      opacity: 0.88;
     }
 
     &:disabled {
@@ -570,16 +572,16 @@ function deleteEngine(id: string) {
     align-items: center;
     gap: 6px;
     padding: 14px 10px;
-    border: 0.5px solid $glass-border;
-    border-radius: 12px;
+    border: 0.5px solid m3.$m3-outline-variant;
+    border-radius: m3.$m3-shape-md;
     background: transparent;
     cursor: pointer;
     font-size: 13px;
     color: $text-secondary;
-    transition: all 0.18s ease;
+    transition: all m3.$m3-duration-medium m3.$m3-easing-standard;
 
     &:hover {
-      background: $glass-hover-bg;
+      background: rgba(128, 128, 128, 0.08);
       color: $text-primary;
     }
 
@@ -588,11 +590,10 @@ function deleteEngine(id: string) {
     }
 
     &.active {
-      background: $glass-active-bg;
-      color: $text-primary;
+      background: m3.$m3-primary-container;
+      color: m3.$m3-on-primary-container;
       font-weight: 500;
       border-color: transparent;
-      box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.1);
 
       .mode-icon-svg {
         opacity: 1;
@@ -601,7 +602,7 @@ function deleteEngine(id: string) {
 
     .mode-icon-svg {
       opacity: 0.55;
-      transition: opacity 0.18s ease;
+      transition: opacity m3.$m3-duration-medium m3.$m3-easing-standard;
       flex-shrink: 0;
     }
 
@@ -619,8 +620,8 @@ function deleteEngine(id: string) {
   align-items: flex-start;
   gap: 8px;
   padding: 10px 14px;
-  border-radius: 10px;
-  background: rgba(128, 128, 128, 0.08);
+  border-radius: m3.$m3-shape-sm;
+  background: m3.$m3-surface-variant;
   font-size: 12px;
   color: $text-secondary;
   line-height: 1.5;

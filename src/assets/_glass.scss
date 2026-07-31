@@ -1,57 +1,91 @@
 // ========================================
-// 山风新页 — 半透明玻璃与表面样式
-// 统一管理所有毛玻璃、半透明背景
-// 所有颜色值引用 CSS 变量，随主题切换自动变化
+// 山风新页 — M3 融合毛玻璃样式
+// 所有颜色引用 M3 令牌 + 动态毛玻璃令牌
 // ========================================
 
-// ===== 毛玻璃 (Frosted Glass) =====
-$glass-bg: var(--glass-bg);
-$glass-bg-2: var(--glass-bg-2);
-$glass-bg-3: var(--glass-bg-3);
-$glass-bg-setting: var(--glass-bg-setting);
-$glass-border: var(--glass-border);
-$glass-shadow: var(--glass-shadow);
-$glass-blur: 8px;
+@use "m3-tokens" as m3;
 
-$glass-hover-bg: var(--glass-hover-bg);
-$glass-active-bg: var(--glass-active-bg);
+// ===== 毛玻璃表面（壁纸之上浮起）=====
+// 用于 SearchBox、DockPanel —— 需要壁纸可见
 
-// 毛玻璃面板1
-@mixin glass-panel-1 {
+$glass-bg: m3.$m3-glass-bg;
+$glass-border: m3.$m3-glass-border;
+$glass-blur: m3.$m3-glass-blur;
+
+// 毛玻璃面板（M3 增强版 — 带 elevation 参数）
+@mixin glass-surface($elevation: 2) {
   background: $glass-bg;
   backdrop-filter: blur($glass-blur);
   -webkit-backdrop-filter: blur($glass-blur);
-  border: 1px solid $glass-border;
-  box-shadow: $glass-shadow;
+  border: 0.5px solid $glass-border;
+  @if $elevation == 1 {
+    box-shadow: m3.$m3-elevation-1;
+  } @else if $elevation == 2 {
+    box-shadow: m3.$m3-elevation-2;
+  } @else if $elevation == 3 {
+    box-shadow: m3.$m3-elevation-3;
+  }
 }
 
-// 毛玻璃面板2
+// 毛玻璃面板（旧版兼容 mixin，后续逐步替换为 glass-surface）
+@mixin glass-panel-1 {
+  @include glass-surface(1);
+}
 @mixin glass-panel-2 {
-  background: $glass-bg-2;
-  backdrop-filter: blur($glass-blur);
-  -webkit-backdrop-filter: blur($glass-blur);
-  border: 1px solid $glass-border;
-  box-shadow: $glass-shadow;
+  @include glass-surface(2);
 }
-
-// 毛玻璃面板3
 @mixin glass-panel-3 {
-  background: $glass-bg-3;
+  @include glass-surface(1);
+  background: m3.$m3-surface-variant;
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
-  border: 1px solid $glass-border;
-  box-shadow: $glass-shadow;
+  opacity: 0.85;
 }
 
-// 毛玻璃 — 设置面板（比普通面板更不透明）
+// ===== Tonal Surface（覆盖层面板）=====
+// 用于 SettingsPanel、LaunchPanel —— 不需要壁纸可见
+// 使用 M3 surface 色 + elevation 阴影，不透明
+
+@mixin tonal-surface($elevation: 3) {
+  background: m3.$m3-surface;
+  border: 0.5px solid m3.$m3-outline-variant;
+  @if $elevation == 1 {
+    box-shadow: m3.$m3-elevation-1;
+  } @else if $elevation == 2 {
+    box-shadow: m3.$m3-elevation-2;
+  } @else if $elevation == 3 {
+    box-shadow: m3.$m3-elevation-3;
+  } @else if $elevation == 4 {
+    box-shadow: m3.$m3-elevation-4;
+  }
+}
+
+// 设置面板（替换旧的 glass-panel-setting）
 @mixin glass-panel-setting {
-  background: $glass-bg-setting;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid $glass-border;
-  box-shadow: $glass-shadow;
+  @include tonal-surface(4);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
-// ===== 主题文字色 =====
-$text-primary: var(--text-primary);
-$text-secondary: var(--text-secondary);
+// ===== State Layer 交互反馈 =====
+// 在毛玻璃或 tonal surface 上的可交互元素使用
+
+@mixin glass-hover {
+  transition: background m3.$m3-duration-medium m3.$m3-easing-standard;
+  &:hover {
+    background: m3.$m3-glass-hover-bg;
+  }
+  &:active {
+    background: m3.$m3-glass-active-bg;
+  }
+}
+
+// ===== 颜色快捷引用（保持旧代码兼容）=====
+$text-primary: m3.$m3-on-surface;
+$text-secondary: m3.$m3-on-surface-variant;
+$glass-bg-2: m3.$m3-surface-variant;
+$glass-bg-3: m3.$m3-surface-variant;
+$glass-bg-setting: m3.$m3-surface;
+$glass-shadow: m3.$m3-elevation-2;
+$glass-hover-bg: rgba(128, 128, 128, 0.12);
+$glass-active-bg: rgba(128, 128, 128, 0.2);

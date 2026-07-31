@@ -22,7 +22,7 @@ import { toasts } from "@/composables/useToast";
 
 <style scoped lang="scss">
 @use "@/assets/glass" as *;
-@use "@/assets/animations" as *;
+@use "@/assets/m3-tokens" as m3;
 
 .toast-container {
   position: fixed;
@@ -43,11 +43,14 @@ import { toasts } from "@/composables/useToast";
   gap: 8px;
   padding: 10px 20px;
   border-radius: var(--standard-radio-radius);
-  color: $text-primary;
+  color: m3.$m3-on-surface;
   font-size: 14px;
   white-space: nowrap;
   pointer-events: auto;
-  @include glass-panel-1;
+  background: m3.$m3-glass-bg;
+  backdrop-filter: blur(m3.$m3-glass-blur);
+  -webkit-backdrop-filter: blur(m3.$m3-glass-blur);
+  border: 0.5px solid m3.$m3-glass-border;
 }
 
 .toast-dot {
@@ -67,11 +70,11 @@ import { toasts } from "@/composables/useToast";
 
 /* TransitionGroup 动画 */
 .toast-enter-active {
-  transition: all 0.25s ease-out;
+  transition: all m3.$m3-duration-long m3.$m3-easing-decelerated;
 }
 
 .toast-leave-active {
-  transition: all 0.2s ease-in;
+  transition: all m3.$m3-duration-medium m3.$m3-easing-accelerated;
 }
 
 .toast-enter-from {

@@ -100,6 +100,7 @@ function setThemeMode(m: "light" | "dark" | "auto") {
 @use "@/assets/variables" as *;
 @use "@/assets/animations" as *;
 @use "@/assets/glass" as *;
+@use "@/assets/m3-tokens" as m3;
 
 .setting-section {
   .section-label {
@@ -122,21 +123,21 @@ function setThemeMode(m: "light" | "dark" | "auto") {
     align-items: center;
     gap: 6px;
     padding: 12px 0;
-    border: 0.5px solid $glass-border;
-    border-radius: 10px;
+    border: 0.5px solid m3.$m3-outline-variant;
+    border-radius: m3.$m3-shape-sm;
     background: transparent;
     cursor: pointer;
     font-size: 13px;
     color: $text-secondary;
-    transition: all 0.15s ease;
+    transition: all m3.$m3-duration-medium m3.$m3-easing-standard;
 
     &:hover {
-      background: $glass-hover-bg;
+      background: rgba(128, 128, 128, 0.08);
     }
 
     &.active {
-      background: $glass-active-bg;
-      color: $text-primary;
+      background: m3.$m3-primary-container;
+      color: m3.$m3-on-primary-container;
       font-weight: 500;
       border-color: transparent;
     }

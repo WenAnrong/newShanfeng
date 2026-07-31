@@ -1,0 +1,155 @@
+@use "sass:map";
+
+// ========================================
+// 山风新页 — Material You 设计令牌层
+// 所有令牌引用 CSS 自定义属性，由 colorExtractor 动态注入
+// ========================================
+
+// ===== M3 颜色令牌 =====
+$m3-primary: var(--md-sys-color-primary);
+$m3-on-primary: var(--md-sys-color-on-primary);
+$m3-primary-container: var(--md-sys-color-primary-container);
+$m3-on-primary-container: var(--md-sys-color-on-primary-container);
+
+$m3-surface: var(--md-sys-color-surface);
+$m3-on-surface: var(--md-sys-color-on-surface);
+$m3-surface-variant: var(--md-sys-color-surface-variant);
+$m3-on-surface-variant: var(--md-sys-color-on-surface-variant);
+
+$m3-outline: var(--md-sys-color-outline);
+$m3-outline-variant: var(--md-sys-color-outline-variant);
+
+// ===== 毛玻璃令牌（动态色调）=====
+$m3-glass-bg: var(--md-glass-bg);
+$m3-glass-border: var(--md-glass-border);
+$m3-glass-blur: 12px;
+
+// ===== State Layer（M3 核心交互）=====
+// 在任意背景色上叠加半透明层，实现 hover / active 反馈
+// 用法：@include state-layer-hover($m3-on-surface);
+//        @include state-layer-active($m3-primary);
+
+@mixin state-layer-hover($color: $m3-on-surface) {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: $color;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+  }
+  &:hover::after {
+    opacity: 0.08;
+  }
+}
+
+@mixin state-layer-active($color: $m3-on-surface) {
+  &:active::after {
+    opacity: 0.12;
+  }
+}
+
+// ===== Elevation（阴影层次）=====
+// Level 0-5，替换当前的单一 $glass-shadow
+
+$m3-elevation-0: none;
+$m3-elevation-1: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px 1px rgba(0, 0, 0, 0.15);
+$m3-elevation-2: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 6px 2px rgba(0, 0, 0, 0.15);
+$m3-elevation-3: 0 4px 8px 3px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.3);
+$m3-elevation-4: 0 6px 10px 4px rgba(0, 0, 0, 0.15), 0 2px 3px rgba(0, 0, 0, 0.3);
+$m3-elevation-5: 0 8px 12px 6px rgba(0, 0, 0, 0.15), 0 4px 4px rgba(0, 0, 0, 0.3);
+
+@mixin elevation-1 {
+  box-shadow: $m3-elevation-1;
+}
+@mixin elevation-2 {
+  box-shadow: $m3-elevation-2;
+}
+@mixin elevation-3 {
+  box-shadow: $m3-elevation-3;
+}
+
+// ===== Shape（圆角）=====
+$m3-shape-xs: 4px;
+$m3-shape-sm: 8px;
+$m3-shape-md: 12px;
+$m3-shape-lg: 16px;
+$m3-shape-xl: 28px;
+
+// ===== Motion（动画缓动）=====
+$m3-duration-short: 50ms;
+$m3-duration-medium: 200ms;
+$m3-duration-long: 300ms;
+$m3-duration-extra-long: 500ms;
+
+// M3 标准缓动曲线
+$m3-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+$m3-easing-emphasized: cubic-bezier(0.05, 0.7, 0.1, 1);
+$m3-easing-decelerated: cubic-bezier(0, 0, 0, 1);
+$m3-easing-accelerated: cubic-bezier(0.3, 0, 1, 1);
+
+// ===== Type Scale（字体层级）=====
+// 基于 M3 type scale，适配浏览器首页场景
+
+$m3-typescale: (
+  display-large:(
+    size: clamp(72px, 6vw, 120px),
+    weight: 400,
+    line-height: 1.1,
+  ),
+  headline-medium:(
+    size: 28px,
+    weight: 400,
+    line-height: 1.2,
+  ),
+  title-large:(
+    size: 22px,
+    weight: 400,
+    line-height: 1.3,
+  ),
+  title-medium:(
+    size: 16px,
+    weight: 500,
+    line-height: 1.4,
+  ),
+  body-large:(
+    size: 16px,
+    weight: 400,
+    line-height: 1.5,
+  ),
+  body-medium:(
+    size: 14px,
+    weight: 400,
+    line-height: 1.5,
+  ),
+  body-small:(
+    size: 12px,
+    weight: 400,
+    line-height: 1.5,
+  ),
+  label-large:(
+    size: 14px,
+    weight: 500,
+    line-height: 1.4,
+  ),
+  label-medium:(
+    size: 12px,
+    weight: 500,
+    line-height: 1.4,
+  ),
+);
+
+// 按名称取字体规格
+@function type-scale($name) {
+  @return map.get($m3-typescale, $name);
+}
+
+@mixin m3-text($name) {
+  $spec: type-scale($name);
+  font-size: map.get($spec, size);
+  font-weight: map.get($spec, weight);
+  line-height: map.get($spec, line-height);
+}

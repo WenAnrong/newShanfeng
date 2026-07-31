@@ -30,6 +30,7 @@ onClickOutside(panelRef, () => emit("close"));
 <style scoped lang="scss">
 @use "@/assets/animations" as *;
 @use "@/assets/glass" as *;
+@use "@/assets/m3-tokens" as m3;
 
 .launch-overlay {
   position: fixed;
@@ -38,7 +39,7 @@ onClickOutside(panelRef, () => emit("close"));
   display: flex;
   align-items: start;
   justify-content: start;
-  @include glass-panel-2;
+  background: rgba(0, 0, 0, 0.32);
 }
 
 .launch-panel {
@@ -46,6 +47,8 @@ onClickOutside(panelRef, () => emit("close"));
   min-width: 400px;
   min-height: 300px;
   color: $text-primary;
+  @include tonal-surface(4);
+  border-radius: m3.$m3-shape-xl;
 }
 
 .launch {

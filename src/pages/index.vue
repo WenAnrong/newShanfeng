@@ -4,10 +4,11 @@ import Search from "@/components/search/SearchBox.vue";
 import Dock from "@/components/dock/DockPanel.vue";
 import Launch from "@/components/launch/LaunchPanel.vue";
 import Setting from "@/components/settings/SettingsPanel.vue";
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import Toast from "@/components/common/Toast.vue";
 import { useThemeStore } from "@/stores/themeStore";
 import { useWallpaperStore } from "@/stores/wallpaperStore";
+import { extractAndApply, applyDefaultPalette } from "@/utils/colorExtractor";
 
 const themeStore = useThemeStore();
 const wallpaperStore = useWallpaperStore();
@@ -34,6 +35,20 @@ const bgImage = computed(() =>
     ? wallpaperStore.darkWallpaper
     : wallpaperStore.lightWallpaper,
 );
+
+// 壁纸 + 主题变化时 → 动态取色
+watch(
+  [bgImage, () => themeStore.effectiveTheme, () => wallpaperStore.ready],
+  async ([url, theme, ready]) => {
+    if (!ready || !url) return;
+    const isDark = theme === "dark";
+    const result = await extractAndApply(url, isDark);
+    if (!result) {
+      applyDefaultPalette(isDark);
+    }
+  },
+  { immediate: true },
+);
 </script>
 
 <template>
@@ -44,6 +59,9 @@ const bgImage = computed(() =>
       class="bg"
       :style="{ backgroundImage: `url(${bgImage})` }"
     ></div>
+
+    <!-- 搜索区遮罩：径向渐变使搜索框永远浮于柔暗底色之上 -->
+    <div v-if="wallpaperStore.ready" class="search-area-mask"></div>
 
     <!-- 内容层 -->
     <div class="main-content">
@@ -64,6 +82,7 @@ const bgImage = computed(() =>
 <style scoped lang="scss">
 @use "@/assets/variables" as *;
 @use "@/assets/glass" as *;
+@use "@/assets/m3-tokens" as m3;
 
 .container {
   position: relative;
@@ -74,7 +93,7 @@ const bgImage = computed(() =>
   align-items: center;
   justify-content: space-between;
   overflow: hidden;
-  background-color: #0d1117;
+  background-color: var(--md-sys-color-surface);
   padding: $container-padding-top 0 30px 0;
   @include compact {
     padding: max(8vh, 60px) 0 20px 0;
@@ -99,8 +118,32 @@ const bgImage = computed(() =>
   transition: background-image 0.5s ease;
 }
 
-/* 内容组件浮于背景之上 */
-.container > :not(.bg) {
+/* 搜索区渐变遮罩：壁纸复杂时提供柔暗底色，保证搜索框可见 */
+.search-area-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 65%;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 70% 55% at 50% 32%,
+    rgba(0, 0, 0, 0.09) 0%,
+    transparent 100%
+  );
+}
+
+[data-theme="dark"] .search-area-mask {
+  background: radial-gradient(
+    ellipse 70% 55% at 50% 32%,
+    rgba(0, 0, 0, 0.18) 0%,
+    transparent 100%
+  );
+}
+
+/* 内容组件浮于遮罩之上 */
+.container > :not(.bg):not(.search-area-mask) {
   position: relative;
   z-index: 1;
 }

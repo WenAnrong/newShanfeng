@@ -155,6 +155,7 @@ watch(
 @use "@/assets/variables" as *;
 @use "@/assets/animations" as *;
 @use "@/assets/glass" as *;
+@use "@/assets/m3-tokens" as m3;
 
 .suggestion-popover {
   position: fixed;
@@ -162,9 +163,8 @@ watch(
   padding: 6px;
   overflow-y: auto;
   border-radius: var(--standard-radio-radius);
-  @include glass-panel-1;
+  @include glass-surface(3);
 
-  // 响应式
   @include compact {
     max-height: 45svh;
   }
@@ -183,14 +183,15 @@ watch(
   align-items: center;
   gap: 10px;
   padding: 10px 14px;
-  border-radius: 8px;
+  border-radius: m3.$m3-shape-sm;
   cursor: pointer;
   font-size: 14px;
   color: $text-primary;
-  transition: background $duration-fast ease;
+  transition: background m3.$m3-duration-medium m3.$m3-easing-standard;
 
   &.active {
-    background: $glass-active-bg;
+    background: m3.$m3-primary-container;
+    color: m3.$m3-on-primary-container;
   }
 }
 

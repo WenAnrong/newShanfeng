@@ -1,7 +1,7 @@
 # 山风新页 设计文档
 
 > 浏览器新标签页扩展。该文档会随着开发不断调整。
-> 文档最后修改时间：2026/07/27
+> 文档最后修改时间：2026/07/31
 
 ---
 
@@ -54,7 +54,6 @@
 │  └─ common/               Toast等            │
 ├──────────────────────────────────────────────┤
 │  Composables (composables/) 可复用逻辑         │
-│  ├─ useBingWallpaper.ts      必应壁纸获取      │
 │  ├─ useSearchSuggestions.ts  搜索建议         │
 │  └─ useToast.ts              提示消息         │
 ├──────────────────────────────────────────────┤
@@ -66,8 +65,16 @@
 │  └─ launchStore.ts        启动台管理          │
 ├──────────────────────────────────────────────┤
 │  Utils (utils/)           工具层              │
+│  ├─ colorExtractor.ts     M3 动态取色引擎     │
 │  ├─ db.ts                 壁纸IndexedDB存储   │
 │  └─ svg.ts                svg检测/获取        │
+├──────────────────────────────────────────────┤
+│  Assets (assets/)         设计令牌 + 样式      │
+│  ├─ _m3-tokens.scss       M3 设计令牌层       │
+│  ├─ _glass.scss           M3 融合毛玻璃样式    │
+│  ├─ _animations.scss      M3 Motion 缓动       │
+│  ├─ _variables.scss       响应式断点 + 布局    │
+│  └─ main.css              全局重置 + 默认色板   │
 └──────────────────────────────────────────────┘
 ```
 
@@ -187,89 +194,95 @@ clearSuggestions();
 
 通过配置不同的 z-index 达到想要的覆盖效果
 
-| z-index | 所属组件                           | 作用                         |
-| ------- | ---------------------------------- | ---------------------------- |
-| 0       | `.bg`（背景层）                    | 壁纸背景，绝对定位铺满       |
-| 1       | `.container > :not(.bg)`（主内容） | 时钟、搜索框                 |
-| 300     | `.container > .dock`（Dock 栏）    | 快捷方式栏，浮在 Launch 之上 |
-| 100     | 弹窗 / Popover                     | 搜索引擎选择器、搜索建议下拉 |
-| 200     | `.launch-overlay`（Launch 面板）   | 启动台全屏覆盖层             |
-| 200     | `.setting-overlay`（设置 面板）    | 设置全屏覆盖层               |
-| 300     | `.context-menu`（右键菜单）        | 右键菜单                     |
-| 999     | `.toast-container`（Toast 提示）   | Toast 提示                   |
+| z-index | 所属组件                                                  | 作用                         |
+| ------- | --------------------------------------------------------- | ---------------------------- |
+| 0       | `.bg`（背景层）                                           | 壁纸背景，绝对定位铺满       |
+| 0       | `.search-area-mask`（搜索区渐变遮罩）                     | 搜索区柔暗底色，保证可见     |
+| 1       | `.container > :not(.bg):not(.search-area-mask)`（主内容） | 时钟、搜索框                 |
+| 300     | `.container > .dock`（Dock 栏）                           | 快捷方式栏，浮在 Launch 之上 |
+| 100     | 弹窗 / Popover                                            | 搜索引擎选择器、搜索建议下拉 |
+| 200     | `.launch-overlay`（Launch 面板）                          | 启动台全屏覆盖层             |
+| 200     | `.setting-overlay`（设置 面板）                           | 设置全屏覆盖层               |
+| 300     | `.context-menu`（右键菜单）                               | 右键菜单                     |
+| 999     | `.toast-container`（Toast 提示）                          | Toast 提示                   |
 
-### 4.4 主题配置
+### 4.4 主题与颜色系统（Material You + Glassmorphism）
 
-在 `main.css` 里提供暗色了亮色两种颜色
+主题系统采用 **Material You (M3) 动态取色 + Glassmorphism 融合方案**，UI 颜色从壁纸自动提取。
 
-```css
-/* ---- 亮色主题（默认） ---- */
-:root,
-[data-theme="light"] {
-  /* 亮色 */
-}
+#### 4.4.1 设计理念
 
-/* ---- 暗色主题 ---- */
-[data-theme="dark"] {
-  /* 暗色 */
-}
-```
+- **壁纸之上用毛玻璃**（SearchBox、Dock）—— 保留壁纸可见性
+- **覆盖层用 Tonal Surface**（SettingsPanel、LaunchPanel）—— 不透明卡片 + elevation 阴影，摆脱毛玻璃疲劳
+- **颜色跟随壁纸走**—— 换壁纸，整个 UI 色调自动跟随
 
-但是不直接使用这些颜色，而是在 `_glass.scss` 里调用，然后其他组件再调用这里面的内容
-
-#### 4.4.1 为什么不直接全放在 `_glass.scss` ？
-
-答：主题切换必须在运行时通过属性选择器 [data-theme="dark"] 改变值，这是 SCSS 变量做不到的，必须用 CSS 自定义属性。`main.css` 存值（运行时主题色），`_glass.scss` 存名字映射（编译时别名），组件只管用名字。
+#### 4.4.2 动态取色流程
 
 ```text
-main.css              ← 运行时动态层
-  定义 :root / [data-theme="dark"] 下的 CSS 变量值
-  └─ --text-primary: #1a1a2e
-  └─ --glass-bg: rgba(255,255,255,.12)
-      │
-      ▼
-_glass.scss           ← SCSS 编译时桥接层
-  把 CSS 变量映射成 SCSS 变量，供组件 @use
-  └─ $text-primary: var(--text-primary)
-  └─ $glass-bg: var(--glass-bg)
-      │
-      ▼
-组件 .vue             ← 消费层
-  @use 后直接用 $text-primary，不用写 var(--x)
+壁纸变化（切换主题 / 更换壁纸）
+  │
+  ▼
+index.vue watch(bgImage, effectiveTheme)
+  │
+  ▼
+src/utils/colorExtractor.ts
+  ├─ loadImage(url)          创建 Image，加载壁纸到 Canvas
+  ├─ samplePixels(img)       50×50 像素采样
+  ├─ extractDominantColor()  色相分桶（12桶×30°）→ 饱和度加权 → 主色
+  ├─ generatePalette(rgb, isDark)  HSL tone 映射 → M3 色板
+  └─ injectPalette()         setProperty 写入 :root CSS 变量
 ```
 
-#### 4.4.2 主题共享
+#### 4.4.3 M3 色板输出
 
-主题状态集中在 `themeStore`（`src/stores/themeStore.ts`）统一管理，各组件通过 Pinia 调用，避免重复读写 localStorage 和手动同步 DOM。
+动态注入到 `:root` 的 CSS 自定义属性（共 10 个核心 token）：
 
-```text
-themeStore.ts            ← 状态管理
-  ├─ themeMode         三态：light / dark / auto
-  ├─ effectiveTheme    实际亮暗（auto 时按系统偏好计算）
-  ├─ themeIcon         当前模式对应的图标 URL
-  ├─ themeLabel        当前模式对应的中文标签
-  ├─ cycleTheme()      循环切换：亮 → 暗 → 自动
-  ├─ setThemeMode(m)   直接设置指定模式
-  └─ watch             自动同步 data-theme + localStorage
-       │
-       ├─▶ document.documentElement.dataset.theme
-       │      └─ CSS 属性选择器 [data-theme="dark"] 生效
-       │
-       ├─▶ localStorage.setItem("theme-mode", ...)
-       │      └─ 刷新后恢复上次主题
-       │
-       ▼
-其他组件                ← 消费方
-  ├─ DockPanel.vue    显示 themeIcon / themeLabel，绑定 cycleTheme
-  ├─ SettingsPanel.vue 外观 Tab 中调用 setThemeMode
-  └─ index.vue         watch effectiveTheme 切换壁纸
-```
+| 令牌                                  | 用途                     |
+| ------------------------------------- | ------------------------ |
+| `--md-sys-color-primary`              | 主色（按钮、选中态）     |
+| `--md-sys-color-on-primary`           | 主色上的文字             |
+| `--md-sys-color-primary-container`    | 主色浅底（选中背景）     |
+| `--md-sys-color-on-primary-container` | 主色浅底上的文字         |
+| `--md-sys-color-surface`              | 表面色（面板背景）       |
+| `--md-sys-color-on-surface`           | 表面文字                 |
+| `--md-sys-color-surface-variant`      | 次要表面（表单、分割区） |
+| `--md-sys-color-on-surface-variant`   | 次要表面文字             |
+| `--md-sys-color-outline`              | 边框色                   |
+| `--md-sys-color-outline-variant`      | 浅边框色                 |
+| `--md-glass-bg`                       | 毛玻璃背景（带动态色调） |
+| `--md-glass-border`                   | 毛玻璃边框               |
 
-**关键设计：**
+亮/暗模式由 `data-theme` 属性选择器控制，取色引擎根据 `isDark` 切换色板 tone 范围（暗色取 tone 6-30，亮色取 tone 80-98）。
 
-- **单一数据源**：所有组件读写同一个 store，不再各自操作 localStorage。
-- **自动同步**：store 内部的 `watch` 在 `themeMode` 或 `effectiveTheme` 变化时自动更新 `data-theme` 和 `localStorage`，组件无需关心 DOM 同步细节。
-- **响应式壁纸**：`index.vue` 通过 `watch(() => themeStore.effectiveTheme, ...)` 监听主题变化来切换壁纸图片。
+#### 4.4.4 设计令牌层
+
+`src/assets/_m3-tokens.scss` 提供 4 类令牌，所有 SCSS 文件通过 `@use` 引用：
+
+| 类别          | 令牌                                                                                               | 说明                             |
+| ------------- | -------------------------------------------------------------------------------------------------- | -------------------------------- |
+| 颜色          | `$m3-primary`, `$m3-surface`, `$m3-outline` 等                                                     | 映射 CSS var                     |
+| Elevation     | `$m3-elevation-0` ~ `$m3-elevation-5`                                                              | 阴影层级                         |
+| Shape         | `$m3-shape-sm(8px)` / `md(12px)` / `lg(16px)` / `xl(28px)`                                         | 圆角                             |
+| Motion        | `$m3-duration-medium(200ms)` / `long(300ms)`, `$m3-easing-standard` / `emphasized` / `decelerated` | 缓动 + 时长                      |
+| State Layer   | `@mixin state-layer-hover($color)` / `state-layer-active`                                          | hover/active 迭加 8%/12% 透明度  |
+| Glass Surface | `@mixin glass-surface($elevation)`                                                                 | 毛玻璃面板，接受 elevation 级别  |
+| Tonal Surface | `@mixin tonal-surface($elevation)`                                                                 | 不透明面板，M3 surface 色 + 阴影 |
+
+#### 4.4.5 组件分层策略
+
+| 组件                                  | 表面类型                        | 说明                       |
+| ------------------------------------- | ------------------------------- | -------------------------- |
+| SearchBox                             | `glass-surface(2)`              | 壁纸之上，毛玻璃浮起       |
+| DockPanel                             | `glass-surface(2)`              | 同 SearchBox               |
+| SettingsPanel                         | `tonal-surface(4)` + scrim 遮罩 | 不透明卡片，M3 dialog 风格 |
+| LaunchPanel                           | `tonal-surface(4)` + scrim 遮罩 | 同上                       |
+| SearchEnginePicker / SearchSuggestion | `glass-surface(3)`              | 弹窗，高 elevation 毛玻璃  |
+| 右键菜单                              | `glass-surface(3)`              | 同上                       |
+| Toast                                 | 直接 glass-bg + blur            | 轻量毛玻璃                 |
+
+#### 4.4.6 主题共享
+
+（同 4.4.2 节内容，保持不变）
 
 ### 4.5 Toast 提醒
 
@@ -386,6 +399,34 @@ src/stores/wallpaperStore.ts      ← Pinia 状态管理
 | `ready`                    | 是否已完成初始化                      |
 | `init()`                   | 异步初始化，从 IndexedDB 加载已有壁纸 |
 | `setWallpaper(mode, file)` | 设置壁纸：存 DB + 更新 objectURL      |
+
+### 4.8 搜索区渐变遮罩
+
+> 解决毛玻璃在浅色/复杂壁纸下可见性不足的问题。双重保障：着色调玻璃（玻璃带上壁纸主题色，饱和度 0.65×，不透明度 0.38/0.48）+ 径向渐变遮罩。
+
+```text
+index.vue 模板层级：
+  <div class="container">
+    <div class="bg">              ← z-index: 0  壁纸
+    <div class="search-area-mask"> ← z-index: 0  径向渐变（圆心：50% 32%）
+    <div class="main-content">    ← z-index: 1  时钟 + 搜索
+    <Dock />                      ← z-index: 300
+```
+
+**渐变参数：**
+
+- 覆盖范围：页面上方 65% 区域
+- 渐变圆心：`ellipse 70% 55% at 50% 32%`（时钟+搜索框中心）
+- 亮度：亮色模式 `rgba(0,0,0,0.09)` → `transparent`；暗色模式 `rgba(0,0,0,0.18)` → `transparent`
+
+### 4.9 动态取色降级策略
+
+取色引擎可能因跨域、网络等问题失败。降级方案：
+
+1. `colorExtractor.extractAndApply()` 返回 `undefined` → 调用 `applyDefaultPalette(isDark)`
+2. `main.css` 中的 `:root` / `[data-theme="dark"]` 定义默认蓝紫色板（`hsl(262, ...)`），作为 CSS 层面的最终兜底
+
+三层保障：动态取色 → JS 默认色板 → CSS 兜底色板。
 
 ## 5. 浏览器存储说明
 

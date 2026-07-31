@@ -68,6 +68,7 @@ function select(id: string) {
 <style scoped lang="scss">
 @use "@/assets/animations" as *;
 @use "@/assets/glass" as *;
+@use "@/assets/m3-tokens" as m3;
 
 .engine-popover {
   position: fixed;
@@ -78,7 +79,7 @@ function select(id: string) {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  @include glass-panel-1;
+  @include glass-surface(3);
 }
 
 .engine-item {
@@ -86,18 +87,19 @@ function select(id: string) {
   align-items: center;
   gap: 10px;
   padding: 10px 14px;
-  border-radius: 8px;
+  border-radius: m3.$m3-shape-sm;
   cursor: pointer;
   font-size: 14px;
   color: $text-primary;
-  transition: background $duration-fast ease;
+  transition: background m3.$m3-duration-medium m3.$m3-easing-standard;
 
   &:hover {
-    background: $glass-hover-bg;
+    background: rgba(128, 128, 128, 0.12);
   }
 
   &.active {
-    background: $glass-active-bg;
+    background: m3.$m3-primary-container;
+    color: m3.$m3-on-primary-container;
     font-weight: 500;
   }
 

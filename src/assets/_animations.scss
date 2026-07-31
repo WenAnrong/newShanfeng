@@ -1,21 +1,23 @@
-// 山风新页 全局动画预设
+// 山风新页 — M3 Motion 缓动 & 动画预设
 
-// ---------- 缓动函数 (Easing) ----------
-$ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); // 弹簧感
-$ease-out: cubic-bezier(0.16, 1, 0.3, 1); // 快速结束
-$ease-in-out: cubic-bezier(0.65, 0, 0.35, 1); // 平滑
+@use "m3-tokens" as m3;
+
+// ---------- 缓动函数 ----------
+$ease-spring: m3.$m3-easing-emphasized;
+$ease-out: m3.$m3-easing-decelerated;
+$ease-in-out: m3.$m3-easing-standard;
 
 // ---------- 过渡时间 ----------
-$duration-fast: 0.25s;
-$duration-normal: 0.35s;
-$duration-slow: 0.45s;
+$duration-fast: m3.$m3-duration-medium;
+$duration-normal: m3.$m3-duration-long;
+$duration-slow: m3.$m3-duration-extra-long;
 
 // ---------- Mixin：放大 ----------
 @mixin scale-up($ratio: 1.08) {
   transform: scale(1);
   transition:
     transform $duration-normal $ease-spring,
-    box-shadow $duration-normal ease;
+    box-shadow $duration-normal $ease-in-out;
   will-change: transform;
 
   &:hover {
@@ -26,13 +28,13 @@ $duration-slow: 0.45s;
   }
 }
 
-// ---------- Mixin：淡入淡出（用于vue的Transition） ----------
+// ---------- Mixin：淡入淡出 ----------
 @mixin fade($duration: $duration-slow) {
   &-enter-active,
   &-leave-active {
     transition:
-      opacity $duration ease,
-      transform $duration ease;
+      opacity m3.$m3-duration-long m3.$m3-easing-standard,
+      transform m3.$m3-duration-long m3.$m3-easing-standard;
   }
 
   &-enter-from,

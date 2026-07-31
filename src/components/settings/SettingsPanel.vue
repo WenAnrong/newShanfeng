@@ -102,8 +102,9 @@ const activeTab = ref<Tab>("appearance");
 @use "@/assets/variables" as *;
 @use "@/assets/animations" as *;
 @use "@/assets/glass" as *;
+@use "@/assets/m3-tokens" as m3;
 
-// 蒙层
+// 蒙层 — M3 scrim（半透明遮罩）
 .setting-overlay {
   position: fixed;
   inset: 0;
@@ -111,23 +112,23 @@ const activeTab = ref<Tab>("appearance");
   display: flex;
   align-items: center;
   justify-content: center;
-  @include glass-panel-3;
+  background: rgba(0, 0, 0, 0.32);
 }
 
-// 面板卡片
+// 面板 — Tonal Surface（不透明卡片，M3 elevation）
 .setting-panel {
   display: flex;
   flex-direction: column;
   width: min(600px, 60vw);
   height: 75vh;
-  border-radius: 18px;
-  @include glass-panel-setting;
+  border-radius: m3.$m3-shape-xl;
+  @include tonal-surface(4);
   color: $text-primary;
 
   @include compact {
     width: 65vw;
     max-height: 70vh;
-    border-radius: 14px;
+    border-radius: m3.$m3-shape-lg;
   }
 }
 
@@ -139,25 +140,24 @@ const activeTab = ref<Tab>("appearance");
   padding: 20px 24px 0;
 
   .setting-title {
-    font-size: 16px;
-    font-weight: 500;
+    @include m3.m3-text(title-medium);
   }
 
   .close-btn {
     width: 32px;
     height: 32px;
     border: none;
-    border-radius: 8px;
+    border-radius: m3.$m3-shape-sm;
     background: transparent;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     color: $text-secondary;
-    transition: background 0.15s ease;
+    transition: background m3.$m3-duration-medium m3.$m3-easing-standard;
 
     &:hover {
-      background: $glass-hover-bg;
+      background: rgba(128, 128, 128, 0.12);
     }
   }
 }
@@ -167,26 +167,26 @@ const activeTab = ref<Tab>("appearance");
   display: flex;
   gap: 4px;
   padding: 16px 24px 0;
-  border-bottom: 0.5px solid $glass-border;
+  border-bottom: 0.5px solid m3.$m3-outline-variant;
 
   .tab-btn {
     padding: 8px 16px;
     border: none;
-    border-radius: 8px 8px 0 0;
+    border-radius: m3.$m3-shape-sm m3.$m3-shape-sm 0 0;
     background: transparent;
     cursor: pointer;
     font-size: 13px;
     color: $text-secondary;
-    transition: all 0.15s ease;
+    transition: all m3.$m3-duration-medium m3.$m3-easing-standard;
     position: relative;
 
     &:hover {
       color: $text-primary;
-      background: $glass-hover-bg;
+      background: rgba(128, 128, 128, 0.08);
     }
 
     &.active {
-      color: $text-primary;
+      color: m3.$m3-primary;
       font-weight: 500;
 
       &::after {
@@ -198,7 +198,7 @@ const activeTab = ref<Tab>("appearance");
         width: 60%;
         height: 2px;
         border-radius: 1px;
-        background: $text-primary;
+        background: m3.$m3-primary;
       }
     }
   }

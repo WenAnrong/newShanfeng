@@ -1,5 +1,5 @@
 /* ========================================
-   全局样式重置
+   全局样式重置 & M3 颜色引用
    ======================================== */
 * {
   margin: 0;
@@ -9,7 +9,6 @@
   -webkit-user-select: none;
 }
 
-/* 输入框允许选中 */
 input,
 textarea {
   user-select: auto;
@@ -24,11 +23,10 @@ body {
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
     "Microsoft YaHei", sans-serif;
-  color: var(--text-primary);
+  color: var(--md-sys-color-on-surface);
   transition: color 0.25s ease;
 }
 
-/* 确保表单元素继承字体 */
 button,
 input,
 select,
@@ -43,57 +41,52 @@ textarea {
   --standard-radio-radius: 18px;
 }
 
-/* 统一滚动条样式 */
 .scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-bg) transparent;
+  scrollbar-color: var(--md-sys-color-outline-variant) transparent;
 }
 
 /* ========================================
-   主题系统 — CSS 自定义属性
+   主题系统 — 动态 M3 色板兜底
+   正常情况由 colorExtractor 动态注入，
+   这里提供取色失败时的默认蓝紫色板。
    ======================================== */
 
-/* ---- 亮色主题（默认） ---- */
+/* 亮色默认 */
 :root,
 [data-theme="light"] {
-  /* 文字 */
-  --text-primary: #1a1a2e;
-  --text-secondary: rgba(0, 0, 0, 0.55);
+  --md-sys-color-primary: hsl(262, 52%, 47%);
+  --md-sys-color-on-primary: hsl(0, 0%, 100%);
+  --md-sys-color-primary-container: hsl(270, 67%, 93%);
+  --md-sys-color-on-primary-container: hsl(266, 69%, 15%);
 
-  /* 毛玻璃 */
-  --glass-bg: rgba(255, 255, 255, 0.12);
-  --glass-bg-2: rgba(0, 0, 0, 0.4);
-  --glass-bg-3: rgba(0, 0, 0, 0.05);
-  --glass-bg-setting: rgba(255, 255, 255, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.2);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --md-sys-color-surface: hsl(260, 20%, 98%);
+  --md-sys-color-on-surface: hsl(266, 10%, 12%);
+  --md-sys-color-surface-variant: hsl(270, 12%, 90%);
+  --md-sys-color-on-surface-variant: hsl(265, 8%, 32%);
 
-  /* 交互状态 */
-  --glass-hover-bg: rgba(0, 0, 0, 0.15);
-  --glass-active-bg: rgba(0, 0, 0, 0.22);
+  --md-sys-color-outline: hsl(270, 5%, 54%);
+  --md-sys-color-outline-variant: hsl(270, 10%, 80%);
 
-  /* 滚动条 */
-  --scrollbar-bg: rgba(0, 0, 0, 0.2);
+  --md-glass-bg: hsla(262, 35%, 88%, 0.38);
+  --md-glass-border: hsla(262, 22%, 35%, 0.18);
 }
 
-/* ---- 暗色主题 ---- */
+/* 暗色默认 */
 [data-theme="dark"] {
-  /* 文字 */
-  --text-primary: #e8e8f0;
-  --text-secondary: rgba(255, 255, 255, 0.55);
+  --md-sys-color-primary: hsl(265, 80%, 80%);
+  --md-sys-color-on-primary: hsl(266, 60%, 22%);
+  --md-sys-color-primary-container: hsl(265, 50%, 30%);
+  --md-sys-color-on-primary-container: hsl(270, 65%, 90%);
 
-  /* 毛玻璃 */
-  --glass-bg: rgba(0, 0, 0, 0.25);
-  --glass-bg-2: rgba(0, 0, 0, 0.6);
-  --glass-bg-3: rgba(0, 0, 0, 0.35);
-  --glass-bg-setting: rgba(0, 0, 0, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  --md-sys-color-surface: hsl(260, 10%, 10%);
+  --md-sys-color-on-surface: hsl(265, 15%, 88%);
+  --md-sys-color-surface-variant: hsl(268, 12%, 22%);
+  --md-sys-color-on-surface-variant: hsl(265, 12%, 74%);
 
-  /* 交互状态 */
-  --glass-hover-bg: rgba(255, 255, 255, 0.1);
-  --glass-active-bg: rgba(255, 255, 255, 0.18);
+  --md-sys-color-outline: hsl(270, 8%, 48%);
+  --md-sys-color-outline-variant: hsl(270, 10%, 30%);
 
-  /* 滚动条 */
-  --scrollbar-bg: rgba(255, 255, 255, 0.2);
+  --md-glass-bg: hsla(262, 32%, 6%, 0.48);
+  --md-glass-border: hsla(262, 20%, 55%, 0.16);
 }

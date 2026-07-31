@@ -61,12 +61,13 @@ onUnmounted(() => {
 @use "@/assets/variables" as *;
 @use "@/assets/glass" as *;
 @use "@/assets/animations" as *;
+@use "@/assets/m3-tokens" as m3;
 
 .clock-panel {
   text-align: center;
   color: $text-primary;
 
-  animation: dockSlideDown 2.2s $ease-spring both;
+  animation: dockSlideDown 2.2s m3.$m3-easing-emphasized both;
 
   .clock-time {
     font-size: $clock-font-size;
@@ -79,9 +80,9 @@ onUnmounted(() => {
     @include portrait {
       font-size: clamp(48px, 7vw, 72px);
     }
-    font-weight: 500;
+    font-weight: 400;
     letter-spacing: -2px;
-    line-height: normal;
+    line-height: 1.1;
   }
 
   .date {
@@ -99,7 +100,7 @@ onUnmounted(() => {
   }
 
   .lunar-date {
-    color: $text-primary;
+    color: $text-secondary;
     font-size: clamp(14px, 1.2vw, 18px);
     @include wide {
       font-size: clamp(18px, 1vw, 24px);

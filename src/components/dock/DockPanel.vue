@@ -446,6 +446,7 @@ onClickOutside(contextMenuRef, () => {
 @use "@/assets/variables" as *;
 @use "@/assets/glass" as *;
 @use "@/assets/animations" as *;
+@use "@/assets/m3-tokens" as m3;
 
 .dock-panel {
   display: flex;
@@ -457,11 +458,11 @@ onClickOutside(contextMenuRef, () => {
   border-radius: var(--standard-radio-radius);
   --dock-item-size: #{$dock-icon-size};
   transition:
-    background 0.25s ease,
-    border-color 0.25s ease,
-    box-shadow 0.25s ease;
+    background m3.$m3-duration-long m3.$m3-easing-standard,
+    border-color m3.$m3-duration-long m3.$m3-easing-standard,
+    box-shadow m3.$m3-duration-long m3.$m3-easing-standard;
 
-  @include glass-panel-1;
+  @include glass-surface(2);
 
   @include compact {
     gap: 10px;
@@ -495,17 +496,18 @@ onClickOutside(contextMenuRef, () => {
   justify-content: center;
   transform-origin: bottom;
   transition:
-    $duration-normal ease,
-    background-color 0.25s ease;
+    m3.$m3-duration-long m3.$m3-easing-emphasized,
+    background-color m3.$m3-duration-medium m3.$m3-easing-standard;
 
   &:hover {
     scale: 1.35;
     transform: translateY(-5px);
+    background: rgba(128, 128, 128, 0.12);
   }
 
   .img {
     width: 100%;
-    transition: filter 0.2s ease; // 变暗/恢复时有平滑过渡
+    transition: filter m3.$m3-duration-medium m3.$m3-easing-standard;
   }
 
   &.is-dragging {
@@ -525,15 +527,15 @@ onClickOutside(contextMenuRef, () => {
     transform: translateX(-50%) scale(0.85);
     white-space: nowrap;
     padding: 4px 10px;
-    border-radius: 6px;
+    border-radius: m3.$m3-shape-sm;
     color: $text-secondary;
     font-size: 14px;
     pointer-events: none;
-    @include glass-panel-1;
+    @include glass-surface(1);
     opacity: 0;
     transition:
-      opacity 0.2s ease,
-      transform 0.2s ease;
+      opacity m3.$m3-duration-medium m3.$m3-easing-standard,
+      transform m3.$m3-duration-medium m3.$m3-easing-standard;
   }
 
   &:hover .dock-label {
@@ -547,11 +549,11 @@ onClickOutside(contextMenuRef, () => {
   position: fixed;
   z-index: 300;
   padding: 6px 0;
-  border-radius: 10px;
-  @include glass-panel-1;
+  border-radius: m3.$m3-shape-md;
+  @include glass-surface(3);
   backdrop-filter: blur(20px);
   overflow: hidden;
-  animation: contextMenuIn 0.12s ease-out;
+  animation: contextMenuIn m3.$m3-duration-medium m3.$m3-easing-decelerated;
 
   @keyframes contextMenuIn {
     from {
@@ -573,11 +575,11 @@ onClickOutside(contextMenuRef, () => {
   font-size: 13px;
   color: $text-primary;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background m3.$m3-duration-medium m3.$m3-easing-standard;
   white-space: nowrap;
 
   &:hover {
-    background: rgba(128, 128, 128, 0.15);
+    background: rgba(128, 128, 128, 0.12);
   }
 
   &.danger {
