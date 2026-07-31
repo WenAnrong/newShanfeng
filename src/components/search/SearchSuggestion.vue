@@ -17,10 +17,12 @@ const props = defineProps<{
 
 // 子组件向父组件发送的事件
 // close: 告诉父组件关闭子组件
-// select: 选中联想词时通知父组件
+// select: 键盘方向键导航时通知父组件（仅预览，不搜索）
+// search: 点击候选词或按 Enter 时通知父组件（直接搜索）
 const emit = defineEmits<{
   close: [];
   select: [text: string];
+  search: [text: string];
 }>();
 
 const popoverRef = ref<HTMLElement>();
@@ -61,9 +63,9 @@ watch(
   },
 );
 
-// 选中联想词后返回给父组件信息
-function selectSuggestion(text: string) {
-  emit("select", text);
+// 点击候选词 → 直接搜索
+function clickSuggestion(text: string) {
+  emit("search", text);
   activeIndex.value = -1;
 }
 
@@ -97,13 +99,13 @@ function onInputKeydown(e: KeyboardEvent) {
       emit("select", suggestions.value[activeIndex.value] as string);
       break;
 
-    // case "Enter":
-    //   if (activeIndex.value >= 0) {
-    //     e.preventDefault();
-    //     emit("select", suggestions.value[activeIndex.value] as string);
-    //     activeIndex.value = -1;
-    //   }
-    //   break;
+    case "Enter":
+      if (activeIndex.value >= 0) {
+        e.preventDefault();
+        emit("search", suggestions.value[activeIndex.value] as string);
+        activeIndex.value = -1;
+      }
+      break;
 
     case "Escape":
       emit("close");
@@ -142,7 +144,7 @@ watch(
           :key="i"
           class="suggestion-item"
           :class="{ active: i === activeIndex }"
-          @click="selectSuggestion(s)"
+          @click="clickSuggestion(s)"
         >
           <span>{{ s }}</span>
         </div>

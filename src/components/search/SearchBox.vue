@@ -56,6 +56,14 @@ function onSelectSuggestion(text: string) {
   shouldFetchSuggestions.value = false;
   input.value = text;
 }
+
+// 点击候选词或按 Enter → 直接搜索跳转
+function onSearchSuggestion(text: string) {
+  shouldFetchSuggestions.value = false;
+  input.value = text;
+  isShowSuggestions.value = false;
+  clickSearch();
+}
 </script>
 
 <template>
@@ -91,6 +99,7 @@ function onSelectSuggestion(text: string) {
       :shouldFetch="shouldFetchSuggestions"
       @close="isShowSuggestions = false"
       @select="onSelectSuggestion"
+      @search="onSearchSuggestion"
     />
   </div>
 </template>
