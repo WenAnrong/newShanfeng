@@ -2,12 +2,16 @@
 import { ref } from "vue";
 import { onClickOutside } from "@vueuse/core";
 import { useLaunchStore } from "@/stores/launchStore";
+import EditDialog from "@/components/common/EditDialog.vue";
+import type { EditData } from "@/components/common/EditDialog.vue";
 
 defineProps<{ visible: boolean }>();
 const emit = defineEmits<{ close: [] }>();
 
 const panelRef = ref<HTMLElement>();
-onClickOutside(panelRef, () => emit("close"));
+onClickOutside(panelRef, () => emit("close"), {
+  ignore: [".dialog-overlay"],
+});
 
 const launchStore = useLaunchStore();
 
@@ -17,6 +21,20 @@ function openSite(url: string) {
   }
   window.location.href = url;
   emit("close");
+}
+
+// 编辑弹窗
+const editVisible = ref(false);
+const editInitial = ref<{ name?: string; url?: string; icon?: string }>({});
+
+function openAddDialog() {
+  editInitial.value = { name: "", url: "", icon: "" };
+  editVisible.value = true;
+}
+
+function onSave(data: EditData) {
+  launchStore.addItem(data);
+  editVisible.value = false;
 }
 </script>
 
@@ -43,10 +61,28 @@ function openSite(url: string) {
                 <span class="card-name">{{ item.name }}</span>
               </button>
             </div>
+
+            <button class="launch-add-btn" @click="openAddDialog">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              添加网站
+            </button>
           </div>
         </div>
       </div>
     </Transition>
+
+    <EditDialog
+      :visible="editVisible"
+      title="添加网站"
+      :initialName="editInitial.name"
+      :initialUrl="editInitial.url"
+      :initialIcon="editInitial.icon"
+      @close="editVisible = false"
+      @save="onSave"
+    />
   </Teleport>
 </template>
 
@@ -147,6 +183,31 @@ function openSite(url: string) {
     text-overflow: ellipsis;
     white-space: nowrap;
     max-width: 100%;
+  }
+}
+
+// 添加按钮
+.launch-add-btn {
+  margin-top: 12px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px;
+  border: 0.5px dashed m3.$m3-outline-variant;
+  border-radius: m3.$m3-shape-md;
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  color: $text-secondary;
+  transition: all m3.$m3-duration-medium m3.$m3-easing-standard;
+
+  &:hover {
+    background: rgba(128, 128, 128, 0.08);
+    color: m3.$m3-primary;
+    border-color: m3.$m3-primary;
+    border-style: solid;
   }
 }
 

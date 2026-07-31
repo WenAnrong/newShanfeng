@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { onClickOutside } from "@vueuse/core";
 import { useEngineStore } from "@/stores/searchStore";
 import type { SearchEngine } from "@/stores/searchStore";
+import EditDialog from "@/components/common/EditDialog.vue";
+import type { EditData } from "@/components/common/EditDialog.vue";
 
 const engineStore = useEngineStore();
 
-// 搜索打开方式：'current' | 'newTab'
 const openMode = ref<string>(
   localStorage.getItem("search-open-mode") || "current",
 );
@@ -20,70 +20,41 @@ function selectEngine(id: string) {
   engineStore.setCurrentEngine(id);
 }
 
-// ------ 添加自定义引擎表单 ------
-const showAddForm = ref(false);
-const formRef = ref<HTMLElement>();
-const editingId = ref<string | null>(null); // 编辑模式：非 null 表示正在编辑某个引擎
-
-const form = ref({
-  name: "",
-  url: "",
-  icon: "",
-});
-
-// 点击外部关闭表单
-onClickOutside(formRef, () => closeForm(), { ignore: [".add-engine-btn"] });
-
-function openAddForm() {
-  editingId.value = null;
-  form.value = { name: "", url: "", icon: "" };
-  showAddForm.value = true;
-}
-
-function openEditForm(engine: SearchEngine) {
-  editingId.value = engine.id;
-  form.value = {
-    name: engine.name,
-    url: engine.url,
-    icon: engine.isBuiltIn ? "" : engine.icon,
-  };
-  showAddForm.value = true;
-}
-
-function closeForm() {
-  showAddForm.value = false;
-  editingId.value = null;
-}
-
-function submitForm() {
-  const name = form.value.name.trim();
-  const url = form.value.url.trim();
-  if (!name || !url) return;
-
-  if (!url.includes("{keyword}")) {
-    // URL 必须包含 {keyword} 占位符
-    return;
-  }
-
-  if (editingId.value) {
-    engineStore.updateEngine(editingId.value, {
-      name,
-      url,
-      icon: form.value.icon.trim() || undefined,
-    });
-  } else {
-    engineStore.addEngine({
-      name,
-      url,
-      icon: form.value.icon.trim(),
-    });
-  }
-  closeForm();
-}
-
 function deleteEngine(id: string) {
   engineStore.removeEngine(id);
-  closeForm();
+}
+
+// EditDialog 状态
+const dialogVisible = ref(false);
+const dialogTitle = ref("添加搜索引擎");
+const dialogInitial = ref<{ name?: string; url?: string; icon?: string }>({});
+const editingId = ref<string | null>(null);
+
+function openAddDialog() {
+  editingId.value = null;
+  dialogTitle.value = "添加搜索引擎";
+  dialogInitial.value = { name: "", url: "", icon: "" };
+  dialogVisible.value = true;
+}
+
+function openEditDialog(engine: SearchEngine) {
+  editingId.value = engine.id;
+  dialogTitle.value = "编辑搜索引擎";
+  dialogInitial.value = {
+    name: engine.name,
+    url: engine.url,
+    icon: engine.isBuiltIn ? engineStore.DEFAULT_ICON : engine.icon,
+  };
+  dialogVisible.value = true;
+}
+
+function onSave(data: EditData) {
+  if (editingId.value) {
+    engineStore.updateEngine(editingId.value, data);
+  } else {
+    engineStore.addEngine(data);
+  }
+  dialogVisible.value = false;
 }
 </script>
 
@@ -107,109 +78,38 @@ function deleteEngine(id: string) {
             <span class="engine-name">{{ engine.name }}</span>
           </div>
           <div class="engine-card-right">
-            <!-- 删除按钮：仅自定义引擎显示 -->
-            <button
-              v-if="!engine.isBuiltIn"
-              class="engine-delete-btn"
-              title="删除"
-              @click.stop="deleteEngine(engine.id)"
-            >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M18 6L6 18M6 6l12 12" />
-              </svg>
-            </button>
+            <!-- 编辑/删除按钮：仅自定义引擎显示 -->
+            <template v-if="!engine.isBuiltIn">
+              <button class="engine-edit-btn" title="编辑" @click.stop="openEditDialog(engine)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
+              </button>
+              <button class="engine-delete-btn" title="删除" @click.stop="deleteEngine(engine.id)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </template>
             <div class="engine-check">
-              <span
-                v-if="engine.id === engineStore.currentId"
-                class="check-dot"
-              ></span>
+              <span v-if="engine.id === engineStore.currentId" class="check-dot"></span>
             </div>
           </div>
         </button>
       </div>
     </section>
 
-    <!-- 添加 / 编辑搜索引擎表单 -->
+    <!-- 添加搜索引擎按钮 -->
     <section class="setting-section">
       <div class="form-header">
-        <button v-if="!showAddForm" class="add-engine-btn" @click="openAddForm">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
+        <button class="add-engine-btn" @click="openAddDialog">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="12" y1="5" x2="12" y2="19" />
             <line x1="5" y1="12" x2="19" y2="12" />
           </svg>
           添加搜索引擎
         </button>
-      </div>
-
-      <!-- 内联表单 -->
-      <div v-if="showAddForm" ref="formRef" class="engine-form">
-        <div class="form-field">
-          <label class="form-label">名称</label>
-          <input
-            v-model="form.name"
-            type="text"
-            class="form-input"
-            placeholder="例如：DuckDuckGo"
-          />
-        </div>
-        <div class="form-field">
-          <label class="form-label"
-            >搜索 URL
-            <span class="form-hint">（含 {keyword} 占位）</span></label
-          >
-          <input
-            v-model="form.url"
-            type="text"
-            class="form-input"
-            placeholder="https://duckduckgo.com/?q={keyword}"
-          />
-        </div>
-        <div class="form-field">
-          <label class="form-label">图标 URL（可选）</label>
-          <div class="icon-preview-row">
-            <img
-              :src="form.icon || engineStore.DEFAULT_ICON"
-              class="icon-preview"
-              alt=""
-            />
-            <input
-              v-model="form.icon"
-              type="text"
-              class="form-input"
-              placeholder="https://example.com/favicon.ico"
-            />
-          </div>
-        </div>
-        <div class="form-actions">
-          <button class="form-btn form-btn-cancel" @click="closeForm">
-            取消
-          </button>
-          <button
-            class="form-btn form-btn-submit"
-            :disabled="!form.name.trim() || !form.url.trim()"
-            @click="submitForm"
-          >
-            {{ editingId ? "保存" : "添加" }}
-          </button>
-        </div>
       </div>
     </section>
 
@@ -288,6 +188,18 @@ function deleteEngine(id: string) {
       </span>
     </div>
   </div>
+
+  <!-- 通用编辑弹窗 -->
+  <EditDialog
+    :visible="dialogVisible"
+    :title="dialogTitle"
+    :initialName="dialogInitial.name"
+    :initialUrl="dialogInitial.url"
+    :initialIcon="dialogInitial.icon"
+    urlPlaceholder="https://xxx.com/search?q={keyword}"
+    @close="dialogVisible = false"
+    @save="onSave"
+  />
 </template>
 
 <style scoped lang="scss">
@@ -335,7 +247,8 @@ function deleteEngine(id: string) {
     background: rgba(128, 128, 128, 0.08);
     border-color: m3.$m3-outline;
 
-    .engine-delete-btn {
+    .engine-delete-btn,
+    .engine-edit-btn {
       opacity: 1;
       visibility: visible;
     }
@@ -380,7 +293,8 @@ function deleteEngine(id: string) {
     transition: all m3.$m3-duration-medium m3.$m3-easing-standard;
   }
 
-  .engine-delete-btn {
+  .engine-delete-btn,
+  .engine-edit-btn {
     width: 24px;
     height: 24px;
     border: none;
@@ -394,11 +308,16 @@ function deleteEngine(id: string) {
     opacity: 0;
     visibility: hidden;
     transition: all m3.$m3-duration-medium m3.$m3-easing-standard;
+  }
 
-    &:hover {
-      background: rgba(231, 76, 60, 0.2);
-      color: #e74c3c;
-    }
+  .engine-edit-btn:hover {
+    background: rgba(128, 128, 128, 0.15);
+    color: $text-primary;
+  }
+
+  .engine-delete-btn:hover {
+    background: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
   }
 
   .engine-check {
@@ -446,116 +365,6 @@ function deleteEngine(id: string) {
       color: m3.$m3-primary;
       border-color: m3.$m3-primary;
       border-style: solid;
-    }
-  }
-}
-
-// ===== 内联表单 =====
-.engine-form {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 16px;
-  border: 0.5px solid m3.$m3-outline-variant;
-  border-radius: m3.$m3-shape-md;
-  background: m3.$m3-surface-variant;
-  animation: form-slide-in m3.$m3-duration-long m3.$m3-easing-decelerated;
-}
-
-.form-field {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-
-  .form-label {
-    font-size: 12px;
-    color: $text-secondary;
-  }
-
-  .form-hint {
-    font-size: 11px;
-    opacity: 0.6;
-  }
-
-  .form-input {
-    width: 100%;
-    padding: 8px 12px;
-    border: 0.5px solid m3.$m3-outline-variant;
-    border-radius: m3.$m3-shape-sm;
-    background: rgba(128, 128, 128, 0.06);
-    outline: none;
-    font-size: 13px;
-    color: $text-primary;
-    transition: border-color m3.$m3-duration-medium m3.$m3-easing-standard;
-
-    &::placeholder {
-      color: rgba(128, 128, 128, 0.6);
-    }
-
-    &:focus {
-      border-color: m3.$m3-primary;
-    }
-  }
-}
-
-.icon-preview-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-
-  .icon-preview {
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
-    flex-shrink: 0;
-    object-fit: contain;
-  }
-
-  .form-input {
-    flex: 1;
-  }
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 2px;
-
-  .form-btn {
-    padding: 7px 18px;
-    border: none;
-    border-radius: m3.$m3-shape-sm;
-    cursor: pointer;
-    font-size: 13px;
-    transition: all m3.$m3-duration-medium m3.$m3-easing-standard;
-
-    &:active {
-      transform: scale(0.97);
-    }
-  }
-
-  .form-btn-cancel {
-    background: transparent;
-    color: $text-secondary;
-
-    &:hover {
-      background: rgba(128, 128, 128, 0.08);
-    }
-  }
-
-  .form-btn-submit {
-    background: m3.$m3-primary;
-    color: m3.$m3-on-primary;
-    font-weight: 500;
-
-    &:hover {
-      opacity: 0.88;
-    }
-
-    &:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
     }
   }
 }

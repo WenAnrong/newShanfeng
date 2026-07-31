@@ -10,7 +10,9 @@ defineProps<{ visible: boolean }>();
 const emit = defineEmits<{ close: [] }>();
 
 const panelRef = ref<HTMLElement>();
-onClickOutside(panelRef, () => emit("close"));
+onClickOutside(panelRef, () => emit("close"), {
+  ignore: [".dialog-overlay", ".engine-popover", ".suggestion-popover"],
+});
 
 // 当前选中的 tab
 type Tab = "appearance" | "about" | "synchronize" | "search";

@@ -10,6 +10,8 @@ interface Shortcuts {
 }
 
 export const useShortcutStore = defineStore("shortcut", () => {
+  let nextUid = 100; // 自动递增，避免与已有 uid 冲突
+
   const shortcuts: Shortcuts[] = [
     {
       id: 1,
@@ -41,20 +43,20 @@ export const useShortcutStore = defineStore("shortcut", () => {
     },
   ];
 
-  // TODO：从启动台添加快捷方式（等设置好启动台数据结构后再实现）
-  // function addShortcut(name: string, path: string, icon: string) {
-  //   const newId =
-  //     shortcuts.length > 0 ? Math.max(...shortcuts.map((s) => s.id)) + 1 : 1;
-  //   const newUid =
-  //     shortcuts.length > 0 ? Math.max(...shortcuts.map((s) => s.uid)) + 1 : 1;
-  //   shortcuts.push({
-  //     id: newId,
-  //     uid: newUid,
-  //     name,
-  //     path,
-  //     icon,
-  //   });
-  // }
+  // 添加快捷方式
+  function addShortcut(name: string, path: string, icon: string) {
+    const newId = shortcuts.length + 1;
+    shortcuts.push({ id: newId, uid: nextUid++, name, path, icon });
+  }
+
+  // 更新快捷方式
+  function updateShortcut(id: number, patch: { name?: string; path?: string; icon?: string }) {
+    const item = shortcuts.find((s) => s.id === id);
+    if (!item) return;
+    if (patch.name !== undefined) item.name = patch.name;
+    if (patch.path !== undefined) item.path = patch.path;
+    if (patch.icon !== undefined) item.icon = patch.icon;
+  }
 
   // 移除快捷方式
   function deleteShortcut(id: number) {
@@ -87,5 +89,5 @@ export const useShortcutStore = defineStore("shortcut", () => {
     });
   }
 
-  return { shortcuts, deleteShortcut, moveShortcutById };
+  return { shortcuts, addShortcut, updateShortcut, deleteShortcut, moveShortcutById };
 });

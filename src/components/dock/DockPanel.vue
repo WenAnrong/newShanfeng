@@ -4,6 +4,8 @@ import { ref } from "vue";
 import { onClickOutside } from "@vueuse/core";
 import { useShortcutStore } from "@/stores/shortcutStore";
 import { useThemeStore } from "@/stores/themeStore";
+import EditDialog from "@/components/common/EditDialog.vue";
+import type { EditData } from "@/components/common/EditDialog.vue";
 
 const shortcutStore = useShortcutStore();
 const themeStore = useThemeStore();
@@ -376,6 +378,39 @@ const contextMenuRef = ref<HTMLElement | null>(null);
 onClickOutside(contextMenuRef, () => {
   closeContextMenu();
 });
+
+// ===== 编辑弹窗 =====
+const editVisible = ref(false);
+const editTitle = ref("添加快捷方式");
+const editInitial = ref<{ name?: string; url?: string; icon?: string }>({});
+const editingShortcutId = ref<number | null>(null);
+
+function openEditDialog(shortcut?: { id: number; name: string; path: string; icon: string }) {
+  if (shortcut) {
+    editingShortcutId.value = shortcut.id;
+    editTitle.value = "编辑快捷方式";
+    editInitial.value = { name: shortcut.name, url: shortcut.path, icon: shortcut.icon };
+  } else {
+    editingShortcutId.value = null;
+    editTitle.value = "添加快捷方式";
+    editInitial.value = { name: "", url: "", icon: "" };
+  }
+  editVisible.value = true;
+  closeContextMenu();
+}
+
+function onEditSave(data: EditData) {
+  if (editingShortcutId.value !== null) {
+    shortcutStore.updateShortcut(editingShortcutId.value, {
+      name: data.name,
+      path: data.url,
+      icon: data.icon,
+    });
+  } else {
+    shortcutStore.addShortcut(data.name, data.url, data.icon);
+  }
+  editVisible.value = false;
+}
 </script>
 
 <template>
@@ -401,6 +436,15 @@ onClickOutside(contextMenuRef, () => {
           class="dock-label"
           >{{ shortcut.name }}</span
         >
+      </div>
+
+      <!-- 添加按钮 -->
+      <div class="dock-item dock-add" @click="openEditDialog()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        <span class="dock-label">添加</span>
       </div>
 
       <div class="division"></div>
@@ -435,11 +479,24 @@ onClickOutside(contextMenuRef, () => {
       <div class="context-menu-item" @click="openInNewTab">
         <span>在新标签页中打开</span>
       </div>
+      <div class="context-menu-item" @click="openEditDialog(contextMenu.shortcut!)">
+        <span>编辑</span>
+      </div>
       <div class="context-menu-item danger" @click="deleteShortcut">
         <span>删除</span>
       </div>
     </div>
   </div>
+
+  <EditDialog
+    :visible="editVisible"
+    :title="editTitle"
+    :initialName="editInitial.name"
+    :initialUrl="editInitial.url"
+    :initialIcon="editInitial.icon"
+    @close="editVisible = false"
+    @save="onEditSave"
+  />
 </template>
 
 <style scoped lang="scss">
@@ -517,6 +574,18 @@ onClickOutside(contextMenuRef, () => {
     transform: none;
     .img {
       opacity: 0;
+    }
+  }
+
+  &.dock-add {
+    opacity: 0.5;
+    color: $text-secondary;
+    &:hover {
+      opacity: 1;
+      color: $text-primary;
+    }
+    svg {
+      pointer-events: none;
     }
   }
 
