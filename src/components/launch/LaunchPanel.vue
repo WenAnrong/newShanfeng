@@ -15,12 +15,14 @@ onClickOutside(panelRef, () => emit("close"), {
 
 onKeyStroke("Escape", () => {
   if (!props.visible) return;
-  const dialog = document.querySelector(".dialog-overlay") as HTMLElement | null;
+  const dialog = document.querySelector(
+    ".dialog-overlay",
+  ) as HTMLElement | null;
   if (dialog && dialog.style.display !== "none") return;
   emit("close");
 });
 
-const launchStore = useLaunchStore();
+const { items, addItem, removeItem, save } = useLaunchStore();
 
 function openSite(url: string) {
   if (!url.startsWith("http://") && !url.startsWith("https://")) {
@@ -40,7 +42,7 @@ function openAddDialog() {
 }
 
 function onSave(data: EditData) {
-  launchStore.addItem(data);
+  addItem(data);
   editVisible.value = false;
 }
 </script>
@@ -57,7 +59,7 @@ function onSave(data: EditData) {
           <div class="sheet-body scrollbar">
             <div class="card-grid">
               <button
-                v-for="item in launchStore.items"
+                v-for="item in items"
                 :key="item.id"
                 class="launch-card"
                 @click="openSite(item.url)"
@@ -70,7 +72,14 @@ function onSave(data: EditData) {
             </div>
 
             <button class="launch-add-btn" @click="openAddDialog">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
               </svg>

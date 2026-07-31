@@ -506,7 +506,8 @@ EditDialog 的 ESC 监听器使用**捕获阶段**（`{ capture: true }` + `stop
 | search-engine | 当前选中的搜索引擎 id |
 | search-list | 自定义搜索引擎列表（JSON 数组） |
 | search-open-mode | 搜索结果打开方式（current / newTab） |
-| shoutcut-list | Dock 快捷方式（JSON 数组） |
+| shoutcut-list | Dock 快捷方式（JSON 数组，shortcutStore 自动同步） |
+| launch-list | 启动台网站（JSON 数组，launchStore 自动同步） |
 
 **indexedDB：**
 | 数据库名 | 对象存储名 | 键名 | 说明 |
