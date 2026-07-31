@@ -469,7 +469,36 @@ src/components/launch/LaunchPanel.vue  ← 视图
 
 ### 4.11 通用编辑弹窗
 
-`src/components/common/EditDialog.vue`，一个弹窗复用于三处场景：**搜索引擎的添加/编辑**、**Dock 快捷方式的添加/编辑**、**启动台网站添加**。统一的四个字段（名称、链接、图标，图标支持内置 SVG 或自定义链接），带 `favicon.im` 自动获取网站图标功能。ESC 关闭。
+`src/components/common/EditDialog.vue`，一个 Tonal Surface 弹窗组件，复用于三处场景：**搜索引擎的添加/编辑**、**Dock 快捷方式的添加/编辑**、**启动台网站添加**。
+
+#### 4.11.1 Props / Emits
+
+| 方向  | 字段                      | 说明                                                    |
+| ----- | ------------------------- | ------------------------------------------------------- |
+| Props | `visible`                 | 控制显隐（v-show）                                      |
+| Props | `title`                   | 弹窗标题（"添加搜索引擎" / "编辑快捷方式" 等）          |
+| Props | `initialName/Url/Icon`    | 编辑模式下预填已有数据                                  |
+| Props | `urlPlaceholder`          | URL 输入框提示文本（搜索引擎场景显示 `{keyword}` 提示） |
+| Emits | `save({name, url, icon})` | 保存回调，icon 为 data URL 或内置 SVG URL               |
+| Emits | `close`                   | 关闭（X 按钮 / 取消按钮 / ESC）                         |
+
+#### 4.11.2 字段
+
+四个字段，所有场景通用：
+
+- **名称**：文本输入
+- **链接**：URL 输入，失焦时自动触发图标获取
+- **图标**：两种模式切换
+  - **内置图标**：来自 `@/assets/svgs/`
+  - **上传图标**：本地文件 → FileReader 读取为 data URL 存储 + 预览；大小限制10kb
+
+#### 4.11.3 自动获取图标
+
+URL 输入失焦时（`@blur`）自动通过 `favicon.im/{domain}?larger=true` 尝试获取网站的 favicon。成功则自动切到"上传图标"模式并填入 URL，失败给出红色提示。图标区域有「获取图标」按钮可手动触发（loading 动画）。
+
+#### 4.11.4 ESC 关闭
+
+EditDialog 的 ESC 监听器使用**捕获阶段**（`{ capture: true }` + `stopImmediatePropagation()`），确保当 EditDialog 依附于 SettingsPanel/LaunchPanel 打开时，ESC 只关闭 EditDialog 而不连带关闭下层面板。
 
 ## 5. 浏览器存储说明
 

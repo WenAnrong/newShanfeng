@@ -2,6 +2,7 @@
 import { ref, watch } from "vue";
 import { useEventListener } from "@vueuse/core";
 import { svgs } from "@/utils/svg";
+import { show } from "@/composables/useToast";
 
 export interface EditData {
   name: string;
@@ -38,14 +39,29 @@ useEventListener(
 
 const name = ref("");
 const url = ref("");
-const iconUrl = ref("");
 const selectedSvg = ref<string>("");
-const iconMode = ref<"svg" | "url">("svg");
+const iconMode = ref<"svg" | "upload">("svg");
 const svgKeys = Object.keys(svgs);
+
+// 上传图标：data URL
+const uploadedIcon = ref("");
+const iconPreview = ref(""); // 当前预览图（内置 SVG URL 或上传的 data URL）
+const fileInput = ref<HTMLInputElement>();
 
 // favicon 获取状态
 const fetchingIcon = ref(false);
 const iconFetchStatus = ref<"idle" | "success" | "fail">("idle");
+
+// 更新图标预览
+function updatePreview() {
+  if (iconMode.value === "svg" && selectedSvg.value) {
+    iconPreview.value = svgs[selectedSvg.value]!;
+  } else if (iconMode.value === "upload" && uploadedIcon.value) {
+    iconPreview.value = uploadedIcon.value;
+  } else {
+    iconPreview.value = svgs[svgKeys[0]!]!;
+  }
+}
 
 watch(
   () => props.visible,
@@ -62,16 +78,18 @@ watch(
     if (builtinKey) {
       iconMode.value = "svg";
       selectedSvg.value = builtinKey;
-      iconUrl.value = "";
-    } else if (init && (init.startsWith("http") || init.startsWith("data:"))) {
-      iconMode.value = "url";
-      iconUrl.value = init;
+      uploadedIcon.value = "";
+    } else if (init) {
+      // 已有的自定义图标（data URL 或外部链接），显示在 upload 模式
+      iconMode.value = "upload";
+      uploadedIcon.value = init;
       selectedSvg.value = "";
     } else {
       iconMode.value = "svg";
       selectedSvg.value = svgKeys[0] ?? "";
-      iconUrl.value = "";
+      uploadedIcon.value = "";
     }
+    updatePreview();
   },
 );
 
@@ -86,7 +104,35 @@ function extractDomain(rawUrl: string): string | null {
   return match?.[1] ?? null;
 }
 
-// 尝试通过 favicon.im 获取网站图标
+// 上传文件限制
+const MAX_ICON_SIZE = 10 * 1024;
+
+// 上传文件：读取为 data URL 存储
+function onFileChange(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0];
+  if (!file) return;
+
+  if (file.size > MAX_ICON_SIZE) {
+    show(
+      `图标文件过大（${(file.size / 1024).toFixed(1)}KB），限制 10KB 以内`,
+      "error",
+    );
+    (e.target as HTMLInputElement).value = "";
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    uploadedIcon.value = reader.result as string;
+    updatePreview();
+  };
+  reader.readAsDataURL(file);
+}
+
+function openFilePicker() {
+  fileInput.value?.click();
+}
+
+// 尝试通过 favicon.im 获取图标
 function tryFetchIcon() {
   const domain = extractDomain(url.value);
   if (!domain) return;
@@ -97,10 +143,10 @@ function tryFetchIcon() {
   const faviconUrl = `https://favicon.im/${domain}?larger=true`;
   const img = new Image();
   img.onload = () => {
-    // 确保不是 1x1 透明图（favicon.im 失败时可能返回占位图）
     if (img.naturalWidth > 1) {
-      iconUrl.value = faviconUrl;
-      iconMode.value = "url";
+      uploadedIcon.value = faviconUrl;
+      iconMode.value = "upload";
+      updatePreview();
       iconFetchStatus.value = "success";
     } else {
       iconFetchStatus.value = "fail";
@@ -129,8 +175,8 @@ function submit() {
   let icon: string;
   if (iconMode.value === "svg" && selectedSvg.value) {
     icon = svgs[selectedSvg.value]!;
-  } else if (iconMode.value === "url" && iconUrl.value.trim()) {
-    icon = iconUrl.value.trim();
+  } else if (iconMode.value === "upload" && uploadedIcon.value) {
+    icon = uploadedIcon.value;
   } else {
     icon = svgs[svgKeys[0]!]!;
   }
@@ -193,10 +239,27 @@ function submit() {
                   :disabled="!url.trim() || fetchingIcon"
                   @click="tryFetchIcon"
                 >
-                  <svg v-if="fetchingIcon" class="spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg
+                    v-if="fetchingIcon"
+                    class="spin"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
                     <path d="M21 12a9 9 0 1 1-6.219-8.56" />
                   </svg>
-                  <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg
+                    v-else
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
                     <circle cx="11" cy="11" r="8" />
                     <line x1="21" y1="21" x2="16.65" y2="16.65" />
                   </svg>
@@ -210,34 +273,63 @@ function submit() {
                     内置图标
                   </button>
                   <button
-                    :class="['toggle-btn', { active: iconMode === 'url' }]"
-                    @click="iconMode = 'url'"
+                    :class="['toggle-btn', { active: iconMode === 'upload' }]"
+                    @click="iconMode = 'upload'"
                   >
-                    自定义链接
+                    上传图标
                   </button>
                 </div>
               </div>
             </div>
 
             <!-- 状态提示 -->
-            <div v-if="iconFetchStatus === 'success'" class="fetch-hint success">
+            <div
+              v-if="iconFetchStatus === 'success'"
+              class="fetch-hint success"
+            >
               已自动获取网站图标
             </div>
             <div v-else-if="iconFetchStatus === 'fail'" class="fetch-hint fail">
               未获取到图标，请手动选择内置图标或填写链接
             </div>
 
-            <!-- 自定义 URL 输入 -->
-            <input
-              v-if="iconMode === 'url'"
-              v-model="iconUrl"
-              type="text"
-              class="field-input"
-              placeholder="https://example.com/favicon.ico"
-            />
+            <!-- 上传图标 -->
+            <div v-if="iconMode === 'upload'" class="upload-area">
+              <img
+                v-if="uploadedIcon"
+                :src="uploadedIcon"
+                class="icon-preview-img"
+              />
+              <div v-else class="icon-preview-placeholder">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  opacity="0.4"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <polyline points="21 15 16 10 5 21" />
+                </svg>
+              </div>
+              <button class="upload-btn" @click="openFilePicker">
+                选择图片
+              </button>
+              <span v-if="uploadedIcon" class="upload-hint">已上传</span>
+              <input
+                ref="fileInput"
+                type="file"
+                accept="image/*"
+                hidden
+                @change="onFileChange"
+              />
+            </div>
 
             <!-- 内置 SVG 选择器 -->
-            <div v-else class="svg-grid scrollbar">
+            <div v-if="iconMode === 'svg'" class="svg-grid scrollbar">
               <button
                 v-for="key in svgKeys"
                 :key="key"
@@ -421,6 +513,54 @@ function submit() {
   &.fail {
     color: #e74c3c;
   }
+}
+
+// 上传图标区域
+.upload-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 0.5px dashed m3.$m3-outline-variant;
+  border-radius: m3.$m3-shape-sm;
+}
+
+.icon-preview-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  object-fit: contain;
+  background: rgba(128, 128, 128, 0.06);
+}
+
+.icon-preview-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  background: rgba(128, 128, 128, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upload-btn {
+  padding: 6px 12px;
+  border: 0.5px solid m3.$m3-outline;
+  border-radius: m3.$m3-shape-sm;
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  color: $text-primary;
+  transition: all m3.$m3-duration-medium m3.$m3-easing-standard;
+
+  &:hover {
+    background: rgba(128, 128, 128, 0.08);
+  }
+}
+
+.upload-hint {
+  font-size: 11px;
+  color: #2ecc71;
 }
 
 .mode-toggle {
