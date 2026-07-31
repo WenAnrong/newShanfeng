@@ -25,9 +25,17 @@ function clickSearch() {
   const engine = engineStore.current;
   if (!engine) return; // 没有选中引擎
 
-  const url = engine.url.replace("{keyword}", encodeURIComponent(keyword));
-  window.location.href = url;
+  // 判断如何打开搜索结果
+  const openMode = localStorage.getItem("search-open-mode") || "current"; // 默认在当前窗口打开
+  if (openMode === "newTab") {
+    const url = engine.url.replace("{keyword}", encodeURIComponent(keyword));
+    window.open(url, "_blank");
+  } else if (openMode === "current") {
+    const url = engine.url.replace("{keyword}", encodeURIComponent(keyword));
+    window.open(url, "_self");
+  }
   input.value = ""; // 搜索后清空
+  return;
 }
 
 const isShowSuggestions = ref(false); // 是否显示搜索建议
