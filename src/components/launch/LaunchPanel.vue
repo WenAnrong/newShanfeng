@@ -1,16 +1,23 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { onClickOutside } from "@vueuse/core";
+import { onClickOutside, onKeyStroke } from "@vueuse/core";
 import { useLaunchStore } from "@/stores/launchStore";
 import EditDialog from "@/components/common/EditDialog.vue";
 import type { EditData } from "@/components/common/EditDialog.vue";
 
-defineProps<{ visible: boolean }>();
+const props = defineProps<{ visible: boolean }>();
 const emit = defineEmits<{ close: [] }>();
 
 const panelRef = ref<HTMLElement>();
 onClickOutside(panelRef, () => emit("close"), {
   ignore: [".dialog-overlay"],
+});
+
+onKeyStroke("Escape", () => {
+  if (!props.visible) return;
+  const dialog = document.querySelector(".dialog-overlay") as HTMLElement | null;
+  if (dialog && dialog.style.display !== "none") return;
+  emit("close");
 });
 
 const launchStore = useLaunchStore();

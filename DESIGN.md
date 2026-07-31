@@ -467,6 +467,10 @@ src/components/launch/LaunchPanel.vue  ← 视图
 
 12 个预设常用网站（GitHub、Gmail、YouTube、Reddit、Notion、Figma、Google 翻译、Spotify、Google 日历、百度网盘、豆瓣、微信读书），通过 launchStore 管理，后续支持自定义添加/删除。
 
+### 4.11 通用编辑弹窗
+
+`src/components/common/EditDialog.vue`，一个弹窗复用于三处场景：**搜索引擎的添加/编辑**、**Dock 快捷方式的添加/编辑**、**启动台网站添加**。统一的四个字段（名称、链接、图标，图标支持内置 SVG 或自定义链接），带 `favicon.im` 自动获取网站图标功能。ESC 关闭。
+
 ## 5. 浏览器存储说明
 
 **localStorage：**

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
+import { useEventListener } from "@vueuse/core";
 import { svgs } from "@/utils/svg";
 
 export interface EditData {
@@ -22,29 +23,39 @@ const emit = defineEmits<{
   save: [data: EditData];
 }>();
 
-// 表单状态
+// ESC：捕获阶段拦截，阻止下层面板同时关闭
+useEventListener(
+  document,
+  "keydown",
+  (e: KeyboardEvent) => {
+    if (e.key === "Escape" && props.visible) {
+      e.stopImmediatePropagation();
+      emit("close");
+    }
+  },
+  { capture: true },
+);
+
 const name = ref("");
 const url = ref("");
-const iconUrl = ref(""); // 自定义图标链接
-const selectedSvg = ref<string>(""); // 选中的内置 SVG key
-
-// 图标模式：url（自定义链接）或 svg（内置选择）
+const iconUrl = ref("");
+const selectedSvg = ref<string>("");
 const iconMode = ref<"svg" | "url">("svg");
-
-// 可用 SVG 图标列表
 const svgKeys = Object.keys(svgs);
 
-// 弹窗可见时，用 initial 值初始化表单
+// favicon 获取状态
+const fetchingIcon = ref(false);
+const iconFetchStatus = ref<"idle" | "success" | "fail">("idle");
+
 watch(
   () => props.visible,
   (v) => {
     if (!v) return;
     name.value = props.initialName ?? "";
     url.value = props.initialUrl ?? "";
+    iconFetchStatus.value = "idle";
 
-    // 判断 initialIcon 是自定义 URL 还是内置 SVG
     const init = props.initialIcon ?? "";
-    // 检查是否是内置 SVG（通过 URL 匹配反向查找 key）
     const builtinKey = Object.entries(svgs).find(
       ([, svgUrl]) => svgUrl === init,
     )?.[0];
@@ -57,7 +68,6 @@ watch(
       iconUrl.value = init;
       selectedSvg.value = "";
     } else {
-      // 默认选第一个 SVG
       iconMode.value = "svg";
       selectedSvg.value = svgKeys[0] ?? "";
       iconUrl.value = "";
@@ -66,6 +76,50 @@ watch(
 );
 
 const panelRef = ref<HTMLElement>();
+
+// 从 URL 提取域名
+function extractDomain(rawUrl: string): string | null {
+  const trimmed = rawUrl.trim();
+  if (!trimmed) return null;
+  // 去掉协议和路径，只留域名
+  const match = trimmed.match(/^(?:https?:\/\/)?([^\/\s]+)/);
+  return match?.[1] ?? null;
+}
+
+// 尝试通过 favicon.im 获取网站图标
+function tryFetchIcon() {
+  const domain = extractDomain(url.value);
+  if (!domain) return;
+
+  fetchingIcon.value = true;
+  iconFetchStatus.value = "idle";
+
+  const faviconUrl = `https://favicon.im/${domain}?larger=true`;
+  const img = new Image();
+  img.onload = () => {
+    // 确保不是 1x1 透明图（favicon.im 失败时可能返回占位图）
+    if (img.naturalWidth > 1) {
+      iconUrl.value = faviconUrl;
+      iconMode.value = "url";
+      iconFetchStatus.value = "success";
+    } else {
+      iconFetchStatus.value = "fail";
+    }
+    fetchingIcon.value = false;
+  };
+  img.onerror = () => {
+    iconFetchStatus.value = "fail";
+    fetchingIcon.value = false;
+  };
+  img.src = faviconUrl;
+}
+
+// URL 失焦时自动获取
+function onUrlBlur() {
+  if (url.value.trim() && iconFetchStatus.value === "idle") {
+    tryFetchIcon();
+  }
+}
 
 function submit() {
   const trimmedName = name.value.trim();
@@ -78,7 +132,7 @@ function submit() {
   } else if (iconMode.value === "url" && iconUrl.value.trim()) {
     icon = iconUrl.value.trim();
   } else {
-    icon = svgs[svgKeys[0]!]!; // fallback
+    icon = svgs[svgKeys[0]!]!;
   }
 
   emit("save", { name: trimmedName, url: trimmedUrl, icon });
@@ -125,6 +179,7 @@ function submit() {
               type="text"
               class="field-input"
               :placeholder="urlPlaceholder ?? 'https://example.com'"
+              @blur="onUrlBlur"
             />
           </label>
 
@@ -132,20 +187,44 @@ function submit() {
           <div class="field">
             <div class="icon-mode-bar">
               <span class="field-label">图标</span>
-              <div class="mode-toggle">
+              <div class="icon-actions">
                 <button
-                  :class="['toggle-btn', { active: iconMode === 'svg' }]"
-                  @click="iconMode = 'svg'"
+                  class="fetch-btn"
+                  :disabled="!url.trim() || fetchingIcon"
+                  @click="tryFetchIcon"
                 >
-                  内置图标
+                  <svg v-if="fetchingIcon" class="spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                  </svg>
+                  <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                  {{ fetchingIcon ? "获取中" : "获取图标" }}
                 </button>
-                <button
-                  :class="['toggle-btn', { active: iconMode === 'url' }]"
-                  @click="iconMode = 'url'"
-                >
-                  自定义链接
-                </button>
+                <div class="mode-toggle">
+                  <button
+                    :class="['toggle-btn', { active: iconMode === 'svg' }]"
+                    @click="iconMode = 'svg'"
+                  >
+                    内置图标
+                  </button>
+                  <button
+                    :class="['toggle-btn', { active: iconMode === 'url' }]"
+                    @click="iconMode = 'url'"
+                  >
+                    自定义链接
+                  </button>
+                </div>
               </div>
+            </div>
+
+            <!-- 状态提示 -->
+            <div v-if="iconFetchStatus === 'success'" class="fetch-hint success">
+              已自动获取网站图标
+            </div>
+            <div v-else-if="iconFetchStatus === 'fail'" class="fetch-hint fail">
+              未获取到图标，请手动选择内置图标或填写链接
             </div>
 
             <!-- 自定义 URL 输入 -->
@@ -288,6 +367,60 @@ function submit() {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.icon-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+// 获取图标按钮
+.fetch-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border: 0.5px solid m3.$m3-outline-variant;
+  border-radius: m3.$m3-shape-sm;
+  background: transparent;
+  cursor: pointer;
+  font-size: 11px;
+  color: $text-secondary;
+  transition: all m3.$m3-duration-medium m3.$m3-easing-standard;
+
+  &:hover:not(:disabled) {
+    background: rgba(128, 128, 128, 0.08);
+    color: m3.$m3-primary;
+    border-color: m3.$m3-primary;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.spin {
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// 状态提示
+.fetch-hint {
+  font-size: 11px;
+  padding: 4px 0;
+
+  &.success {
+    color: #2ecc71;
+  }
+  &.fail {
+    color: #e74c3c;
+  }
 }
 
 .mode-toggle {

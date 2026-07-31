@@ -1,17 +1,25 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { onClickOutside } from "@vueuse/core";
+import { onClickOutside, onKeyStroke } from "@vueuse/core";
 import Appearance from "./Appearance.vue";
 import About from "./About.vue";
 import Synchronize from "./Sync.vue";
 import SearchEngine from "./SearchEngine.vue";
 
-defineProps<{ visible: boolean }>();
+const props = defineProps<{ visible: boolean }>();
 const emit = defineEmits<{ close: [] }>();
 
 const panelRef = ref<HTMLElement>();
 onClickOutside(panelRef, () => emit("close"), {
   ignore: [".dialog-overlay", ".engine-popover", ".suggestion-popover"],
+});
+
+// ESC 关闭：如果 EditDialog 在上层打开，先让它关
+onKeyStroke("Escape", () => {
+  if (!props.visible) return;
+  const dialog = document.querySelector(".dialog-overlay") as HTMLElement | null;
+  if (dialog && dialog.style.display !== "none") return;
+  emit("close");
 });
 
 // 当前选中的 tab
