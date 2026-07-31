@@ -294,6 +294,7 @@ document.addEventListener(
             shortcutStore.shortcuts.forEach((item, i) => {
               item.id = i + 1;
             });
+            shortcutStore.save();
           }
         }
       }
