@@ -157,6 +157,6 @@ watch(
 }
 
 .container > .dock {
-  z-index: 300;
+  z-index: 1;
 }
 </style>

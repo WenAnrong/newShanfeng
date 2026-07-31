@@ -8,6 +8,9 @@
 ## 0. 当前设计缺少的部分
 
 - 设计一个在当前页打开或者在新建标签页打开的选项（搜索部分）
+- 启动台自定义添加/删除网站
+- 备份与同步（WebDAV）
+- Dock 快捷方式持久化存储
 
 ---
 
@@ -50,7 +53,7 @@
 │  ├─ search/               搜索框              │
 │  ├─ dock/                 快捷方式栏          │
 │  ├─ settings/             设置面板            │
-│  ├─ launch/               仿mac的启动台        │
+│  ├─ launch/               底部抽屉启动台        │
 │  └─ common/               Toast等            │
 ├──────────────────────────────────────────────┤
 │  Composables (composables/) 可复用逻辑         │
@@ -190,21 +193,21 @@ console.log(suggestions.value); // string[]
 clearSuggestions();
 ```
 
-### 4.3 z-index 设计
+### 4.3 层叠关系
 
-通过配置不同的 z-index 达到想要的覆盖效果
+Teleport 组件（SettingsPanel、LaunchPanel、Toast、Popover）渲染在 `<body>` 下，与 `.container` 分属不同层叠上下文。因此 `.container` 内 z-index 只对容器内组件有效。
 
-| z-index | 所属组件                                                  | 作用                         |
-| ------- | --------------------------------------------------------- | ---------------------------- |
-| 0       | `.bg`（背景层）                                           | 壁纸背景，绝对定位铺满       |
-| 0       | `.search-area-mask`（搜索区渐变遮罩）                     | 搜索区柔暗底色，保证可见     |
-| 1       | `.container > :not(.bg):not(.search-area-mask)`（主内容） | 时钟、搜索框                 |
-| 300     | `.container > .dock`（Dock 栏）                           | 快捷方式栏，浮在 Launch 之上 |
-| 100     | 弹窗 / Popover                                            | 搜索引擎选择器、搜索建议下拉 |
-| 200     | `.launch-overlay`（Launch 面板）                          | 启动台全屏覆盖层             |
-| 200     | `.setting-overlay`（设置 面板）                           | 设置全屏覆盖层               |
-| 300     | `.context-menu`（右键菜单）                               | 右键菜单                     |
-| 999     | `.toast-container`（Toast 提示）                          | Toast 提示                   |
+**实际覆盖规则：**
+
+| 谁盖谁                           | 原因                                    |
+| -------------------------------- | --------------------------------------- |
+| Toast 盖一切                     | z-index: 999，body 层级最高             |
+| 右键菜单盖 Setting / Launch 遮罩 | z-index: 300 > 200                      |
+| Setting 遮罩盖主界面             | 在 body 层叠上下文，container = auto(0) |
+| Setting / Launch 不冲突          | 互斥显示，永远不同时存在                |
+| Dock > 主内容                    | 容器内 z-index: 1 > 1                   |
+
+container 内部仅保留 3 层：`bg(0) → 遮罩(0) → 主内容(1)`，均不对外生效。
 
 ### 4.4 主题与颜色系统（Material You + Glassmorphism）
 
@@ -270,15 +273,15 @@ src/utils/colorExtractor.ts
 
 #### 4.4.5 组件分层策略
 
-| 组件                                  | 表面类型                        | 说明                       |
-| ------------------------------------- | ------------------------------- | -------------------------- |
-| SearchBox                             | `glass-surface(2)`              | 壁纸之上，毛玻璃浮起       |
-| DockPanel                             | `glass-surface(2)`              | 同 SearchBox               |
-| SettingsPanel                         | `tonal-surface(4)` + scrim 遮罩 | 不透明卡片，M3 dialog 风格 |
-| LaunchPanel                           | `tonal-surface(4)` + scrim 遮罩 | 同上                       |
-| SearchEnginePicker / SearchSuggestion | `glass-surface(3)`              | 弹窗，高 elevation 毛玻璃  |
-| 右键菜单                              | `glass-surface(3)`              | 同上                       |
-| Toast                                 | 直接 glass-bg + blur            | 轻量毛玻璃                 |
+| 组件                                  | 表面类型                        | 说明                                     |
+| ------------------------------------- | ------------------------------- | ---------------------------------------- |
+| SearchBox                             | `glass-surface(2)`              | 壁纸之上，毛玻璃浮起                     |
+| DockPanel                             | `glass-surface(2)`              | 同 SearchBox                             |
+| SettingsPanel                         | `tonal-surface(4)` + scrim 遮罩 | 不透明卡片，M3 dialog 风格               |
+| LaunchPanel                           | `tonal-surface(4)` + scrim 遮罩 | 底部抽屉（bottom sheet），从下方向上滑入 |
+| SearchEnginePicker / SearchSuggestion | `glass-surface(3)`              | 弹窗，高 elevation 毛玻璃                |
+| 右键菜单                              | `glass-surface(3)`              | 同上                                     |
+| Toast                                 | 直接 glass-bg + blur            | 轻量毛玻璃                               |
 
 #### 4.4.6 主题共享
 
@@ -347,9 +350,9 @@ Vue 检测到变化，那个 <div> 从页面消失
 
 用户可以拖拽 dock 栏的快捷方式来调整它们的位置。当拖拽结束时，如果拖拽距离小于阈值且有有效的插入位置，则调用 `shortcutStore.moveShortcutById()` 来移动快捷方式到新的位置。
 
-#### 4.6.3 启动台拖拽添加
+#### 4.6.3 启动台与 Dock
 
-用户可以从启动台拖拽应用到 dock 栏中。当拖拽结束时，如果拖拽距离小于阈值且有有效的插入位置，则调用 `shortcutStore.addShortcut()` 来添加新的快捷方式到 dock 栏中。
+启动台（底部抽屉，见 4.10）与 Dock 栏互相独立。启动台网站点击打开，不拖拽到 Dock。如需将启动台网站加入 Dock，可通过后续的自定义添加功能实现。
 
 #### 4.6.4 右键菜单
 
@@ -427,6 +430,42 @@ index.vue 模板层级：
 2. `main.css` 中的 `:root` / `[data-theme="dark"]` 定义默认蓝紫色板（`hsl(262, ...)`），作为 CSS 层面的最终兜底
 
 三层保障：动态取色 → JS 默认色板 → CSS 兜底色板。
+
+### 4.10 启动台（底部抽屉）
+
+> 点击 Dock 栏「启动台」图标打开。Material Design bottom sheet 风格，从底部滑入的卡片网格面板，快速访问不常驻 Dock 的网站。
+
+#### 4.10.1 架构
+
+```
+src/stores/launchStore.ts    ← 数据管理
+  ├─ items: LaunchItem[]     id / name / url / icon
+  ├─ removeItem(id)          删除
+  └─ addItem(item)           添加
+        │
+        ▼
+src/components/launch/LaunchPanel.vue  ← 视图
+  蒙层 scrim + 底部面板（border-radius 上方圆角）
+  ├─ 拖拽指示条
+  ├─ 3 列卡片网格（grid-template-columns: repeat(3, 1fr)）
+  └─ 点击卡片打开网站 + 关闭面板
+```
+
+#### 4.10.2 面板参数
+
+- 宽度：`min(680px, 90vw)`
+- 最大高度：`65vh`，内容超出可滚动
+- 表面：`tonal-surface(4)`，上方圆角 `28px`，下方无圆角与屏幕底部对齐
+- 蒙层：`rgba(0,0,0,0.32)` scrim
+
+#### 4.10.3 动画
+
+- 进入：scrim 淡入 + 面板 `translateY(100%) → 0`，`decelerated` 缓动 300ms
+- 退出：scrim 淡出 + 面板 `0 → translateY(100%)`，`accelerated` 缓动 200ms
+
+#### 4.10.4 内置内容
+
+12 个预设常用网站（GitHub、Gmail、YouTube、Reddit、Notion、Figma、Google 翻译、Spotify、Google 日历、百度网盘、豆瓣、微信读书），通过 launchStore 管理，后续支持自定义添加/删除。
 
 ## 5. 浏览器存储说明
 
