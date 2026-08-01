@@ -4,7 +4,7 @@
   "manifest_version": 3,
   "version": "1.0.0",
   "default_locale": "zh_CN",
-  "permissions": ["storage", "activeTab"],
+  "permissions": ["activeTab"],
   "host_permissions": ["https://suggestion.baidu.com/*"],
   "action": {
     "default_popup": "popup/popup.html",
@@ -25,7 +25,10 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "shanfeng-newtab@shanfeng",
-      "strict_min_version": "115.0"
+      "strict_min_version": "142.0",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
     }
   }
 }

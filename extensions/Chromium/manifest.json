@@ -4,7 +4,7 @@
   "manifest_version": 3,
   "version": "1.0.0",
   "default_locale": "zh_CN",
-  "permissions": ["storage", "activeTab"],
+  "permissions": ["activeTab"],
   "host_permissions": ["https://suggestion.baidu.com/*"],
   "action": {
     "default_popup": "popup/popup.html",
