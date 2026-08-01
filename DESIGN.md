@@ -1,13 +1,14 @@
 # 山风新页 设计文档
 
 > 浏览器新标签页扩展。该文档会随着开发不断调整。
-> 文档最后修改时间：2026/07/31
+> 文档最后修改时间：2026/08/01
 
 ---
 
 ## 0. 当前设计缺少的部分
 
 - 备份与同步（WebDAV）
+- Firefox 扩展目录（`extensions/Firefox/` 当前为空，build 脚本仅处理 Chromium）
 
 ---
 
@@ -349,7 +350,7 @@ Vue 检测到变化，那个 <div> 从页面消失
 
 #### 4.6.3 启动台与 Dock
 
-启动台（底部抽屉，见 4.10）与 Dock 栏互相独立。启动台网站点击打开，不拖拽到 Dock。如需将启动台网站加入 Dock，可通过后续的自定义添加功能实现。
+启动台（底部抽屉，见 4.10）与 Dock 栏互相独立。启动台网站点击打开，不拖拽到 Dock。通过启动台卡片的**右键菜单**可将网站「添加到 Dock 栏」（见 4.10.5），新图标由 shortcutStore 自动渲染，且可继续使用拖拽排序、右键编辑/删除。
 
 #### 4.6.4 右键菜单
 
@@ -436,16 +437,19 @@ index.vue 模板层级：
 
 ```
 src/stores/launchStore.ts    ← 数据管理
-  ├─ items: LaunchItem[]     id / name / url / icon
+  ├─ items: LaunchItem[]     id / name / url / icon（ref 响应式）
+  ├─ addItem(item)           添加
+  ├─ updateItem(id, patch)   编辑（名称/链接/图标）
   ├─ removeItem(id)          删除
-  └─ addItem(item)           添加
+  └─ storage 监听            跨页面同步（popup 写入后实时重载）
         │
         ▼
 src/components/launch/LaunchPanel.vue  ← 视图
   蒙层 scrim + 底部面板（border-radius 上方圆角）
   ├─ 拖拽指示条
   ├─ 3 列卡片网格（grid-template-columns: repeat(3, 1fr)）
-  └─ 点击卡片打开网站 + 关闭面板
+  ├─ 点击卡片打开网站 + 关闭面板
+  └─ 右键菜单：新标签页打开 / 添加到 Dock 栏 / 编辑 / 删除
 ```
 
 #### 4.10.2 面板参数
@@ -462,7 +466,24 @@ src/components/launch/LaunchPanel.vue  ← 视图
 
 #### 4.10.4 内置内容
 
-12 个预设常用网站（GitHub、Gmail、YouTube、Reddit、Notion、Figma、Google 翻译、Spotify、Google 日历、百度网盘、豆瓣、微信读书），通过 launchStore 管理，后续支持自定义添加/删除。
+12 个预设常用网站（GitHub、Gmail、YouTube、Reddit、Notion、Figma、Google 翻译、Spotify、Google 日历、百度网盘、豆瓣、微信读书），通过 launchStore 管理，支持自定义添加/编辑/删除。
+
+#### 4.10.5 右键菜单（仿 dock 栏）
+
+启动台卡片支持右键菜单（`@contextmenu.prevent`），样式与 dock 右键菜单完全一致（`glass-surface(3)` 毛玻璃 + 弹入动画，删除项为红色 danger），提供 4 个操作：
+
+| 菜单项           | 行为                                                                                              |
+| ---------------- | ------------------------------------------------------------------------------------------------- |
+| 在新标签页中打开 | `window.open(url, "_blank")`，同时关闭启动台                                                      |
+| 添加到 Dock 栏   | 调 `shortcutStore.addShortcut()`，按补全协议后的 URL 去重（已存在则 Toast 提示），成功 Toast 反馈 |
+| 编辑             | 复用 EditDialog（标题「编辑网站」），`launchStore.updateItem()` 持久化                            |
+| 删除             | `launchStore.removeItem()`                                                                        |
+
+**交互细节：**
+
+- 定位：默认从鼠标处向上弹出（bottom 锚点，同 dock），渲染后 `nextTick` 实测尺寸自动翻转，保证不溢出视口
+- 菜单独立 Teleport 到 body（z-index 300）；`onClickOutside` 的 ignore 列表含 `.launch-context-menu`，避免点击菜单项误触发"点击外部关闭启动台"
+- LaunchPanel 通过 **`launchStore.items` 属性访问**（而非解构）消费 store，保证跨页面同步（storage 事件替换数组引用）后模板能感知更新
 
 ### 4.11 通用编辑弹窗
 
@@ -509,6 +530,19 @@ EditDialog 的 ESC 监听器使用**捕获阶段**（`{ capture: true }` + `stop
 | shoutcut-list | Dock 快捷方式（JSON 数组，shortcutStore 自动同步） |
 | launch-list | 启动台网站（JSON 数组，launchStore 自动同步） |
 
+**跨页面同步机制（popup ⇄ newtab）：**
+
+popup 与 newtab 同为 `chrome-extension://<id>/` 下的页面（**同源**），localStorage 直接共享。popup 写入列表后，已打开的 newtab 通过 `storage` 事件实时重载，无需刷新页面：
+
+```text
+popup 写入 localStorage（原生 JS：readList → push → setItem）
+  → 浏览器向同源其他页面触发 storage 事件
+  → launchStore / shortcutStore 的监听：重载 items / shortcuts
+  → Vue 响应式 → 启动台 / dock 界面即时刷新
+```
+
+监听实现：`window.addEventListener("storage", e => { if (e.key === STORAGE_KEY) ... })`，仅处理本 store 的键，异常 JSON 静默忽略。消费组件需**通过 store 属性访问**（如 `launchStore.items`）而非解构，否则数组引用替换后模板无法感知。
+
 **indexedDB：**
 | 数据库名 | 对象存储名 | 键名 | 说明 |
 |---------- | ---------- | ---- | ---------------------------- |
@@ -517,7 +551,71 @@ EditDialog 的 ESC 监听器使用**捕获阶段**（`{ capture: true }` + `stop
 
 ## 6. 插件体系设计
 
-`extensions/` 目录下分别为 Chromium 和 Firefox 的插件目录。当执行 `npm run build` 后，`dist/` 下的内容会自动复制到两个插件目录中。用户可以直接在浏览器中加载插件。
+`extensions/` 目录下分别为 Chromium 和 Firefox 的插件目录。执行 `npm run build` 后，`dist/` 构建产物复制到插件目录，用户可直接在浏览器中加载插件。
+
+### 6.1 目录结构（Chromium）
+
+```
+extensions/Chromium/
+├── manifest.json                ← 手动维护，构建不覆盖
+├── index.html                   ← 构建产物（newtab 页面）
+├── assets/                      ← 构建产物（JS / CSS / 图片）
+├── icons/                       ← 扩展图标（手动维护）
+├── popup/                       ← 扩展弹窗（手动维护，构建不清除）
+│   ├── popup.html
+│   ├── popup.js
+│   └── popup.css
+├── service-worker.js            ← MV3 后台（预留，当前为空）
+└── _locales/zh_CN/messages.json ← 扩展名称 / 描述多语言
+```
+
+> ⚠️ `build-extension.js` 只删除并重建 `index.html`、`assets/`、`favicon.ico`，`popup/`、`manifest.json`、`icons/`、`service-worker.js` 等手动维护文件不受影响。
+
+### 6.2 Manifest 关键配置（MV3）
+
+| 字段                          | 值                            | 说明                                                                                            |
+| ----------------------------- | ----------------------------- | ----------------------------------------------------------------------------------------------- |
+| `manifest_version`            | 3                             | MV3                                                                                             |
+| `permissions`                 | `storage`, `activeTab`        | 最小权限；`activeTab` 供 popup 读取当前页信息（点击图标时临时授予），无 `<all_urls>` 侵入性权限 |
+| `action.default_popup`        | `popup/popup.html`            | 点击工具栏图标弹出网页收藏面板                                                                  |
+| `chrome_url_overrides.newtab` | `index.html`                  | 替换新标签页                                                                                    |
+| `background.service_worker`   | `service-worker.js`（module） | 预留后台                                                                                        |
+
+### 6.3 popup 网页收藏（在网页上点击扩展图标）
+
+> 在任意网页点击工具栏「山风新页」图标，获取当前网页信息，可选择保存到启动台或 Dock 栏。
+
+**数据流：**
+
+```text
+网页 → 点击工具栏图标 → popup 打开（activeTab 临时授权）
+  → chrome.tabs.query({ active, currentWindow }) 读取 标题 / URL / favIconUrl
+  → 名称、链接可编辑，图标自动获取
+  → 「保存到启动台」写入 launch-list / 「保存到 Dock 栏」写入 shoutcut-list
+  → newtab 的 store 收到 storage 事件 → 启动台 / dock 界面即时更新
+```
+
+**功能细节：**
+
+| 项       | 说明                                                                                                                                                                                                          |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 页面信息 | 标题默认填入名称、URL 默认填入链接，均可编辑                                                                                                                                                                  |
+| 图标     | 优先 `tab.favIconUrl`，onerror / 缺失时用 `favicon.im/<domain>?larger=true` 兜底；链接变更后重新匹配                                                                                                          |
+| 保存     | 补全协议（无 `http(s)://` 前缀自动加 `https://`）→ 按 URL 去重（已在目标列表则提示）→ 生成 `id`（max+1）→ dock 条目额外生成 `uid`（`Date.now()`）→ 写入 localStorage → 成功提示 900ms 后自动 `window.close()` |
+| 限制     | `chrome://` 等浏览器内部页面无法读取，提示不可用并禁用按钮                                                                                                                                                    |
+| 存储键   | `launch-list`（启动台）/ `shoutcut-list`（Dock），与 newtab store 完全一致                                                                                                                                    |
+| 样式     | 320px 宽，M3 色板 + 毛玻璃风格，`prefers-color-scheme` 适配明暗主题                                                                                                                                           |
+
+**实现要点：**
+
+- popup 为**原生 JS**（非 Vue 构建产物），刻意保持零依赖：popup 页面没有 Vue/Pinia 运行时，直接读写 localStorage，不经过 Vite 打包
+- popup 与 newtab 同源共享 localStorage，是跨页面数据同步的桥梁（详见 5. 浏览器存储说明）
+
+### 6.4 构建与维护约定
+
+- `npm run build` = type-check + vite build + `build-extension.js`（复制 dist → extensions/Chromium）
+- 若未来要共享 store 逻辑，可将数据操作抽为纯函数模块（不依赖 Vue）供 popup 与 store 两端复用，或为 Vite 配置多入口将 popup 升级为 Vue 应用
+- **Firefox**：`extensions/Firefox/` 当前为空，build 脚本仅处理 Chromium；popup 方案（MV3）对 Firefox 同样适用，待后续同步
 
 ## 7. 问题
 

@@ -140,7 +140,7 @@ function tryFetchIcon() {
   fetchingIcon.value = true;
   iconFetchStatus.value = "idle";
 
-  const faviconUrl = `https://favicon.im/${domain}?larger=true`;
+  const faviconUrl = `https://favicon.im/${domain}`;
   const img = new Image();
   img.onload = () => {
     if (img.naturalWidth > 1) {

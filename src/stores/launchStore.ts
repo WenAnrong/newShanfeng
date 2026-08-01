@@ -27,6 +27,16 @@ function persist(items: LaunchItem[]) {
 export const useLaunchStore = defineStore("launch", () => {
   const items = ref<LaunchItem[]>(load());
 
+  // 跨页面实时同步：popup 等页面写入 localStorage 后，已打开的 newtab 自动重载
+  window.addEventListener("storage", (e) => {
+    if (e.key !== STORAGE_KEY) return;
+    try {
+      items.value = e.newValue ? JSON.parse(e.newValue) : [];
+    } catch {
+      /* ignore */
+    }
+  });
+
   function save() {
     persist(items.value);
   }

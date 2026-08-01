@@ -27,7 +27,7 @@ onKeyStroke("Escape", () => {
   emit("close");
 });
 
-const { items, addItem, updateItem, removeItem } = useLaunchStore();
+const launchStore = useLaunchStore();
 
 // 补齐协议前缀
 function ensureProtocol(url: string) {
@@ -110,7 +110,7 @@ function openInNewTab() {
 // 删除
 function deleteItem() {
   const item = contextMenu.value.item;
-  if (item) removeItem(item.id);
+  if (item) launchStore.removeItem(item.id);
   closeContextMenu();
 }
 
@@ -158,9 +158,9 @@ function openEditDialog() {
 
 function onSave(data: EditData) {
   if (editingId.value !== null) {
-    updateItem(editingId.value, data);
+    launchStore.updateItem(editingId.value, data);
   } else {
-    addItem(data);
+    launchStore.addItem(data);
   }
   editVisible.value = false;
 }
@@ -178,7 +178,7 @@ function onSave(data: EditData) {
           <div class="sheet-body scrollbar">
             <div class="card-grid">
               <button
-                v-for="item in items"
+                v-for="item in launchStore.items"
                 :key="item.id"
                 class="launch-card"
                 @click="openSite(item.url)"

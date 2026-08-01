@@ -65,6 +65,22 @@ export const useShortcutStore = defineStore("shortcut", () => {
   const maxUid = shortcuts.value.reduce((m, s) => Math.max(m, s.uid), 0);
   if (maxUid >= nextUid) nextUid = maxUid + 1;
 
+  // 跨页面实时同步：popup 等页面写入 localStorage 后，已打开的 newtab 自动重载
+  window.addEventListener("storage", (e) => {
+    if (e.key !== STORAGE_KEY) return;
+    try {
+      const data = e.newValue ? JSON.parse(e.newValue) : [];
+      shortcuts.value = data;
+      const m = data.reduce(
+        (cur: number, s: Shortcuts) => Math.max(cur, s.uid),
+        0,
+      );
+      if (m >= nextUid) nextUid = m + 1;
+    } catch {
+      /* ignore */
+    }
+  });
+
   function save() {
     persist(shortcuts.value);
   }
