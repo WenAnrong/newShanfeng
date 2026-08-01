@@ -45,7 +45,14 @@ function load(): Shortcuts[] {
   } catch {
     /* ignore */
   }
-  return defaults.map((d) => ({ ...d }));
+  // 首次初始化：把默认项写入 localStorage。
+  const initial = defaults.map((d) => ({ ...d }));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
+  } catch {
+    /* ignore */
+  }
+  return initial;
 }
 
 function persist(shortcuts: Shortcuts[]) {
