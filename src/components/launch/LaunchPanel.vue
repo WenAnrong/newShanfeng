@@ -291,7 +291,8 @@ function onSave(data: EditData) {
 // 卡片网格
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  // 轨道最小宽度设为 0，避免长文字（min-content）把列撑宽，保证卡片尺寸稳定
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -305,6 +306,7 @@ function onSave(data: EditData) {
   border-radius: m3.$m3-shape-md;
   background: transparent;
   cursor: pointer;
+  min-width: 0; // 允许 flex/grid 子项收缩，防止长内容撑开
   transition: all m3.$m3-duration-medium m3.$m3-easing-standard;
 
   &:hover {
@@ -341,6 +343,8 @@ function onSave(data: EditData) {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    width: 100%; // 占满卡片内容宽度，保证被压缩后省略号生效
+    min-width: 0;
     max-width: 100%;
   }
 }

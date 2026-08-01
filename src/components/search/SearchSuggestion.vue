@@ -34,14 +34,26 @@ onClickOutside(popoverRef, () => {
   activeIndex.value = -1;
 });
 
-// 计算弹窗位置
+// 计算弹窗位置 + 可用高度
+// 可用高度 = 视口高度 − 搜索框底部 − 顶部间距(14px) − dock 栏预留高度
+// dock 预留 = dock 面板高度 + 容器底部 padding（compact 约 100px，wide 可达 160px），取 150 覆盖大部分场景
+const DOCK_RESERVE = 150;
+// 弹窗最小可见高度（空间极小时仍保留可滚动区域）
+const MIN_POPOVER_H = 120;
 const popoverStyle = computed(() => {
   if (!props.triggerEl) return {};
   const rect = props.triggerEl.getBoundingClientRect();
+  const top = rect.bottom + 14;
+  // 动态限制高度，避免联想词列表盖住底部 dock 栏（写死 vh 在矮窗口/搜索框靠下时必超界）
+  const maxHeight = Math.max(
+    MIN_POPOVER_H,
+    window.innerHeight - top - DOCK_RESERVE,
+  );
   return {
-    top: `${rect.bottom + 14}px`,
+    top: `${top}px`,
     left: `${rect.left}px`,
     width: `${rect.width}px`,
+    maxHeight: `${maxHeight}px`,
   };
 });
 
@@ -167,9 +179,9 @@ watch(
   border-radius: var(--standard-radio-radius);
   @include glass-surface(3);
 
-  @include compact {
-    max-height: 45svh;
-  }
+  // max-height 由 JS 动态计算并内联覆盖（避免盖住底部 dock 栏）；
+  // 以下 vh 值仅作为 JS 未设置时的兜底
+  max-height: 45svh;
 
   @include wide {
     max-height: 50vh;
