@@ -7,7 +7,7 @@
 
 ## 0. 当前设计缺少的部分
 
-- Firefox 扩展目录（`extensions/Firefox/` 当前为空，build 脚本仅处理 Chromium）
+- （无）
 
 ---
 
@@ -337,19 +337,19 @@ Vue 检测到变化，那个 <div> 从页面消失
 
 ### 4.6 dock栏设计
 
-> dock栏是一个可拖拽的快捷方式栏，支持添加、删除、移动快捷方式。
+> dock栏是一个快捷方式栏，支持添加、删除快捷方式（通过右键菜单）。~~拖拽排序/删除功能已移除~~（2026/08/01 重构：去除拖拽逻辑，Dock 顺序 = 数组顺序）。
 
-#### 4.6.1 拖拽删除
+#### 4.6.1 ~~拖拽删除~~（已移除）
 
-当用户拖拽 dock 栏的快捷方式时，如果拖拽距离超过阈值（视口高度的18%），则认为是删除操作，下方显示红色的删除字样。同时调用 `shortcutStore.deleteShortcut()` 删除该快捷方式。
+> 原功能：拖拽距离超过阈值（视口高度的 18%）判定删除。已随拖拽逻辑整体移除，删除统一走右键菜单。
 
-#### 4.6.2 拖拽移动位置
+#### 4.6.2 ~~拖拽移动位置~~（已移除）
 
-用户可以拖拽 dock 栏的快捷方式来调整它们的位置。当拖拽结束时，如果拖拽距离小于阈值且有有效的插入位置，则调用 `shortcutStore.moveShortcutById()` 来移动快捷方式到新的位置。
+> 原功能：拖拽调整 dock 快捷方式位置。已移除，`moveShortcutById` 从 store 中删除；Dock 顺序即 `shoutcut-list` 数组顺序。
 
 #### 4.6.3 启动台与 Dock
 
-启动台（底部抽屉，见 4.10）与 Dock 栏互相独立。启动台网站点击打开，不拖拽到 Dock。通过启动台卡片的**右键菜单**可将网站「添加到 Dock 栏」（见 4.10.5），新图标由 shortcutStore 自动渲染，且可继续使用拖拽排序、右键编辑/删除。
+启动台（底部抽屉，见 4.10）与 Dock 栏互相独立。启动台网站点击打开，不拖拽到 Dock。通过启动台卡片的**右键菜单**可将网站「添加到 Dock 栏」（见 4.10.5），新图标由 shortcutStore 自动渲染，并支持右键编辑/删除。
 
 #### 4.6.4 右键菜单
 
@@ -568,7 +568,7 @@ localStorage 中 5 个配置键，**按原始字符串存储**（不解析内部
 | 方式 | 行为 |
 | ---- | ---- |
 | **覆盖导入** | `applyBackup()`：备份中出现的键整体覆盖，备份中缺失的键保持现状 |
-| **合并导入** | `mergeBackup()`：标量键（search-engine 等）以备份为准覆盖；列表键（search-list / shoutcut-list / launch-list）以本地为基础，把备份中**不存在的项（按补全协议后的 URL 去重）追加**，追加项 `id` 重算（max+1），Dock 项的 `uid` 重新分配（保证渲染 key 唯一） |
+| **合并导入** | `mergeBackup()`：标量键（search-engine 等）以备份为准覆盖；列表键（search-list / shoutcut-list / launch-list）以本地为基础，把备份中**不存在的项（按补全协议后的 URL 去重）追加**，追加项的 `id` 用时间戳+随机数重新分配（保证渲染 key 唯一；search-list 的字符串 id 保留原值） |
 
 #### 4.12.5 边界
 
@@ -628,7 +628,7 @@ extensions/Chromium/
 └── _locales/zh_CN/messages.json ← 扩展名称 / 描述多语言
 ```
 
-> ⚠️ `build-extension.js` 只删除并重建 `index.html`、`assets/`、`favicon.ico`，`popup/`、`manifest.json`、`icons/`、`service-worker.js` 等手动维护文件不受影响。
+> ⚠️ `build-extension.js` 只删除并重建 `index.html`、`assets/`、`favicon.ico`、`migrate.js`，`popup/`、`manifest.json`、`icons/`、`service-worker.js` 等手动维护文件不受影响。`extensions/Firefox/` 结构相同（`manifest.json` / `service-worker.js` 为 Firefox 版），`popup/`、`icons/`、`_locales/` 由构建脚本从 Chromium 同步。
 
 ### 6.2 Manifest 关键配置（MV3）
 
@@ -660,7 +660,7 @@ extensions/Chromium/
 | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 页面信息 | 标题默认填入名称、URL 默认填入链接，均可编辑                                                                                                                                                                  |
 | 图标     | 优先 `tab.favIconUrl`，onerror / 缺失时用 `favicon.im/<domain>?larger=true` 兜底；链接变更后重新匹配                                                                                                          |
-| 保存     | 补全协议（无 `http(s)://` 前缀自动加 `https://`）→ 按 URL 去重（已在目标列表则提示）→ 生成 `id`（max+1）→ dock 条目额外生成 `uid`（`Date.now()`）→ 写入 localStorage → 成功提示 900ms 后自动 `window.close()` |
+| 保存     | 补全协议（无 `http(s)://` 前缀自动加 `https://`）→ 按 URL 去重（已在目标列表则提示）→ 生成 `id`（`Date.now()` + 一位随机数，与 newtab store 规则一致）→ 写入 localStorage → 成功提示 900ms 后自动 `window.close()` |
 | 限制     | `chrome://` 等浏览器内部页面无法读取，提示不可用并禁用按钮                                                                                                                                                    |
 | 存储键   | `launch-list`（启动台）/ `shoutcut-list`（Dock），与 newtab store 完全一致                                                                                                                                    |
 | 样式     | 320px 宽，M3 色板 + 毛玻璃风格，`prefers-color-scheme` 适配明暗主题                                                                                                                                           |
@@ -672,9 +672,16 @@ extensions/Chromium/
 
 ### 6.4 构建与维护约定
 
-- `npm run build` = type-check + vite build + `build-extension.js`（复制 dist → extensions/Chromium）
+- `npm run build` = type-check + vite build + `build-extension.js`（复制 dist → `extensions/Chromium` 和 `extensions/Firefox`）
+- **双浏览器构建**（build-extension.js）：
+  - 对 Chromium 和 Firefox 各自删除旧构建产物（index.html / assets / favicon.ico / migrate.js）后从 dist 复制
+  - `manifest.json`、`service-worker.js` **按浏览器各自维护**（字段有差异，构建不覆盖）
+  - `popup/`、`icons/`、`_locales/` 为浏览器无关共享文件，构建时从 Chromium 同步到 Firefox，只需维护 Chromium 一份
+- **Firefox 与 Chromium 的 manifest 差异**（`extensions/Firefox/manifest.json`）：
+  - `background` 用 `scripts` 数组（event page），非 Chromium 的 `service_worker` 字段
+  - 必须包含 `browser_specific_settings.gecko.id`（Firefox 安装/上架要求），`strict_min_version` 为 115.0（MV3 支持下限）
+  - 其余字段（permissions / action / chrome_url_overrides / host_permissions 等）与 Chromium 一致
 - 若未来要共享 store 逻辑，可将数据操作抽为纯函数模块（不依赖 Vue）供 popup 与 store 两端复用，或为 Vite 配置多入口将 popup 升级为 Vue 应用
-- **Firefox**：`extensions/Firefox/` 当前为空，build 脚本仅处理 Chromium；popup 方案（MV3）对 Firefox 同样适用，待后续同步
 
 ## 7. 问题
 

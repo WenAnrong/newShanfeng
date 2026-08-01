@@ -97,19 +97,16 @@ function mergeListKey(key: string, rawBackup: string) {
 
   const seen = new Set(local.map(itemUrl));
   const merged = [...local];
-  let nextId = local.length
-    ? Math.max(...local.map((i) => Number(i.id) || 0)) + 1
-    : 1;
 
   for (const item of backupList) {
     if (!item || typeof item !== "object") continue;
     const url = itemUrl(item);
     if (url && seen.has(url)) continue; // 本地已存在相同 URL，跳过
     const copy = { ...item };
-    copy.id = nextId++;
-    // Dock 快捷方式的 uid 用作渲染 key，必须全局唯一，重新分配
-    if (key === "shoutcut-list") {
-      copy.uid = Date.now() + Math.floor(Math.random() * 1e6);
+    // 数字 id 列表（launch-list / shoutcut-list）重新分配：时间戳 + 一位随机数，保证全局唯一（渲染 key）
+    // search-list 的 id 是字符串标识（custom-xxx），保留原值，避免破坏 currentId 关联
+    if (key !== "search-list") {
+      copy.id = Date.now() + Math.floor(Math.random() * 10);
     }
     seen.add(url);
     merged.push(copy);

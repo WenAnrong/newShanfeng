@@ -2,8 +2,8 @@
  * 山风新页 — 旧版数据迁移脚本
  *
  * 旧版（oldShanfeng）把数据存在 chrome.storage.local，新版改为 localStorage：
- *   favorites  -> launch-list    （删除多余字段 categoryId，id 重新编号为 number，icon 归一化）
- *   shortcuts  -> shoutcut-list  （url 字段映射为 path，补齐 uid，id 重新编号为 number）
+ *   favorites  -> launch-list    （删除多余字段 categoryId，id 用时间戳+随机数生成，icon 归一化）
+ *   shortcuts  -> shoutcut-list  （url 字段映射为 path，id 用时间戳+随机数生成）
  * 迁移完成后清空 chrome.storage.local 中全部旧版插件存储。
  *
  * 仅需执行一次：第一次打开新版 newtab 时，检测到旧数据则转换；
@@ -100,14 +100,14 @@
 
       // ===== favorites -> launch-list =====
       // 新版 LaunchItem: { id: number, name, url, icon }
-      // 多余字段（categoryId、旧字符串 id）在映射时丢弃；id 从 1 重新编号
+      // 多余字段（categoryId、旧字符串 id）在映射时丢弃；id 用时间戳 + 一位随机数（与新版 store 规则一致）
       if (
         hasKey(all, "favorites") &&
         localStorage.getItem(LS_LAUNCH) === null
       ) {
-        var launchList = toArray(all.favorites).map(function (f, i) {
+        var launchList = toArray(all.favorites).map(function (f) {
           return {
-            id: i + 1,
+            id: Date.now() + Math.floor(Math.random() * 10),
             name: clean(f && f.name),
             url: clean(f && f.url),
             icon: normalizeIcon(f && f.icon),
@@ -123,17 +123,15 @@
       }
 
       // ===== shortcuts -> shoutcut-list =====
-      // 新版 Shortcuts: { id: number, uid: number, name, path, icon }
-      // 旧版 url 字段映射为新版 path；补齐 uid（唯一）；id 从 1 重新编号
+      // 新版 Shortcuts: { id: number, name, path, icon }
+      // 旧版 url 字段映射为新版 path；id 用时间戳 + 一位随机数（全局唯一，渲染 key）
       if (
         hasKey(all, "shortcuts") &&
         localStorage.getItem(LS_SHORTCUT) === null
       ) {
-        var now = Date.now();
-        var shortcutList = toArray(all.shortcuts).map(function (s, i) {
+        var shortcutList = toArray(all.shortcuts).map(function (s) {
           return {
-            id: i + 1,
-            uid: now + i,
+            id: Date.now() + Math.floor(Math.random() * 10),
             name: clean(s && s.name),
             path: clean(s && s.url),
             icon: normalizeIcon(s && s.icon),

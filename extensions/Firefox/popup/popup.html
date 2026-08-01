@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="popup.css" />
+    <title>山风新页 · 收藏</title>
+  </head>
+  <body>
+    <div class="popup">
+      <header class="header">
+        <img class="logo" src="../icons/icon.png" alt="山风新页" />
+        <div class="header-text">
+          <h1 class="title">山风新页</h1>
+          <p class="subtitle">收藏当前网页</p>
+        </div>
+      </header>
+
+      <!-- 当前网页信息预览 -->
+      <section class="preview">
+        <div class="favicon-wrap">
+          <img id="favicon" class="favicon" alt="" />
+        </div>
+        <div class="fields">
+          <input
+            id="nameInput"
+            class="input name"
+            type="text"
+            placeholder="网站名称"
+            spellcheck="false"
+          />
+          <input
+            id="urlInput"
+            class="input url"
+            type="text"
+            placeholder="https://example.com"
+            spellcheck="false"
+          />
+        </div>
+      </section>
+
+      <!-- 保存操作 -->
+      <div class="actions">
+        <button id="saveLaunch" class="btn primary">保存到启动台</button>
+        <button id="saveDock" class="btn secondary">保存到 Dock 栏</button>
+      </div>
+
+      <div id="status" class="status"></div>
+    </div>
+    <script src="popup.js"></script>
+  </body>
+</html>

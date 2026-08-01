@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { svgs } from "@/utils/svg";
-import { ref, watch } from "vue";
+import { ref } from "vue";
 import { onClickOutside } from "@vueuse/core";
 import { useShortcutStore } from "@/stores/shortcutStore";
 import { useThemeStore } from "@/stores/themeStore";
@@ -33,280 +33,6 @@ function clickTo(url: string) {
   }
   window.location.href = url;
 }
-
-// =========拖拽实现==========
-let draggedId: number | null = null; // 当前拖拽的是哪个 shortcut
-let originalRect: DOMRect | null = null; // 拖拽开始时元素的位置
-const DRAG_THRESHOLD = window.innerHeight * 0.2; // Y轴距离超过此值显示"删除"
-const isShowSpace = ref(false); // 是否显示文字
-
-// 缓存布局尺寸（在 dragstart 时记录，避免被 transform 干扰）
-let layoutItemWidth = 0;
-let layoutGap = 0;
-let layoutShift = 0;
-
-// 自定义浮动幽灵图（替代原生 drag ghost）
-let dragFloater: HTMLElement | null = null;
-let dragFloaterText: HTMLElement | null = null;
-
-// 创建自定义浮动幽灵图
-function createDragFloater(imgSrc: string) {
-  const floater = document.createElement("div");
-  floater.style.cssText = `
-    position: fixed;
-    top: 0; left: 0;
-    pointer-events: none;
-    z-index: 99999;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    transform: translate(-50%, -50%);
-  `;
-
-  const icon = document.createElement("img");
-  icon.src = imgSrc;
-  icon.style.cssText = "width:48px;height:48px;border-radius:20%;";
-  floater.appendChild(icon);
-
-  const text = document.createElement("span");
-  text.textContent = "删除";
-  text.style.cssText = `
-    display: none;
-    color: #ff3b30;
-    font-size: 13px;
-    font-weight: 600;
-    white-space: nowrap;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
-  `;
-  floater.appendChild(text);
-  dragFloaterText = text;
-
-  document.body.appendChild(floater);
-  return floater;
-}
-
-// 拖拽开始
-document.addEventListener(
-  "dragstart",
-  (e) => {
-    const el = (e.target as HTMLElement).closest(".drg") as HTMLElement;
-    if (el) {
-      el.classList.add("is-dragging");
-      const id = parseInt(el.dataset.id ?? "");
-      if (isNaN(id)) return;
-      // 记录当前拖拽的 shortcut id 和原始位置
-      draggedId = id;
-      originalRect = el.getBoundingClientRect();
-
-      // 缓存布局尺寸（所有 item 均无 transform 时读取，保证准确）
-      const allItems = document.querySelectorAll<HTMLElement>(".drg");
-      if (allItems.length >= 2) {
-        const r0 = allItems[0]!.getBoundingClientRect();
-        const r1 = allItems[1]!.getBoundingClientRect();
-        layoutItemWidth = r0.width;
-        layoutGap = r1.left - r0.right;
-        layoutShift = layoutItemWidth + layoutGap;
-      } else if (allItems.length === 1) {
-        layoutItemWidth = allItems[0]!.getBoundingClientRect().width;
-        layoutGap = 0;
-        layoutShift = layoutItemWidth;
-      }
-
-      // 不显示space元素
-      isShowSpace.value = true;
-
-      // 用 1×1 透明像素隐藏原生幽灵图
-      const blank = new Image();
-      blank.src =
-        "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-      e.dataTransfer?.setDragImage(blank, 0, 0);
-
-      // 创建自定义浮动幽灵图
-      const img = el.querySelector("img");
-      if (img) {
-        dragFloater = createDragFloater(img.src);
-        dragFloater.style.left = e.clientX + "px";
-        dragFloater.style.top = e.clientY + "px";
-      }
-    }
-  },
-  false,
-);
-
-// 上一次插入位置，用于避免 drag 高频重复设置相同值
-let lastInsertIndex = -1;
-
-// 根据鼠标 X 找到插入位置（items 中的第几个之前）
-// 用 item 的右边界（含 gap 中点）作为切换点，保证一格一换
-function calcInsertIndex(clientX: number): number {
-  const items = document.querySelectorAll<HTMLElement>(".drg");
-  if (!items.length) return 0;
-  for (let i = 0; i < items.length; i++) {
-    const rect = items[i]!.getBoundingClientRect();
-    // 边界 = item 右边缘 + gap 的一半
-    const boundary = rect.right + layoutGap / 2;
-    if (clientX < boundary) return i;
-  }
-  return items.length;
-}
-
-// 更新所有 items 的 translateX 产生"让位"动画
-function applyShifts(insertIndex: number) {
-  const items = document.querySelectorAll<HTMLElement>(".drg");
-  if (!items.length || draggedId === null) return;
-
-  const shift = layoutShift;
-  if (shift <= 0) return;
-
-  const draggedIdx = shortcutStore.shortcuts.findIndex(
-    (s) => s.id === draggedId,
-  );
-
-  items.forEach((el, i) => {
-    if (i === draggedIdx) {
-      el.style.transform = ""; // 被拖元素本身不移位
-      return;
-    }
-
-    if (insertIndex < draggedIdx) {
-      // 鼠标在拖拽元素左侧 → 中间的元素右移
-      if (i >= insertIndex && i < draggedIdx) {
-        el.style.transform = `translateX(${shift}px)`;
-      } else {
-        el.style.transform = "";
-      }
-    } else if (insertIndex > draggedIdx) {
-      // 鼠标在拖拽元素右侧 → 中间的元素左移
-      if (i > draggedIdx && i < insertIndex) {
-        el.style.transform = `translateX(${-shift}px)`;
-      } else {
-        el.style.transform = "";
-      }
-    } else {
-      el.style.transform = "";
-    }
-  });
-}
-
-// 清除所有位移
-function resetShifts() {
-  document
-    .querySelectorAll<HTMLElement>(".drg")
-    .forEach((el) => (el.style.transform = ""));
-}
-
-// 拖拽中途
-document.addEventListener(
-  "drag",
-  (e) => {
-    if (e.clientX === 0 && e.clientY === 0) return;
-
-    // 更新浮动幽灵图位置
-    if (dragFloater) {
-      dragFloater.style.left = e.clientX + "px";
-      dragFloater.style.top = e.clientY + "px";
-    }
-
-    // 判断距离
-    if (draggedId !== null && originalRect) {
-      const centerY = originalRect.top + originalRect.height / 2;
-      const distY = Math.abs(e.clientY - centerY);
-
-      // 控制"删除"显隐
-      if (dragFloaterText) {
-        dragFloaterText.style.display =
-          distY > DRAG_THRESHOLD ? "block" : "none";
-      }
-
-      // ---- 让位动画：只有 Y 偏移小于 20px 时才触发移位 ----
-      if (distY < 20) {
-        const idx = calcInsertIndex(e.clientX);
-        if (idx !== lastInsertIndex) {
-          lastInsertIndex = idx;
-          applyShifts(idx);
-        }
-      } else if (lastInsertIndex !== -1) {
-        // 移出水平区 → 清除移位，恢复原位
-        resetShifts();
-        lastInsertIndex = -1;
-      }
-    }
-  },
-  false,
-);
-
-// 拖拽结束
-document.addEventListener(
-  "dragend",
-  (e) => {
-    const el = (e.target as HTMLElement).closest(".drg") as HTMLElement;
-    if (el) {
-      el.classList.remove("is-dragging");
-
-      // 移除浮动幽灵图
-      if (dragFloater) {
-        dragFloater.remove();
-        dragFloater = null;
-        dragFloaterText = null;
-      }
-
-      // 清除所有移位（放手归位）
-      resetShifts();
-      const finalInsertIndex = lastInsertIndex;
-      lastInsertIndex = -1;
-      layoutItemWidth = 0;
-      layoutGap = 0;
-      layoutShift = 0;
-
-      // 删除 / 移动判定
-      if (draggedId !== null && originalRect) {
-        const centerY = originalRect.top + originalRect.height / 2;
-        const distY = Math.abs(e.clientY - centerY);
-
-        if (distY > DRAG_THRESHOLD) {
-          shortcutStore.deleteShortcut(draggedId);
-        } else if (distY < 20 && finalInsertIndex >= 0) {
-          const idx = shortcutStore.shortcuts.findIndex(
-            (s) => s.id === draggedId,
-          );
-          const len = shortcutStore.shortcuts.length;
-
-          // 没有真正移动的情况：插入点就是原位或紧挨原位右侧
-          const noMove =
-            finalInsertIndex === idx ||
-            finalInsertIndex === idx + 1 ||
-            (idx === len - 1 && finalInsertIndex === len);
-
-          if (!noMove) {
-            if (finalInsertIndex >= len) {
-              // 移到末尾
-              const [item] = shortcutStore.shortcuts.splice(idx, 1);
-              shortcutStore.shortcuts.push(item!);
-            } else {
-              // 移到 finalInsertIndex 处（该位置 item 之前）
-              shortcutStore.moveShortcutById(
-                draggedId,
-                shortcutStore.shortcuts[finalInsertIndex]!.id,
-              );
-            }
-            // 重新编号
-            shortcutStore.shortcuts.forEach((item, i) => {
-              item.id = i + 1;
-            });
-            shortcutStore.save();
-          }
-        }
-      }
-
-      // 重置状态
-      isShowSpace.value = false;
-      draggedId = null;
-      originalRect = null;
-    }
-  },
-  false,
-);
 
 // =========右键菜单==========
 const contextMenu = ref({
@@ -430,18 +156,13 @@ function onEditSave(data: EditData) {
       <div
         class="dock-item drg"
         v-for="shortcut in shortcutStore.shortcuts"
-        :key="shortcut.uid"
+        :key="shortcut.id"
         @click="clickTo(shortcut.path)"
-        draggable="true"
         :data-id="shortcut.id"
         @contextmenu.prevent="handleContextMenu"
       >
         <img draggable="false" :src="shortcut.icon" class="img" />
-        <span
-          :style="{ display: isShowSpace ? 'none' : 'block' }"
-          class="dock-label"
-          >{{ shortcut.name }}</span
-        >
+        <span class="dock-label">{{ shortcut.name }}</span>
       </div>
 
       <div class="division"></div>
@@ -565,16 +286,6 @@ function onEditSave(data: EditData) {
   .img {
     width: 100%;
     transition: filter m3.$m3-duration-medium m3.$m3-easing-standard;
-  }
-
-  &.is-dragging {
-    background: rgba(128, 128, 128, 0.15);
-    border: 2px dashed rgba(128, 128, 128, 0.35);
-    scale: none;
-    transform: none;
-    .img {
-      opacity: 0;
-    }
   }
 
   .dock-label {

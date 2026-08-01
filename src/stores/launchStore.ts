@@ -42,10 +42,8 @@ export const useLaunchStore = defineStore("launch", () => {
   }
 
   function addItem(item: Omit<LaunchItem, "id">) {
-    const id =
-      items.value.length > 0
-        ? Math.max(...items.value.map((i) => i.id)) + 1
-        : 1;
+    // id 用时间戳 + 一位随机数：与 shortcutStore / popup 规则一致，跨页面写入不撞号
+    const id = Date.now() + Math.floor(Math.random() * 10);
     items.value.push({ ...item, id });
     save();
   }

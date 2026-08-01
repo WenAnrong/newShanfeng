@@ -1,0 +1,211 @@
+/* 山风新页 popup —— M3 风格，支持明暗主题 */
+:root {
+  --primary: #6750a4;
+  --on-primary: #ffffff;
+  --surface: #fef7ff;
+  --surface-container: #f3edf7;
+  --surface-variant: #e7e0ec;
+  --on-surface: #1d1b20;
+  --on-surface-variant: #49454f;
+  --outline: #79747e;
+  --outline-variant: #cac4d0;
+  --success: #2e7d32;
+  --error: #b3261e;
+  --warn: #b26a00;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary: #d0bcff;
+    --on-primary: #381e72;
+    --surface: #141218;
+    --surface-container: #211f26;
+    --surface-variant: #49454f;
+    --on-surface: #e6e0e9;
+    --on-surface-variant: #cac4d0;
+    --outline: #938f99;
+    --outline-variant: #49454f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  width: 320px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  color: var(--on-surface);
+  background: var(--surface);
+}
+
+.popup {
+  padding: 16px;
+}
+
+/* ===== 头部 ===== */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.logo {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+}
+
+.header-text .title {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.header-text .subtitle {
+  font-size: 12px;
+  color: var(--on-surface-variant);
+}
+
+/* ===== 网页信息预览 ===== */
+.preview {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: var(--surface-container);
+  border: 1px solid var(--outline-variant);
+}
+
+.favicon-wrap {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: var(--surface-variant);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.favicon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.fields {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--on-surface);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.input::placeholder {
+  color: var(--on-surface-variant);
+  opacity: 0.7;
+}
+
+.input:focus {
+  border-color: var(--primary);
+}
+
+.url {
+  font-size: 12px;
+  color: var(--on-surface-variant);
+}
+
+/* ===== 按钮 ===== */
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.btn {
+  flex: 1;
+  padding: 9px 0;
+  border: none;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    opacity 0.15s ease,
+    transform 0.05s ease;
+}
+
+.btn:hover {
+  opacity: 0.88;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn.primary {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.btn.secondary {
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+}
+
+/* ===== 状态提示 ===== */
+.status {
+  min-height: 20px;
+  margin-top: 12px;
+  font-size: 12px;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.status.info {
+  color: var(--on-surface-variant);
+  opacity: 1;
+}
+
+.status.success {
+  color: var(--success);
+  opacity: 1;
+}
+
+.status.error {
+  color: var(--error);
+  opacity: 1;
+}
+
+.status.warn {
+  color: var(--warn);
+  opacity: 1;
+}
