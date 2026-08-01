@@ -517,6 +517,66 @@ URL 输入失焦时（`@blur`）自动通过 `favicon.im/{domain}?larger=true` �
 
 EditDialog 的 ESC 监听器使用**捕获阶段**（`{ capture: true }` + `stopImmediatePropagation()`），确保当 EditDialog 依附于 SettingsPanel/LaunchPanel 打开时，ESC 只关闭 EditDialog 而不连带关闭下层面板。
 
+### 4.12 手动备份（导出 / 导入）
+
+> 设置 → 备份 tab（`src/components/settings/Sync.vue`）。提供配置的导出与导入，**纯本地、不依赖任何云端服务**。云端同步（WebDAV）已废弃，不再支持。
+
+#### 4.12.1 备份范围
+
+localStorage 中 5 个配置键，**按原始字符串存储**（不解析内部格式，避免格式差异带来的兼容问题）：
+
+| 键               | 说明               |
+| ---------------- | ------------------ |
+| search-engine    | 当前搜索引擎 id    |
+| search-list      | 自定义搜索引擎列表 |
+| search-open-mode | 搜索结果打开方式   |
+| shoutcut-list    | Dock 快捷方式      |
+| launch-list      | 启动台网站         |
+
+壁纸图片（IndexedDB Blob）不在备份范围内。
+
+#### 4.12.2 文件格式
+
+```json
+{
+  "app": "shanfeng-newtab",
+  "version": 1,
+  "exportedAt": "2026-08-01T10:00:00.000Z",
+  "data": {
+    "theme-mode": "auto",
+    "shoutcut-list": "[{\"id\":1,...}]"
+  }
+}
+```
+
+| 字段      | 说明                                   |
+| --------- | -------------------------------------- |
+| `app`     | 文件归属标识，导入时校验，不匹配则拒绝 |
+| `version` | 格式版本号，为格式演进预留             |
+| `data`    | `键名 → localStorage 原始字符串`       |
+
+#### 4.12.3 导出流程
+
+`collectBackup()` 收集全部键 → `JSON.stringify(..., null, 2)` → Blob 下载，文件名 `shanfeng-backup-YYYY-MM-DD.json`。
+
+#### 4.12.4 导入流程
+
+`FileReader.readAsText` → `JSON.parse` → 校验 `app` 字段 → **弹窗让用户选择导入方式** → 执行 → Toast 提示 → 900ms 后 `location.reload()`（让所有 store 重新 load，保证界面与数据一致）。
+
+弹窗展示备份导出时间与配置项数量，提供两种方式：
+
+| 方式 | 行为 |
+| ---- | ---- |
+| **覆盖导入** | `applyBackup()`：备份中出现的键整体覆盖，备份中缺失的键保持现状 |
+| **合并导入** | `mergeBackup()`：标量键（search-engine 等）以备份为准覆盖；列表键（search-list / shoutcut-list / launch-list）以本地为基础，把备份中**不存在的项（按补全协议后的 URL 去重）追加**，追加项 `id` 重算（max+1），Dock 项的 `uid` 重新分配（保证渲染 key 唯一） |
+
+#### 4.12.5 边界
+
+- 备份缺失部分键（旧版本导出）时仅写入存在的键，其余保持现状
+- 非法文件 / 校验失败 → Toast 报错，不写入任何数据、不弹选择框
+- 合并时本地列表解析失败视为空列表；备份列表解析失败则跳过该键
+- 云端同步已废弃：原 WebDAV 方案的 `host_permissions` / `optional_host_permissions` 已全部移除，manifest 无相关权限
+
 ## 5. 浏览器存储说明
 
 **localStorage：**

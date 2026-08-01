@@ -11,7 +11,12 @@ const emit = defineEmits<{ close: [] }>();
 
 const panelRef = ref<HTMLElement>();
 onClickOutside(panelRef, () => emit("close"), {
-  ignore: [".dialog-overlay", ".engine-popover", ".suggestion-popover"],
+  ignore: [
+    ".dialog-overlay",
+    ".engine-popover",
+    ".suggestion-popover",
+    ".import-overlay",
+  ],
 });
 
 // ESC 关闭：如果 EditDialog 在上层打开，先让它关
