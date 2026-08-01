@@ -17,7 +17,9 @@ onClickOutside(panelRef, () => emit("close"), {
 // ESC 关闭：如果 EditDialog 在上层打开，先让它关
 onKeyStroke("Escape", () => {
   if (!props.visible) return;
-  const dialog = document.querySelector(".dialog-overlay") as HTMLElement | null;
+  const dialog = document.querySelector(
+    ".dialog-overlay",
+  ) as HTMLElement | null;
   if (dialog && dialog.style.display !== "none") return;
   emit("close");
 });
@@ -62,7 +64,7 @@ const activeTab = ref<Tab>("appearance");
               :class="['tab-btn', { active: activeTab === 'synchronize' }]"
               @click="activeTab = 'synchronize'"
             >
-              备份和同步
+              备份
             </button>
 
             <button
