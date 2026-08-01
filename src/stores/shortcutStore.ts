@@ -14,27 +14,33 @@ interface Shortcuts {
 const defaults: Shortcuts[] = [
   {
     id: 1,
-    name: "Bing",
-    path: "www.bing.com",
+    name: "deepseek",
+    path: "https://chat.deepseek.com",
     icon: svgs.ai as string,
   },
   {
     id: 2,
-    name: "aa",
-    path: "www.bing.com",
-    icon: svgs.bookmark as string,
+    name: "翻译",
+    path: "https://fanyi.youdao.com/#/TextTranslate",
+    icon: svgs.translate as string,
   },
   {
     id: 3,
-    name: "bb",
-    path: "www.bing.com",
-    icon: svgs.home as string,
+    name: "bilibili",
+    path: "https://www.bilibili.com",
+    icon: svgs.video as string,
   },
   {
     id: 4,
-    name: "cc",
-    path: "www.bing.com",
+    name: "图片",
+    path: "https://image.baidu.com",
     icon: svgs.image as string,
+  },
+  {
+    id: 5,
+    name: "邮箱",
+    path: "https://mail.163.com",
+    icon: svgs.email as string,
   },
 ];
 
