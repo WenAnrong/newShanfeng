@@ -1,16 +1,21 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed, nextTick } from "vue";
 import { onClickOutside, onKeyStroke } from "@vueuse/core";
 import { useLaunchStore } from "@/stores/launchStore";
+import type { LaunchItem } from "@/stores/launchStore";
 import EditDialog from "@/components/common/EditDialog.vue";
 import type { EditData } from "@/components/common/EditDialog.vue";
+import { useShortcutStore } from "@/stores/shortcutStore";
+import { show } from "@/composables/useToast";
 
 const props = defineProps<{ visible: boolean }>();
 const emit = defineEmits<{ close: [] }>();
 
+const shortcutStore = useShortcutStore();
+
 const panelRef = ref<HTMLElement>();
 onClickOutside(panelRef, () => emit("close"), {
-  ignore: [".dialog-overlay"],
+  ignore: [".dialog-overlay", ".launch-context-menu"],
 });
 
 onKeyStroke("Escape", () => {
@@ -22,27 +27,141 @@ onKeyStroke("Escape", () => {
   emit("close");
 });
 
-const { items, addItem, removeItem, save } = useLaunchStore();
+const { items, addItem, updateItem, removeItem } = useLaunchStore();
 
+// 补齐协议前缀
+function ensureProtocol(url: string) {
+  return /^https?:\/\//i.test(url) ? url : "https://" + url;
+}
+
+// 左键点击打开
 function openSite(url: string) {
-  if (!url.startsWith("http://") && !url.startsWith("https://")) {
-    url = "https://" + url;
-  }
-  window.location.href = url;
+  window.location.href = ensureProtocol(url);
   emit("close");
 }
 
-// 编辑弹窗
+// =========右键菜单（模仿 dock 栏）==========
+const contextMenu = ref<{
+  visible: boolean;
+  x: number;
+  y: number;
+  anchor: "top" | "bottom";
+  item: LaunchItem | null;
+}>({ visible: false, x: 0, y: 0, anchor: "bottom", item: null });
+
+const contextMenuRef = ref<HTMLElement | null>(null);
+
+// 预估菜单尺寸，用于防溢出
+const MENU_W = 172;
+const MENU_H = 148;
+
+// 右键打开菜单：默认向上弹出（bottom 锚点，同 dock），空间不足时自动翻转
+function openContextMenu(e: MouseEvent, item: LaunchItem) {
+  const spaceBelow = window.innerHeight - e.clientY;
+  const anchor = spaceBelow < MENU_H ? "top" : "bottom";
+  contextMenu.value = {
+    visible: true,
+    x: Math.max(8, Math.min(e.clientX, window.innerWidth - MENU_W - 8)),
+    y: e.clientY,
+    anchor,
+    item,
+  };
+
+  // 渲染后按实际尺寸二次校正，确保不溢出视口
+  nextTick(() => {
+    const el = contextMenuRef.value;
+    if (!el || !contextMenu.value.visible) return;
+    const rect = el.getBoundingClientRect();
+    const pad = 8;
+    const cur = contextMenu.value;
+    let { x, y, anchor } = cur;
+    if (rect.right > window.innerWidth - pad)
+      x = window.innerWidth - rect.width - pad;
+    if (x < pad) x = pad;
+    if (anchor === "bottom" && rect.top < pad) anchor = "top";
+    if (anchor === "top" && rect.bottom > window.innerHeight - pad)
+      anchor = "bottom";
+    contextMenu.value = { ...cur, x, y, anchor };
+  });
+}
+
+// 菜单位置样式（bottom 锚点时从鼠标处向上弹出）
+const contextMenuStyle = computed(() => {
+  const { x, y, anchor } = contextMenu.value;
+  return anchor === "bottom"
+    ? { left: x + "px", bottom: window.innerHeight - y + "px" }
+    : { left: x + "px", top: y + "px" };
+});
+
+// 关闭右键菜单
+function closeContextMenu() {
+  contextMenu.value.visible = false;
+}
+onClickOutside(contextMenuRef, closeContextMenu);
+
+// 在新标签页打开
+function openInNewTab() {
+  const item = contextMenu.value.item;
+  if (item) window.open(ensureProtocol(item.url), "_blank");
+  closeContextMenu();
+  emit("close");
+}
+
+// 删除
+function deleteItem() {
+  const item = contextMenu.value.item;
+  if (item) removeItem(item.id);
+  closeContextMenu();
+}
+
+// =========编辑弹窗==========
 const editVisible = ref(false);
+const editTitle = ref("添加网站");
 const editInitial = ref<{ name?: string; url?: string; icon?: string }>({});
+const editingId = ref<number | null>(null);
 
 function openAddDialog() {
+  editTitle.value = "添加网站";
+  editingId.value = null;
   editInitial.value = { name: "", url: "", icon: "" };
   editVisible.value = true;
 }
 
+function addToDock() {
+  const item = contextMenu.value.item;
+  if (!item) return;
+  // 去重：按补全协议后的 url 判断是否已在 dock 里
+  const url = ensureProtocol(item.url);
+  const exists = shortcutStore.shortcuts.some(
+    (s) => ensureProtocol(s.path) === url,
+  );
+  if (exists) {
+    show("该网站已在 Dock 栏中", "info");
+    closeContextMenu();
+    return;
+  }
+
+  shortcutStore.addShortcut(item.name, item.url, item.icon);
+  show("已添加到 Dock 栏", "success");
+  closeContextMenu();
+}
+
+function openEditDialog() {
+  const item = contextMenu.value.item;
+  if (!item) return;
+  editTitle.value = "编辑网站";
+  editingId.value = item.id;
+  editInitial.value = { name: item.name, url: item.url, icon: item.icon };
+  editVisible.value = true;
+  closeContextMenu();
+}
+
 function onSave(data: EditData) {
-  addItem(data);
+  if (editingId.value !== null) {
+    updateItem(editingId.value, data);
+  } else {
+    addItem(data);
+  }
   editVisible.value = false;
 }
 </script>
@@ -63,6 +182,7 @@ function onSave(data: EditData) {
                 :key="item.id"
                 class="launch-card"
                 @click="openSite(item.url)"
+                @contextmenu.prevent="openContextMenu($event, item)"
               >
                 <div class="card-icon-wrap">
                   <img :src="item.icon" class="card-icon" />
@@ -92,13 +212,36 @@ function onSave(data: EditData) {
 
     <EditDialog
       :visible="editVisible"
-      title="添加网站"
+      :title="editTitle"
       :initialName="editInitial.name"
       :initialUrl="editInitial.url"
       :initialIcon="editInitial.icon"
       @close="editVisible = false"
       @save="onSave"
     />
+
+    <!-- 右键菜单（模仿 dock 栏） -->
+    <Teleport to="body">
+      <div
+        v-if="contextMenu.visible"
+        ref="contextMenuRef"
+        class="launch-context-menu"
+        :style="contextMenuStyle"
+      >
+        <div class="context-menu-item" @click="openInNewTab">
+          <span>在新标签页中打开</span>
+        </div>
+        <div class="context-menu-item" @click="addToDock">
+          <span>添加到dock栏</span>
+        </div>
+        <div class="context-menu-item" @click="openEditDialog">
+          <span>编辑</span>
+        </div>
+        <div class="context-menu-item danger" @click="deleteItem">
+          <span>删除</span>
+        </div>
+      </div>
+    </Teleport>
   </Teleport>
 </template>
 
@@ -254,6 +397,52 @@ function onSave(data: EditData) {
     opacity: 0;
     .launch-sheet {
       transform: translateY(100%);
+    }
+  }
+}
+
+// =========右键菜单（模仿 dock 栏）==========
+.launch-context-menu {
+  position: fixed;
+  z-index: 300;
+  padding: 6px 0;
+  border-radius: m3.$m3-shape-md;
+  @include glass-surface(3);
+  backdrop-filter: blur(20px);
+  overflow: hidden;
+  animation: contextMenuIn m3.$m3-duration-medium m3.$m3-easing-decelerated;
+
+  @keyframes contextMenuIn {
+    from {
+      opacity: 0;
+      transform: scale(0.92);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}
+
+.context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  font-size: 13px;
+  color: $text-primary;
+  cursor: pointer;
+  transition: background m3.$m3-duration-medium m3.$m3-easing-standard;
+  white-space: nowrap;
+
+  &:hover {
+    background: rgba(128, 128, 128, 0.12);
+  }
+
+  &.danger {
+    color: #ff3b30;
+    &:hover {
+      background: rgba(255, 59, 48, 0.12);
     }
   }
 }

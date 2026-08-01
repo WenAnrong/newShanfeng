@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { svgs } from "@/utils/svg";
+import { ref } from "vue";
 
 const STORAGE_KEY = "shoutcut-list";
 
@@ -59,18 +60,18 @@ function persist(shortcuts: Shortcuts[]) {
 export const useShortcutStore = defineStore("shortcut", () => {
   let nextUid = 100;
 
-  const shortcuts: Shortcuts[] = load();
+  const shortcuts = ref<Shortcuts[]>(load());
   // 确保 uid 不冲突
-  const maxUid = shortcuts.reduce((m, s) => Math.max(m, s.uid), 0);
+  const maxUid = shortcuts.value.reduce((m, s) => Math.max(m, s.uid), 0);
   if (maxUid >= nextUid) nextUid = maxUid + 1;
 
   function save() {
-    persist(shortcuts);
+    persist(shortcuts.value);
   }
 
   function addShortcut(name: string, path: string, icon: string) {
-    const newId = shortcuts.length + 1;
-    shortcuts.push({ id: newId, uid: nextUid++, name, path, icon });
+    const newId = shortcuts.value.length + 1;
+    shortcuts.value.push({ id: newId, uid: nextUid++, name, path, icon });
     save();
   }
 
@@ -78,7 +79,7 @@ export const useShortcutStore = defineStore("shortcut", () => {
     id: number,
     patch: { name?: string; path?: string; icon?: string },
   ) {
-    const item = shortcuts.find((s) => s.id === id);
+    const item = shortcuts.value.find((s) => s.id === id);
     if (!item) return;
     if (patch.name !== undefined) item.name = patch.name;
     if (patch.path !== undefined) item.path = patch.path;
@@ -87,10 +88,10 @@ export const useShortcutStore = defineStore("shortcut", () => {
   }
 
   function deleteShortcut(id: number) {
-    const index = shortcuts.findIndex((item) => item.id === id);
+    const index = shortcuts.value.findIndex((item) => item.id === id);
     if (index !== -1) {
-      shortcuts.splice(index, 1);
-      shortcuts.forEach((item, idx) => {
+      shortcuts.value.splice(index, 1);
+      shortcuts.value.forEach((item, idx) => {
         item.id = idx + 1;
       });
       save();
@@ -98,16 +99,16 @@ export const useShortcutStore = defineStore("shortcut", () => {
   }
 
   function moveShortcutById(fromId: number, toId: number) {
-    const fromIndex = shortcuts.findIndex((s) => s.id === fromId);
-    const toIndex = shortcuts.findIndex((s) => s.id === toId);
+    const fromIndex = shortcuts.value.findIndex((s) => s.id === fromId);
+    const toIndex = shortcuts.value.findIndex((s) => s.id === toId);
     if (fromIndex === -1 || toIndex === -1) return;
     if (fromIndex === toIndex) return;
 
-    const [item] = shortcuts.splice(fromIndex, 1);
+    const [item] = shortcuts.value.splice(fromIndex, 1);
     const insertAt = toIndex > fromIndex ? toIndex - 1 : toIndex;
-    shortcuts.splice(insertAt, 0, item as Shortcuts);
+    shortcuts.value.splice(insertAt, 0, item as Shortcuts);
 
-    shortcuts.forEach((item, idx) => {
+    shortcuts.value.forEach((item, idx) => {
       item.id = idx + 1;
     });
     save();

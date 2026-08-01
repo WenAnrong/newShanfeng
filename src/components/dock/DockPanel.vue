@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { svgs } from "@/utils/svg";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { onClickOutside } from "@vueuse/core";
 import { useShortcutStore } from "@/stores/shortcutStore";
 import { useThemeStore } from "@/stores/themeStore";
@@ -386,15 +386,20 @@ const editTitle = ref("添加快捷方式");
 const editInitial = ref<{ name?: string; url?: string; icon?: string }>({});
 const editingShortcutId = ref<number | null>(null);
 
-function openEditDialog(shortcut?: { id: number; name: string; path: string; icon: string }) {
+function openEditDialog(shortcut?: {
+  id: number;
+  name: string;
+  path: string;
+  icon: string;
+}) {
   if (shortcut) {
     editingShortcutId.value = shortcut.id;
     editTitle.value = "编辑快捷方式";
-    editInitial.value = { name: shortcut.name, url: shortcut.path, icon: shortcut.icon };
-  } else {
-    editingShortcutId.value = null;
-    editTitle.value = "添加快捷方式";
-    editInitial.value = { name: "", url: "", icon: "" };
+    editInitial.value = {
+      name: shortcut.name,
+      url: shortcut.path,
+      icon: shortcut.icon,
+    };
   }
   editVisible.value = true;
   closeContextMenu();
@@ -439,15 +444,6 @@ function onEditSave(data: EditData) {
         >
       </div>
 
-      <!-- 添加按钮 -->
-      <div class="dock-item dock-add" @click="openEditDialog()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="12" y1="5" x2="12" y2="19" />
-          <line x1="5" y1="12" x2="19" y2="12" />
-        </svg>
-        <span class="dock-label">添加</span>
-      </div>
-
       <div class="division"></div>
 
       <div class="dock-item">
@@ -480,7 +476,10 @@ function onEditSave(data: EditData) {
       <div class="context-menu-item" @click="openInNewTab">
         <span>在新标签页中打开</span>
       </div>
-      <div class="context-menu-item" @click="openEditDialog(contextMenu.shortcut!)">
+      <div
+        class="context-menu-item"
+        @click="openEditDialog(contextMenu.shortcut!)"
+      >
         <span>编辑</span>
       </div>
       <div class="context-menu-item danger" @click="deleteShortcut">
@@ -575,18 +574,6 @@ function onEditSave(data: EditData) {
     transform: none;
     .img {
       opacity: 0;
-    }
-  }
-
-  &.dock-add {
-    opacity: 0.5;
-    color: $text-secondary;
-    &:hover {
-      opacity: 1;
-      color: $text-primary;
-    }
-    svg {
-      pointer-events: none;
     }
   }
 

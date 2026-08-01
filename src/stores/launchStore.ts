@@ -48,5 +48,17 @@ export const useLaunchStore = defineStore("launch", () => {
     }
   }
 
-  return { items, addItem, removeItem, save };
+  function updateItem(
+    id: number,
+    patch: { name?: string; url?: string; icon?: string },
+  ) {
+    const item = items.value.find((i) => i.id === id);
+    if (!item) return;
+    if (patch.name !== undefined) item.name = patch.name;
+    if (patch.url !== undefined) item.url = patch.url;
+    if (patch.icon !== undefined) item.icon = patch.icon;
+    save();
+  }
+
+  return { items, addItem, removeItem, updateItem, save };
 });
