@@ -9,12 +9,20 @@
     </div>
     <div class="about-links">
       <a
-        href="https://shanfeng.space/"
+        href="https://shanfeng.space/docs"
         target="_blank"
         rel="noopener noreferrer"
         >官网</a
       >
       <span class="about-divider">|</span>
+      <a
+        href="https://github.com/WenAnrong/newShanfeng"
+        target="_blank"
+        rel="noopener noreferrer"
+        >开源地址（协议：MIT）</a
+      >
+    </div>
+    <div class="about-links">
       <a
         href="https://beian.miit.gov.cn/"
         target="_blank"

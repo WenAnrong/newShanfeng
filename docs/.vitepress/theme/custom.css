@@ -1,0 +1,15 @@
+/* 山风新页 文档站主题定制 —— 对齐扩展 M3 蓝紫主色 */
+
+:root {
+  --vp-c-brand-1: hsl(262, 84%, 58%);
+  --vp-c-brand-2: hsl(262, 84%, 48%);
+  --vp-c-brand-3: hsl(262, 84%, 38%);
+  --vp-c-brand-soft: hsl(262, 84%, 58%, 0.14);
+}
+
+.dark {
+  --vp-c-brand-1: hsl(262, 84%, 65%);
+  --vp-c-brand-2: hsl(262, 84%, 55%);
+  --vp-c-brand-3: hsl(262, 84%, 45%);
+  --vp-c-brand-soft: hsl(262, 84%, 65%, 0.16);
+}
