@@ -278,8 +278,7 @@ function onEditSave(data: EditData) {
     background-color m3.$m3-duration-medium m3.$m3-easing-standard;
 
   &:hover {
-    scale: 1.35;
-    transform: translateY(-5px);
+    transform: translateY(-5px) scale(1.2);
     background: rgba(128, 128, 128, 0.12);
   }
 
@@ -297,7 +296,7 @@ function onEditSave(data: EditData) {
     padding: 4px 10px;
     border-radius: m3.$m3-shape-sm;
     color: $text-secondary;
-    font-size: 14px;
+    font-size: 13px;
     pointer-events: none;
     @include glass-surface(1);
     opacity: 0;

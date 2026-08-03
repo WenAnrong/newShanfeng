@@ -242,10 +242,7 @@ function formatTime(iso: string) {
           </p>
           <p class="import-desc">请选择导入方式：</p>
           <div class="import-actions">
-            <button
-              class="btn btn-primary"
-              @click="confirmImport('overwrite')"
-            >
+            <button class="btn btn-primary" @click="confirmImport('overwrite')">
               覆盖导入
             </button>
             <button class="btn btn-outline" @click="confirmImport('merge')">
@@ -276,7 +273,9 @@ function formatTime(iso: string) {
     font-size: 14px;
     color: $text-secondary;
     margin-bottom: 10px;
-    margin-top: 12px;
+    &:not(:first-child) {
+      margin-top: 12px;
+    }
   }
 }
 

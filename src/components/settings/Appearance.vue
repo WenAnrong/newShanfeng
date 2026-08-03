@@ -108,7 +108,10 @@ function setThemeMode(m: "light" | "dark" | "auto") {
     font-size: 14px;
     color: $text-secondary;
     margin-bottom: 10px;
-    margin-top: 12px;
+
+    &:not(:first-child) {
+      margin-top: 12px;
+    }
   }
 }
 

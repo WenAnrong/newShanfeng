@@ -154,9 +154,12 @@ function onSearchSuggestion(text: string) {
     transform m3.$m3-duration-long m3.$m3-easing-emphasized,
     box-shadow m3.$m3-duration-long m3.$m3-easing-standard;
 
+  &:hover {
+    transform: scale(1.02);
+  }
+
   &:focus-within {
-    transform: scale(1.03);
-    box-shadow: m3.$m3-elevation-3;
+    transform: scale(1.06);
   }
 
   input {
@@ -184,19 +187,11 @@ function onSearchSuggestion(text: string) {
     padding: 4px 12px;
     border-radius: m3.$m3-shape-sm;
     transition: background m3.$m3-duration-medium m3.$m3-easing-standard;
-
-    &:hover {
-      background: rgba(128, 128, 128, 0.12);
-    }
-
-    &:active {
-      background: rgba(128, 128, 128, 0.2);
-    }
   }
 
   .engine-btn {
     .eng-img {
-      height: 70%;
+      height: 85%;
     }
   }
 }

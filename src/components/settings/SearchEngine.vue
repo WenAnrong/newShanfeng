@@ -62,7 +62,7 @@ function onSave(data: EditData) {
   <div class="search-engine-settings">
     <!-- 默认搜索引擎 -->
     <section class="setting-section">
-      <label class="section-label">默认搜索引擎</label>
+      <label class="section-label">当前搜索引擎</label>
       <div class="engine-list">
         <button
           v-for="engine in engineStore.engines"
@@ -80,20 +80,53 @@ function onSave(data: EditData) {
           <div class="engine-card-right">
             <!-- 编辑/删除按钮：仅自定义引擎显示 -->
             <template v-if="!engine.isBuiltIn">
-              <button class="engine-edit-btn" title="编辑" @click.stop="openEditDialog(engine)">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+              <button
+                class="engine-edit-btn"
+                title="编辑"
+                @click.stop="openEditDialog(engine)"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                  />
+                  <path
+                    d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                  />
                 </svg>
               </button>
-              <button class="engine-delete-btn" title="删除" @click.stop="deleteEngine(engine.id)">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <button
+                class="engine-delete-btn"
+                title="删除"
+                @click.stop="deleteEngine(engine.id)"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
                   <path d="M18 6L6 18M6 6l12 12" />
                 </svg>
               </button>
             </template>
             <div class="engine-check">
-              <span v-if="engine.id === engineStore.currentId" class="check-dot"></span>
+              <span
+                v-if="engine.id === engineStore.currentId"
+                class="check-dot"
+              ></span>
             </div>
           </div>
         </button>
@@ -104,7 +137,16 @@ function onSave(data: EditData) {
     <section class="setting-section">
       <div class="form-header">
         <button class="add-engine-btn" @click="openAddDialog">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <line x1="12" y1="5" x2="12" y2="19" />
             <line x1="5" y1="12" x2="19" y2="12" />
           </svg>
@@ -164,29 +206,6 @@ function onSave(data: EditData) {
         </button>
       </div>
     </section>
-
-    <!-- 引擎预览提示 -->
-    <div class="engine-tip">
-      <svg
-        width="14"
-        height="14"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <circle cx="12" cy="12" r="10" />
-        <line x1="12" y1="16" x2="12" y2="12" />
-        <line x1="12" y1="8" x2="12.01" y2="8" />
-      </svg>
-      <span>
-        当前搜索引擎：
-        <strong>{{ engineStore.current?.name }}</strong>
-        &mdash; 点击引擎卡片即可切换，搜索框将使用所选引擎
-      </span>
-    </div>
   </div>
 
   <!-- 通用编辑弹窗 -->
@@ -217,11 +236,9 @@ function onSave(data: EditData) {
 .setting-section {
   .section-label {
     display: block;
-    font-size: 13px;
-    font-weight: 500;
+    font-size: 14px;
     color: $text-secondary;
     margin-bottom: 10px;
-    letter-spacing: 0.3px;
   }
 }
 
@@ -420,30 +437,6 @@ function onSave(data: EditData) {
       font-weight: 400;
       opacity: 0.6;
     }
-  }
-}
-
-// ===== 底部提示 =====
-.engine-tip {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 10px 14px;
-  border-radius: m3.$m3-shape-sm;
-  background: m3.$m3-surface-variant;
-  font-size: 12px;
-  color: $text-secondary;
-  line-height: 1.5;
-
-  svg {
-    flex-shrink: 0;
-    margin-top: 1px;
-    opacity: 0.6;
-  }
-
-  strong {
-    color: $text-primary;
-    font-weight: 500;
   }
 }
 
