@@ -5,7 +5,7 @@
     <h3>山风新页</h3>
     <p class="about-desc">一个精美好用的浏览器起始页扩展</p>
     <div class="about-meta">
-      <span>版本 v1.0.0</span>
+      <span>版本 v1.0.1</span>
     </div>
     <div class="about-links">
       <a

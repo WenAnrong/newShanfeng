@@ -8,7 +8,7 @@ const chromiumDir = resolve(import.meta.dirname, "extensions/Chromium");
 const firefoxDir = resolve(import.meta.dirname, "extensions/Firefox");
 
 // 由构建产物接管、会被删除重建的文件/目录（每个浏览器目录都要同步）
-const DIST_FILES = ["index.html", "assets", "favicon.ico", "migrate.js"];
+const DIST_FILES = ["index.html", "assets", "favicon.ico"];
 
 // 浏览器无关、可从 Chromium 同步到 Firefox 的共享文件（手动维护，构建时复制）
 // manifest.json / service-worker.js 按浏览器各自维护，不参与同步
