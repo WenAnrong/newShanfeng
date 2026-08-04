@@ -77,9 +77,5 @@ export default defineConfig({
     sidebarMenuLabel: "菜单",
     returnToTopLabel: "返回顶部",
     footer: { message: "MIT License", copyright: "山风新页" },
-    editLink: {
-      pattern: "https://github.com/WenAnrong/newShanfeng/edit/main/docs/:path",
-      text: "在 GitHub 上编辑此页",
-    },
   },
 });

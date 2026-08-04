@@ -4,15 +4,15 @@
 
 ## 技术栈
 
-| 技术 | 版本 | 用途 |
-| --- | --- | --- |
-| Vue 3 | ^3.5 | 响应式 UI 框架 |
-| TypeScript | ~6.0 | 类型安全 |
-| Pinia | ^3.0 | 共享状态管理 |
-| Vite | ^8.0 | 构建工具 |
-| sass-embedded | ^1.100 | SCSS 样式编译 |
-| @vueuse/core | ^14.3 | 开箱即用的组合式工具 |
-| lunar-javascript | ^1.7 | 农历计算（无运行时依赖） |
+| 技术             | 版本   | 用途                     |
+| ---------------- | ------ | ------------------------ |
+| Vue 3            | ^3.5   | 响应式 UI 框架           |
+| TypeScript       | ~6.0   | 类型安全                 |
+| Pinia            | ^3.0   | 共享状态管理             |
+| Vite             | ^8.0   | 构建工具                 |
+| sass-embedded    | ^1.100 | SCSS 样式编译            |
+| @vueuse/core     | ^14.3  | 开箱即用的组合式工具     |
+| lunar-javascript | ^1.7   | 农历计算（无运行时依赖） |
 
 ## 分层架构
 
@@ -59,14 +59,14 @@
 
 ### src/components 分组
 
-| 目录 | 组件 | 职责 |
-| --- | --- | --- |
-| clock | ClockPanel | 时钟 + 农历展示 |
-| search | SearchBox / SearchEnginePicker / SearchSuggestion | 搜索输入、引擎切换、联想下拉 |
-| dock | DockPanel | 底部快捷方式栏（右键菜单：打开 / 左移右移排序 / 编辑 / 删除） |
-| launch | LaunchPanel | 启动台底部抽屉（bottom sheet） |
-| settings | SettingsPanel + Appearance / SearchEngine / Sync / About | 设置面板及四个分区 |
-| common | EditDialog / Toast | 通用编辑弹窗、全局消息提示 |
+| 目录     | 组件                                                     | 职责                                                          |
+| -------- | -------------------------------------------------------- | ------------------------------------------------------------- |
+| clock    | ClockPanel                                               | 时钟 + 农历展示                                               |
+| search   | SearchBox / SearchEnginePicker / SearchSuggestion        | 搜索输入、引擎切换、联想下拉                                  |
+| dock     | DockPanel                                                | 底部快捷方式栏（右键菜单：打开 / 左移右移排序 / 编辑 / 删除） |
+| launch   | LaunchPanel                                              | 启动台底部抽屉（bottom sheet）                                |
+| settings | SettingsPanel + Appearance / SearchEngine / Sync / About | 设置面板及四个分区                                            |
+| common   | EditDialog / Toast                                       | 通用编辑弹窗、全局消息提示                                    |
 
 ### 数据流模式
 
@@ -76,13 +76,13 @@
 
 ## 数据存储总览
 
-| 存储 | 内容 | 键 |
-| --- | --- | --- |
-| localStorage | 主题模式 | `theme-mode` |
-| localStorage | 当前搜索引擎 / 列表 / 打开方式 | `search-engine` / `search-list` / `search-open-mode` |
-| localStorage | Dock 快捷方式（注意拼写即如此） | `shoutcut-list` |
-| localStorage | 启动台网站 | `launch-list` |
-| IndexedDB | 亮/暗壁纸 Blob（库 `shanfeng-wallpaper`，表 `wallpapers`） | `light` / `dark` |
+| 存储         | 内容                                                       | 键                                                   |
+| ------------ | ---------------------------------------------------------- | ---------------------------------------------------- |
+| localStorage | 主题模式                                                   | `theme-mode`                                         |
+| localStorage | 当前搜索引擎 / 列表 / 打开方式                             | `search-engine` / `search-list` / `search-open-mode` |
+| localStorage | Dock 快捷方式（注意拼写即如此）                            | `shoutcut-list`                                      |
+| localStorage | 启动台网站                                                 | `launch-list`                                        |
+| IndexedDB    | 亮/暗壁纸 Blob（库 `shanfeng-wallpaper`，表 `wallpapers`） | `light` / `dark`                                     |
 
 ## 样式体系
 
