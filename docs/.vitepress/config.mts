@@ -81,8 +81,9 @@ export default defineConfig({
     sidebarMenuLabel: "菜单",
     returnToTopLabel: "返回顶部",
     footer: {
-      message: "山风新页 - MIT License",
-      copyright: "京ICP备XXXXXXXX号 | 京公网安备XXXXXXXX号",
+      message:
+        '<a href="https://beian.miit.gov.cn/" target="_blank" style="text-decoration: none; margin: 0 8px;">黔ICP备2026000324号-2</a>|<a href="https://beian.mps.gov.cn/#/query/webSearch?code=62012302000654" target="_blank" rel="noreferrer" style="text-decoration: none; margin: 0 12px;">甘公网安备62012302000654号</a>',
+      copyright: "© 2026 山风新页 MIT License.",
     },
   },
 });
