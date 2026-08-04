@@ -39,6 +39,7 @@ const contextMenu = ref({
   visible: false,
   x: 0,
   y: 0,
+  index: -1,
   shortcut: null as {
     id: number;
     name: string;
@@ -58,8 +59,10 @@ function handleContextMenu(e: MouseEvent) {
   const id = parseInt(el.dataset.id ?? "");
   if (isNaN(id)) return;
 
-  // 根据 id 在 shortcutStore 中找到对应的快捷方式对象
-  const shortcut = shortcutStore.shortcuts.find((s) => s.id === id);
+  // 根据 id 在 shortcutStore 中找到对应的快捷方式对象及其下标（用于排序边界判断）
+  const index = shortcutStore.shortcuts.findIndex((s) => s.id === id);
+  if (index === -1) return;
+  const shortcut = shortcutStore.shortcuts[index];
   if (!shortcut) return;
 
   // 设置菜单位置（鼠标点击处）和要操作的快捷方式
@@ -67,6 +70,7 @@ function handleContextMenu(e: MouseEvent) {
     visible: true, // 显示菜单
     x: e.clientX, // 鼠标在视口中的 X 坐标
     y: window.innerHeight - e.clientY, // 鼠标在视口中的 Y 坐标（从底部计算）
+    index, // 被右键的快捷方式在数组中的下标
     shortcut, // 被右键的快捷方式数据
   };
 }
@@ -96,6 +100,24 @@ function deleteShortcut() {
   const shortcut = contextMenu.value.shortcut;
   if (shortcut) {
     shortcutStore.deleteShortcut(shortcut.id);
+  }
+  closeContextMenu();
+}
+
+// 右键菜单-左移（前移一位）
+function moveLeft() {
+  const { shortcut, index } = contextMenu.value;
+  if (shortcut && index > 0) {
+    shortcutStore.moveItem(shortcut.id, -1);
+  }
+  closeContextMenu();
+}
+
+// 右键菜单-右移（后移一位）
+function moveRight() {
+  const { shortcut, index } = contextMenu.value;
+  if (shortcut && index < shortcutStore.shortcuts.length - 1) {
+    shortcutStore.moveItem(shortcut.id, 1);
   }
   closeContextMenu();
 }
@@ -197,6 +219,22 @@ function onEditSave(data: EditData) {
       <div class="context-menu-item" @click="openInNewTab">
         <span>在新标签页中打开</span>
       </div>
+      <div class="menu-separator"></div>
+      <div
+        class="context-menu-item"
+        :class="{ disabled: contextMenu.index <= 0 }"
+        @click="moveLeft"
+      >
+        <span>左移</span>
+      </div>
+      <div
+        class="context-menu-item"
+        :class="{ disabled: contextMenu.index >= shortcutStore.shortcuts.length - 1 }"
+        @click="moveRight"
+      >
+        <span>右移</span>
+      </div>
+      <div class="menu-separator"></div>
       <div
         class="context-menu-item"
         @click="openEditDialog(contextMenu.shortcut!)"
@@ -355,6 +393,20 @@ function onEditSave(data: EditData) {
       background: rgba(255, 59, 48, 0.12);
     }
   }
+
+  // 排序边界禁用态：灰显 + 阻断点击（逻辑层也有边界判断双保险）
+  &.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}
+
+// 菜单分组分隔线
+.menu-separator {
+  height: 1px;
+  margin: 4px 12px;
+  background: m3.$m3-outline-variant;
 }
 
 @keyframes dockSlideUp {

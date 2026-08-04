@@ -116,11 +116,29 @@ export const useShortcutStore = defineStore("shortcut", () => {
     }
   }
 
+  /**
+   * 相邻交换实现 dock 排序：dir 为 -1（前移/左移）或 +1（后移/右移）。
+   * 数组顺序即 Dock 显示顺序，splice 交换后 save() 持久化。
+   * 到达边界时直接返回（配合菜单禁用态双保险）。
+   */
+  function moveItem(id: number, dir: -1 | 1) {
+    const i = shortcuts.value.findIndex((item) => item.id === id);
+    if (i === -1) return;
+    const j = i + dir;
+    if (j < 0 || j >= shortcuts.value.length) return;
+    const item = shortcuts.value[i];
+    if (!item) return;
+    shortcuts.value.splice(i, 1);
+    shortcuts.value.splice(j, 0, item);
+    save();
+  }
+
   return {
     shortcuts,
     addShortcut,
     updateShortcut,
     deleteShortcut,
+    moveItem,
     save,
   };
 });

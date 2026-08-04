@@ -92,3 +92,4 @@ popup 写入 localStorage
 - **`chrome_settings_overrides.homepage`**：仅商店安装生效，Load unpacked 看不到效果；2018 年后 Chrome 商店不再接受纯改主页的扩展。替换新标签页的正路是 `chrome_url_overrides.newtab`
 - **WebDAV 云端同步**：已废弃，只保留纯本地手动备份（导出/导入 JSON）。manifest 中相关 `host_permissions` 已全部移除
 - **Dock 拖拽排序/删除**：2026/08 重构移除。Dock 顺序 = 数组顺序，删除统一走右键菜单，减少拖拽相关的状态复杂度
+- **Dock 排序改用右键菜单「左移/右移」**（2026-08-04）：拖拽排序在 Firefox 上兼容性差、状态复杂，已用相邻交换方案替代。`shortcutStore.moveItem(id, ±1)` 用 `splice` 相邻交换，数组顺序即显示顺序，无需任何拖拽状态机；菜单项在边界时禁用（`pointer-events:none` + 逻辑层双重校验），`localStorage` + `storage` 事件同步链路全复用

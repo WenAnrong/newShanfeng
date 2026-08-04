@@ -63,7 +63,7 @@
 | --- | --- | --- |
 | clock | ClockPanel | 时钟 + 农历展示 |
 | search | SearchBox / SearchEnginePicker / SearchSuggestion | 搜索输入、引擎切换、联想下拉 |
-| dock | DockPanel | 底部快捷方式栏（右键菜单管理） |
+| dock | DockPanel | 底部快捷方式栏（右键菜单：打开 / 左移右移排序 / 编辑 / 删除） |
 | launch | LaunchPanel | 启动台底部抽屉（bottom sheet） |
 | settings | SettingsPanel + Appearance / SearchEngine / Sync / About | 设置面板及四个分区 |
 | common | EditDialog / Toast | 通用编辑弹窗、全局消息提示 |
