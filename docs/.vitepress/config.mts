@@ -38,6 +38,10 @@ export default defineConfig({
       { text: "指南", link: "/guide/install", activeMatch: "^/guide/" },
       { text: "开发", link: "/dev/architecture", activeMatch: "^/dev/" },
       {
+        text: "更新日志",
+        link: "/changelog",
+      },
+      {
         text: "GitHub",
         link: "https://github.com/WenAnrong/newShanfeng",
       },
@@ -76,6 +80,9 @@ export default defineConfig({
     darkModeSwitchLabel: "外观",
     sidebarMenuLabel: "菜单",
     returnToTopLabel: "返回顶部",
-    footer: { message: "MIT License", copyright: "山风新页" },
+    footer: {
+      message: "山风新页 - MIT License",
+      copyright: "京ICP备XXXXXXXX号 | 京公网安备XXXXXXXX号",
+    },
   },
 });

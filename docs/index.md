@@ -4,7 +4,7 @@ layout: home
 hero:
   name: 山风新页
   text: 精美壁纸，动态取色
-  tagline: 一款基于 Material You 动态取色与毛玻璃设计的新标签页扩展，为 Chrome / Firefox 用户带来更美、更高效的开新页体验。
+  tagline: 一款基于 Material You 动态取色与毛玻璃设计的新标签页扩展，为 Chrome/Edge / Firefox 用户带来更美、更高效的开新页体验。
   actions:
     - theme: brand
       text: 快速开始
@@ -12,11 +12,13 @@ hero:
     - theme: alt
       text: 查看源码
       link: https://github.com/WenAnrong/newShanfeng
+    - theme: alt
+      text: 隐私政策
+      link: /privacy
   image:
     src: /icons/icon.png
     alt: 山风新页
 
-# TODO(截图): 上线前替换为真实产品界面截图
 features:
   - icon: 🖼️
     title: 精美壁纸
