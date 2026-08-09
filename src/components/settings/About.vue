@@ -5,37 +5,18 @@
     <h3>山风新页</h3>
     <p class="about-desc">一个精美好用的浏览器起始页扩展</p>
     <div class="about-meta">
-      <span>版本 v1.0.1</span>
+      <span>版本 v1.1.1</span>
     </div>
     <div class="about-links">
-      <a
-        href="https://shanfeng.space/docs"
-        target="_blank"
-        rel="noopener noreferrer"
-        >官网</a
-      >
+      <a href="https://shanfeng.space/docs" target="_blank" rel="noopener noreferrer">官网</a>
       <span class="about-divider">|</span>
-      <a
-        href="https://github.com/WenAnrong/newShanfeng"
-        target="_blank"
-        rel="noopener noreferrer"
-        >开源地址（协议：MIT）</a
-      >
+      <a href="https://github.com/WenAnrong/newShanfeng" target="_blank" rel="noopener noreferrer">开源地址（协议：MIT）</a>
     </div>
     <div class="about-links">
-      <a
-        href="https://beian.miit.gov.cn/"
-        target="_blank"
-        rel="noopener noreferrer"
-        >黔ICP备2026000324号-2</a
-      >
+      <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">黔ICP备2026000324号-2</a>
       <span class="about-divider">|</span>
-      <a
-        href="https://beian.mps.gov.cn/#/query/webSearch?code=62012302000654"
-        target="_blank"
-        rel="noopener noreferrer"
-        >甘公网安备62012302000654号</a
-      >
+      <a href="https://beian.mps.gov.cn/#/query/webSearch?code=62012302000654" target="_blank"
+        rel="noopener noreferrer">甘公网安备62012302000654号</a>
     </div>
   </div>
 </template>

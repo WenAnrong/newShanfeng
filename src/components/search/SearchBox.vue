@@ -3,8 +3,15 @@ import { ref } from "vue";
 import SearchEnginePicker from "./SearchEnginePicker.vue";
 import { useEngineStore } from "@/stores/searchStore.ts";
 import SearchSuggestion from "./SearchSuggestion.vue";
+import { useBookmarkSearch } from "@/composables/useBookmarkSearch";
 
 const engineStore = useEngineStore();
+
+// 收藏夹搜索（扩展页面才有 chrome.bookmarks；dev 环境静默降级为空结果）
+const bookmarkSearch = useBookmarkSearch();
+bookmarkSearch.init();
+// setup 顶层绑定 ref 会在模板中自动解包，composable 返回对象的属性不会
+const bookmarkResults = bookmarkSearch.results;
 
 const isShowMenu = ref(false); // 是否显示
 const triggerRef = ref<HTMLElement | null>(null); // 切换搜索引擎当前按钮元素信息
@@ -42,9 +49,10 @@ const isShowSuggestions = ref(false); // 是否显示搜索建议
 const inputRef = ref<HTMLElement | null>(null); // 搜索框元素信息
 const shouldFetchSuggestions = ref(true); // 是否为手动输入触发的请求
 
-// 输入时显示搜索建议
+// 输入时显示搜索建议 + 并行匹配收藏夹
 function onInput() {
   shouldFetchSuggestions.value = true;
+  bookmarkSearch.search(input.value);
   if (input.value.trim().length >= 2) {
     isShowSuggestions.value = true;
   } else {
@@ -71,6 +79,13 @@ function onSearchSuggestion(text: string) {
   input.value = text;
   isShowSuggestions.value = false;
   clickSearch();
+}
+
+// 点击收藏夹项或在其上按 Enter → 直接打开 URL（与搜索打开方式一致）
+function onOpenBookmark(url: string) {
+  isShowSuggestions.value = false;
+  input.value = "";
+  window.open(url, "_self");
 }
 </script>
 
@@ -99,15 +114,17 @@ function onSearchSuggestion(text: string) {
       @close="isShowMenu = false"
     />
 
-    <!-- 搜索建议 -->
+    <!-- 搜索建议 + 收藏夹（Tab 分区） -->
     <SearchSuggestion
       :visible="isShowSuggestions"
       :triggerEl="inputRef"
       :query="input"
       :shouldFetch="shouldFetchSuggestions"
+      :bookmarks="bookmarkResults"
       @close="isShowSuggestions = false"
       @select="onSelectSuggestion"
       @search="onSearchSuggestion"
+      @openBookmark="onOpenBookmark"
     />
   </div>
 </template>

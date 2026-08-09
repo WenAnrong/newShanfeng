@@ -21,14 +21,13 @@
 **现状**（Chromium manifest）：
 
 ```json
-"permissions": ["activeTab"],
+"permissions": ["bookmarks", "activeTab"],
 "host_permissions": ["https://suggestion.baidu.com/*"]
 ```
 
+- `bookmarks`：提供对浏览器书签的读写权限，让其可以读取书签数据方便搜索
 - `activeTab`：点击工具栏图标时临时授予读取当前页信息的能力，用于 popup 收藏网页；无 `<all_urls>` 侵入性权限
 - `host_permissions` 只有百度搜索建议域：搜索联想词的跨域请求必需
-
-在这个项目之前有一个项目，权限申请了 `<all_urls>` 和 storage ，每次更新审核都很慢。新项目就改成只申请 `activeTab` + 百度联想词相关域名。
 
 **影响**：
 
@@ -70,3 +69,15 @@ popup 写入 localStorage
 
 - **WebDAV 云端同步**：已废弃，只保留纯本地手动备份（导出/导入 JSON）。manifest 中相关 `host_permissions` 已全部移除
 - **Dock 拖拽排序/删除**：实现起来麻烦，而且firefox兼容性差，已改为右键菜单「左移/右移」相邻交换方案。
+
+## 7. 纵向留白用高度断点，不用宽度断点代理
+
+**背景**：`.container` 的顶部 padding 控制内容（时钟 + 搜索框）距视口顶部的留白，本质取决于视口**高度**。最初用 `compact`/`wide`（宽度断点）切换留白档位，隐含"窄窗口 = 矮窗口、宽窗口 = 高窗口"的代理假设，在 21:9 超宽屏（如 2560×800）等场景会失效：宽度命中 `wide` → 顶部留白偏大，内容 + Dock 逼近溢出。
+
+**决策**：
+
+- 宽度断点（`compact`/`standard`/`wide`）只负责**横向布局**（搜索框宽度、Dock 尺寸、时钟字号）
+- 新增高度断点 `short`（`max-height: 800px`）/ `tall`（`min-height: 1440px`），负责**纵向留白**（`index.vue` 的 `.container` padding）
+- 档位取值：标准 `min(16vh, 160px)` / short `max(6vh, 48px)` / tall `min(20vh, 280px)` / portrait `max(8vh, 60px)`，全部基于 vh 平滑响应高度
+
+**影响**：纵向留白随窗口高度自适应——矮窗口自动压缩给内容腾空间，高窗口舒展；横向布局不受任何影响。宽度断点语义恢复纯粹（只管宽度相关布局）。

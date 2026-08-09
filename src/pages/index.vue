@@ -54,11 +54,7 @@ watch(
 <template>
   <div class="container">
     <!-- 背景层：init 完成后才显示 -->
-    <div
-      v-if="wallpaperStore.ready"
-      class="bg"
-      :style="{ backgroundImage: `url(${bgImage})` }"
-    ></div>
+    <div v-if="wallpaperStore.ready" class="bg" :style="{ backgroundImage: `url(${bgImage})` }"></div>
 
     <!-- 搜索区遮罩：径向渐变使搜索框永远浮于柔暗底色之上 -->
     <div v-if="wallpaperStore.ready" class="search-area-mask"></div>
@@ -68,11 +64,7 @@ watch(
       <Clock />
       <Search />
     </div>
-    <Dock
-      class="dock"
-      @openLaunch="toggleLaunch"
-      @openSetting="toggleSetting"
-    />
+    <Dock class="dock" @openLaunch="toggleLaunch" @openSetting="toggleSetting" />
     <Launch :visible="isShowLaunch" @close="isShowLaunch = false" />
     <Setting :visible="isShowSetting" @close="isShowSetting = false" />
     <Toast />
@@ -95,11 +87,12 @@ watch(
   overflow: hidden;
   background-color: var(--md-sys-color-surface);
   padding: $container-padding-top 0 30px 0;
-  @include compact {
-    padding: max(8vh, 60px) 0 20px 0;
+
+  @include short {
+    padding: max(6vh, 48px) 0 20px 0;
   }
 
-  @include wide {
+  @include tall {
     padding: min(20vh, 280px) 0 40px 0;
   }
 
@@ -127,23 +120,19 @@ watch(
   height: 65%;
   z-index: 0;
   pointer-events: none;
-  background: radial-gradient(
-    ellipse 70% 55% at 50% 32%,
-    rgba(0, 0, 0, 0.09) 0%,
-    transparent 100%
-  );
+  background: radial-gradient(ellipse 70% 55% at 50% 32%,
+      rgba(0, 0, 0, 0.09) 0%,
+      transparent 100%);
 }
 
 [data-theme="dark"] .search-area-mask {
-  background: radial-gradient(
-    ellipse 70% 55% at 50% 32%,
-    rgba(0, 0, 0, 0.18) 0%,
-    transparent 100%
-  );
+  background: radial-gradient(ellipse 70% 55% at 50% 32%,
+      rgba(0, 0, 0, 0.18) 0%,
+      transparent 100%);
 }
 
 /* 内容组件浮于遮罩之上 */
-.container > :not(.bg):not(.search-area-mask) {
+.container> :not(.bg):not(.search-area-mask) {
   position: relative;
   z-index: 1;
 }
@@ -156,7 +145,7 @@ watch(
   gap: 30px;
 }
 
-.container > .dock {
+.container>.dock {
   z-index: 1;
 }
 </style>

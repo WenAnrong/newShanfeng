@@ -26,6 +26,20 @@ $bp-wide: 2560px;
   }
 }
 
+// 矮窗口
+@mixin short {
+  @media (max-height: 800px) {
+    @content;
+  }
+}
+
+// 高窗口
+@mixin tall {
+  @media (min-height: 1440px) {
+    @content;
+  }
+}
+
 // ---------- 布局变量 ----------
 $clock-font-size: clamp(72px, 6vw, 120px);
 $search-height: clamp(45px, 3.6vh, 70px);

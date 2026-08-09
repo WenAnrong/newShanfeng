@@ -49,7 +49,7 @@
 │  ├─ _m3-tokens.scss           M3 设计令牌（颜色/阴影/圆角/动效）│
 │  ├─ _glass.scss               毛玻璃 / Tonal Surface 混入 │
 │  ├─ _animations.scss          M3 Motion 缓动令牌        │
-│  ├─ _variables.scss           响应式断点（3 档）        │
+│  ├─ _variables.scss           响应式断点（宽度 3 档 + 高度 2 档）│
 │  ├─ main.css                  全局重置 + 默认色板        │
 │  └─ bg/ engines-icon/ setting-icon/ svgs/  静态资源     │
 └──────────────────────────────────────────────────────┘
@@ -88,5 +88,6 @@
 
 - **颜色全部通过 M3 令牌引用**（`_m3-tokens.scss` 映射 CSS 变量 `--md-sys-color-*`），由 `colorExtractor.ts` 从壁纸取色后动态注入 `:root`
 - **两类表面**：壁纸之上的交互元素用毛玻璃（`glass-surface` mixin），覆盖层面板用不透明 Tonal Surface（`tonal-surface` mixin）
-- **响应式 3 档断点**：compact < 1440px / standard 1440–2560px（默认）/ wide > 2560px，通过 `_variables.scss` 的 mixin 使用
+- **响应式断点（宽度维度）**：compact < 1440px / standard 1440–2560px（默认）/ wide > 2560px，负责**横向布局**（搜索框宽度、Dock 尺寸、时钟字号等）
+- **响应式断点（高度维度）**：`short` ≤ 800px 高 / `tall` ≥ 1440px 高，负责**纵向留白**（`index.vue` 的 `.container` 顶部 padding）；竖屏用 `portrait` 单独处理
 - **动画统一 M3 Motion 令牌**（时长 + 缓动），定义在 `_animations.scss`

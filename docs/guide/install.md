@@ -2,7 +2,7 @@
 
 edge: [edge商店](https://microsoftedge.microsoft.com/addons/detail/%E5%B1%B1%E9%A3%8E%E6%96%B0%E9%A1%B5/jamooijddnckllcpmjocfnhlapldojkb)
 
-firefox: 准备上线
+firefox: [firefox商店](https://addons.mozilla.org/zh-CN/firefox/addon/%E5%B1%B1%E9%A3%8E%E6%96%B0%E9%A1%B5/)
 
 chrome: 暂时没有上线计划
 
