@@ -30,6 +30,7 @@
 │  └─ common/                   通用组件（EditDialog/Toast）│
 ├──────────────────────────────────────────────────────┤
 │  Composables (src/composables/)  可复用组合式逻辑      │
+│  ├─ useBookmarkSearch.ts      收藏夹搜索逻辑            │
 │  ├─ useSearchSuggestions.ts   百度联想建议              │
 │  └─ useToast.ts               全局消息提示              │
 ├──────────────────────────────────────────────────────┤

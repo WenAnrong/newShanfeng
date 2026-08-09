@@ -41,20 +41,6 @@ extensions/
 | `popup` / `icons` / `_locales`          | **共享文件**：从 Chromium 同步到 Firefox，只维护 Chromium 一份 |
 | `manifest.json` / `service-worker.js`   | **按浏览器各自维护**，构建不覆盖、不同步                       |
 
-## Chromium 与 Firefox 的 manifest 差异
-
-| 项                                   | Chromium                            | Firefox                                                      |
-| ------------------------------------ | ----------------------------------- | ------------------------------------------------------------ |
-| `background`                         | `service_worker` + `type: "module"` | `scripts` 数组（event page）                                 |
-| `permissions`                        | `["activeTab"]`                     | `["storage", "activeTab"]`                                   |
-| `browser_specific_settings.gecko.id` | 无                                  | 必须（`shanfeng-newtab@shanfeng`）                           |
-| `strict_min_version`                 | 无                                  | `142.0`（MV3 特性下限）                                      |
-| 数据收集声明                         | 无                                  | `data_collection_permissions.required: ["none"]`（商店要求） |
-
-其余字段（`chrome_url_overrides.newtab`、`action.default_popup`、`host_permissions` 等）两边一致。
-
-> ⚠️ 修改权限或新增字段时，务必同步检查两个 manifest——它们不会自动对齐。
-
 ## 手动维护清单
 
 以下文件不进构建流程，改动后需手动同步（`popup` / `icons` / `_locales` 只需改 Chromium，构建时自动同步到 Firefox）：
