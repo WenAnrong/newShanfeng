@@ -2,7 +2,7 @@
   "name": "__MSG_extension_name__",
   "description": "__MSG_extension_description__",
   "manifest_version": 3,
-  "version": "1.1.1",
+  "version": "1.1.2",
   "default_locale": "zh_CN",
   "permissions": ["activeTab", "bookmarks"],
   "host_permissions": ["https://suggestion.baidu.com/*"],
